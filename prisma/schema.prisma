@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Estado {
+  ACTIVO
+  INACTIVO
+}
+
+model Roles {
+  id_rol   Int        @id @default(autoincrement())
+  nombre   String
+  Estado   Estado     @default(ACTIVO)
+  Usuarios Usuarios[]
+}
+model Sucursales {
+  id_sucursal    Int              @id @default(autoincrement())
+  nombre         String
+  estado         Estado           @default(ACTIVO)
+  Usuarios       Usuarios[] 
+}
+
+
+model Usuarios {
+  id             Int      @id @default(autoincrement())
+  usuario        String
+  password       String
+  nombres        String
+  apellidos      String
+  dui            String?
+  foto           String?  @unique
+  estado         Estado   @default(ACTIVO)
+  fecha_creacion DateTime @default(now()) @db.Timestamp()
+
+  id_rol Int
+  Roles  Roles @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
+
+  id_sucursal Int
+  Sucursales  Sucursales @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
+
+  @@index([id_rol], name: "fk_usuario_rol_id")
+  @@index([id_sucursal], name: "fk_usuario_sucursal_id")
+}
