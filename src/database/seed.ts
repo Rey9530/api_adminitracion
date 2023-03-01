@@ -7,23 +7,13 @@ const bcrypt = require('bcryptjs');
 
 const execute = async () => {
     try {
-
-        //SUCURSAL DEMO 
-        // await prisma.sexo.createMany({
-        //     data: [
-        //         {  nombres:"Masculino" },
-        //         {  nombres:"Femenino" },
-        //     ]
-        // }); 
+ 
         //SUCURSAL DEMO 
         let sucursal = await prisma.sucursales.create({
             data: { 
                 nombre:"Sucursal Matriz"
             }
-        });
- 
-  
-              
+        }); 
 
         //ROLS DEMO 
         let rol = await prisma.roles.create({
