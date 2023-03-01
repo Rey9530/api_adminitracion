@@ -8,6 +8,21 @@ const bcrypt = require('bcryptjs');
 const execute = async () => {
     try {
  
+
+        await prisma.CatalogoCategorias.createMany({
+            data: [
+                {  nombre:"Categoria 1"},
+                {  nombre:"Categoria 2"}
+            ]
+        });  
+        await prisma.CatalogoTipo.createMany({
+            data: [
+                {  nombre:"Servicio"},
+                {  nombre:"Producto"}
+            ]
+        }); 
+
+
         //SUCURSAL DEMO 
         let sucursal = await prisma.sucursales.create({
             data: { 

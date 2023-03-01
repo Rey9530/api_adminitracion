@@ -37,8 +37,7 @@ export const login= async (req=request,resp=response)=>{
                 status:false,
                 msg:'El email o clave no existe'
             });
-        }
-
+        } 
         const token = await getenerarJWT(usaurioDB.id);
 
 

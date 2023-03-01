@@ -49,3 +49,38 @@ model Usuarios {
   @@index([id_rol], name: "fk_usuario_rol_id")
   @@index([id_sucursal], name: "fk_usuario_sucursal_id")
 }
+
+
+
+// Tablas del modulo Facturacion
+
+model CatalogoCategorias {
+  id_categoria Int                    @id @default(autoincrement())
+  nombre       String
+  estado       Estado                 @default(ACTIVO)
+  catalogo Catalogo[]
+}
+
+model CatalogoTipo {
+  id_tipo   Int                    @id @default(autoincrement())
+  nombre    String
+  estado    Estado                 @default(ACTIVO)
+  catalogo Catalogo[]
+}
+
+model Catalogo {
+  id_catalogo  Int     @id @default(autoincrement())
+  id_tipo      Int
+  id_categoria Int
+  codigo       String? @db.Text
+  nombre       String
+  descripcion  String? @db.Text 
+  precio       Float?  @default(0) 
+  Tipo CatalogoTipo @relation(fields: [id_tipo], references: [id_tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_tipo_catalogo")
+  Categorias CatalogoCategorias @relation(fields: [id_categoria], references: [id_categoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_categoria_sefvicio")
+  estado                     Estado                       @default(ACTIVO) 
+  fecha_creacion  DateTime               @default(now()) @db.Timestamp()
+
+  @@index([id_tipo], name: "fk_tipo_catalogo_id")
+  @@index([id_categoria], name: "fk_categoria_sefvicio_id")
+}
