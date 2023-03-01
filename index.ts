@@ -13,13 +13,14 @@ import usuarios from "./src/routes/usuarios";
 import auth from "./src/routes/auth"; 
 import catalogo_tipos from "./src/routes/facturacion/catalogo_tipos"; 
 import catalogo_categorias from "./src/routes/facturacion/catalogo_categorias"; 
+import catalogo from "./src/routes/facturacion/catalogo"; 
 
 //intanciando rutas
 app.use('/api/usuarios', usuarios );
 app.use('/api/auth', auth);  
 
 //Facturacion
-// app.use('/api/facturacion', catalogo);  
+app.use('/api/facturacion/catalogo', catalogo);  
 app.use('/api/facturacion/catalogo_tipos', catalogo_tipos);  
 app.use('/api/facturacion/catalogo_categorias', catalogo_categorias);  
 

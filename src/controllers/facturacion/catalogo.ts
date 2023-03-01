@@ -1,96 +1,86 @@
 import expres from "express";
 const response = expres.response;
-const request = expres.request; 
-import bcrypt from "bcryptjs";  
+const request = expres.request;
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getUsuarios = async (__: any, resp = response) => {
-  const usuarios = await prisma.usuarios.findMany({
+export const getRegistros = async (__: any, resp = response) => {
+  const registros = await prisma.catalogo.findMany({
     where: { estado: "ACTIVO" },
   });
-  const total = await usuarios.length;
+  const total = await registros.length;
   resp.json({
     status: true,
-    msg: "Usuario",
-    usuarios,
+    msg: "Listado de registros",
+    registros,
     total,
   });
 };
-export const getUsuario = async (req = request, resp = response) => {
+export const getRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
-  const usuario = await prisma.usuarios.findFirst({
-    where: { id: uid, estado: "ACTIVO" },
+  const registros = await prisma.catalogo.findFirst({
+    where: { id_catalogo: uid, estado: "ACTIVO" },
   });
 
-  if (!usuario) {
+  if (!registros) {
     resp.status(400).json({
       status: false,
-      msg: "El usuario no existe o esta deshabilitado",
+      msg: "El registro no existe",
     });
   } else {
     resp.json({
       status: true,
-      msg: "Usuario",
-      usuario,
+      msg: "Exito",
+      registros,
     });
   }
 };
 
-export const crearUsuario = async (req = request, resp = response) => {
-  let { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal } =
-    req.body;
+export const crearRegistro = async (req = request, resp = response) => {
+  let {
+    id_tipo = 0,
+    id_categoria = 0,
+    codigo = "0000",
+    nombre = "",
+    descripcion = "",
+    precio = 0,
+  } = req.body;
   try {
-    const existeRol = await prisma.roles.findUnique({ where: { id_rol } });
-    if (!existeRol) {
+    const [tipo, categoria] = await Promise.all([
+      await prisma.catalogoTipo.findFirst({
+        where: { id_tipo },
+      }),
+      await prisma.catalogoCategorias.findFirst({
+        where: { id_categoria },
+      }),
+    ]); 
+    if (!tipo) {
       return resp.status(400).json({
         status: false,
-        msg: "El registro del rol no existe",
+        msg: "El tipo no existe ",
       });
     }
-    const existeSucursal = await prisma.sucursales.findUnique({
-      where: { id_sucursal },
-    });
-    if (!existeSucursal) {
+    if (!categoria) {
       return resp.status(400).json({
         status: false,
-        msg: "El registro de la sucursal no existe",
+        msg: "La categoria no existe",
       });
     }
 
-    const existeEmail = await prisma.usuarios.findFirst({
-      where: {
-        usuario
-      },
-    });
-    if (existeEmail) {
-      return resp.status(400).json({
-        status: true,
-        msg: usuario + " ya existe",
-      });
-    }
-    //encriptar clave
-    const salt = bcrypt.genSaltSync();
-    password = bcrypt.hashSync(password, salt);
-
-    const userSaved = await prisma.usuarios.create({
+    const data = await prisma.catalogo.create({
       data: {
-        usuario,
-        password,
-        nombres,
-        apellidos,
-        dui,
-        id_rol,
-        id_sucursal,
+        id_tipo,
+        id_categoria,
+        codigo,
+        nombre,
+        descripcion,
+        precio,
       },
     });
-
-    const token =" await getenerarJWT(userSaved.id)";
-
     resp.json({
       status: true,
-      msg: "Crear usuario",
-      data: { ...userSaved, token },
+      msg: "Registro creado con Éxito",
+      data,
     });
   } catch (error) {
     resp.status(500).json({
@@ -100,58 +90,62 @@ export const crearUsuario = async (req = request, resp = response) => {
   }
   return;
 };
-export const actualizarUsuario = async (req = request, resp = response) => {
+
+export const actualizarRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {
-    const existeEmail = await prisma.usuarios.findFirst({
-      where: { id: uid ,estado: "ACTIVO"},
+    const registro = await prisma.catalogo.findFirst({
+      where: { id_catalogo: uid, estado: "ACTIVO" },
     });
-    if (!existeEmail) {
+    if (!registro) {
       return resp.status(400).json({
         status: false,
-        msg: "El usuario no existe o esta deshabilitado",
+        msg: "El registro no existe",
       });
     }
-
-    const { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal } =
-      req.body;
-    if (existeEmail.usuario != usuario) {
-      const existeEmail = await prisma.usuarios.findFirst({
-        where: { usuario },
-      });
-      if (existeEmail) {
-        return resp.status(400).json({
-          status: true,
-          msg: "Ya existe un registro con ese usuario",
-        });
-      }
-    }
-
-    const existeRol = await prisma.roles.findUnique({ where: { id_rol } });
-    if (!existeRol) {
+    let {
+      id_tipo = 0,
+      id_categoria = 0,
+      codigo = "0000",
+      nombre = "",
+      descripcion = "",
+      precio = 0,
+    } = req.body;  
+    const [tipo, categoria] = await Promise.all([
+      await prisma.catalogoTipo.findFirst({
+        where: { id_tipo },
+      }),
+      await prisma.catalogoCategorias.findFirst({
+        where: { id_categoria },
+      }),
+    ]); 
+    if (!tipo) {
       return resp.status(400).json({
         status: false,
-        msg: "El registro del rol no existe",
+        msg: "El tipo no existe ",
       });
     }
-    const existeSucursal = await prisma.sucursales.findUnique({
-      where: { id_sucursal },
-    });
-    if (!existeSucursal) {
+    if (!categoria) {
       return resp.status(400).json({
         status: false,
-        msg: "El registro de la sucursal no existe",
+        msg: "La categoria no existe",
       });
     }
-
-    const usuarioUpdate = await prisma.usuarios.update({
-      where: { id: uid },
-      data: { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal },
+    const registroActualizado = await prisma.catalogo.update({
+      where: { id_catalogo: uid },
+      data: {
+        id_tipo,
+        id_categoria,
+        codigo,
+        nombre,
+        descripcion,
+        precio,
+      },
     });
     resp.json({
       status: true,
-      msg: "Usuario Actualizado",
-      usuario: usuarioUpdate,
+      msg: "Registro Actualizado",
+      data: registroActualizado,
     });
   } catch (error) {
     console.log(error);
@@ -163,25 +157,25 @@ export const actualizarUsuario = async (req = request, resp = response) => {
   return;
 };
 
-export const eliminarUsuarios = async (req = request, resp = response) => {
+export const eliminarRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {
-    const existeEmail = await prisma.usuarios.findFirst({
-      where: { id: uid, estado: "ACTIVO" },
+    const registro = await prisma.catalogo.findFirst({
+      where: { id_catalogo: uid, estado: "ACTIVO" },
     });
-    if (!existeEmail) {
+    if (!registro) {
       return resp.status(400).json({
         status: false,
-        msg: "El usuario no existe o ya esta deshabilitado",
+        msg: "El registro no existe",
       });
     }
-    await prisma.usuarios.update({
+    await prisma.catalogo.update({
       data: { estado: "INACTIVO" },
-      where: { id: uid },
+      where: { id_catalogo: uid },
     });
     resp.json({
       status: true,
-      msg: "Usuario elimiando",
+      msg: "Registro elimiando",
     });
   } catch (error) {
     console.log(error);
