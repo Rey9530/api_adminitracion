@@ -66,7 +66,6 @@ export const crearRegistro = async (req = request, resp = response) => {
         msg: "La categoria no existe",
       });
     }
-
     const data = await prisma.catalogo.create({
       data: {
         id_tipo,
