@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 export const getRegistros = async (__: any, resp = response) => {
   const registros = await prisma.catalogo.findMany({
     where: { estado: "ACTIVO" },
+    include:{ Tipo:true,Categorias:true }
   });
   const total = await registros.length;
   resp.json({
@@ -20,6 +21,7 @@ export const getRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   const registros = await prisma.catalogo.findFirst({
     where: { id_catalogo: uid, estado: "ACTIVO" },
+    include:{ Tipo:true,Categorias:true }
   });
 
   if (!registros) {
