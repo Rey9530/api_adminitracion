@@ -27,7 +27,7 @@ router.post(
     validarCampos,
   ],
   crearRegistro
-);
+); 
 router.put(
   "/:id",
   [
