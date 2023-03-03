@@ -78,8 +78,8 @@ model Catalogo {
   codigo         String?            @db.Text
   nombre         String
   descripcion    String?            @db.Text
-  precio_sin_iva Decimal?           @default(0)
-  precio_con_iva Decimal?           @default(0)
+  precio_sin_iva Float?           @default(0)
+  precio_con_iva Float?           @default(0)
   Tipo           CatalogoTipo       @relation(fields: [id_tipo], references: [id_tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_tipo_catalogo")
   Categorias     CatalogoCategorias @relation(fields: [id_categoria], references: [id_categoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_categoria_sefvicio")
   estado         Estado             @default(ACTIVO)
@@ -140,10 +140,10 @@ model Facturas {
   id_tipo_factura Int           @default(0)
   Tipo            FacturasTipos @relation(fields: [id_tipo_factura], references: [id_tipo_factura], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_tipo")
 
-  subtotal        Decimal?          @db.Decimal(10, 4)
-  descuento       Decimal?          @db.Decimal(10, 4)
-  iva             Decimal?          @db.Decimal(10, 4)
-  total           Decimal?          @db.Decimal(10, 4)
+  subtotal        Float?          @default(0)
+  descuento       Float?          @default(0)
+  iva             Float?          @default(0)
+  total           Float?          @default(0)
   estado          EstadoFactura     @default(ACTIVO)
   FacturasDetalle FacturasDetalle[]
 
@@ -161,13 +161,13 @@ model FacturasDetalle {
   codigo         String?  @db.Text
   nombre         String
   descripcion    String?  @db.Text
-  precio_sin_iva Decimal? @db.Decimal(10, 4)
-  precio_con_iva Decimal? @db.Decimal(10, 4)
+  precio_sin_iva Float? @default(0)
+  precio_con_iva Float? @default(0)
   cantidad       Int      @default(0)
-  subtotal       Decimal? @db.Decimal(10, 4)
-  descuento      Decimal? @db.Decimal(10, 4)
-  iva            Decimal? @db.Decimal(10, 4)
-  total          Decimal? @db.Decimal(10, 4)
+  subtotal       Float? @default(0)
+  descuento      Float? @default(0)
+  iva            Float? @default(0)
+  total          Float? @default(0)
 
   @@index([id_factura], name: "fk_fatura_detalle_id")
   @@index([id_catalogo], name: "fk_factura_detalle_catalogo_id")
