@@ -11,7 +11,7 @@ datasource db {
 }
 
 model GeneralData {
-  id_general     Int      @id @default(autoincrement())
+  id_general     Int    @id @default(autoincrement())
   nombre_sistema String
   impuesto       Float? @default(0.13)
 }
@@ -78,8 +78,8 @@ model Catalogo {
   codigo         String?            @db.Text
   nombre         String
   descripcion    String?            @db.Text
-  precio_sin_iva Float?           @default(0)
-  precio_con_iva Float?           @default(0)
+  precio_sin_iva Float?             @default(0)
+  precio_con_iva Float?             @default(0)
   Tipo           CatalogoTipo       @relation(fields: [id_tipo], references: [id_tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_tipo_catalogo")
   Categorias     CatalogoCategorias @relation(fields: [id_categoria], references: [id_categoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_categoria_sefvicio")
   estado         Estado             @default(ACTIVO)
@@ -97,10 +97,28 @@ enum EstadoFactura {
 }
 
 model FacturasTipos {
-  id_tipo_factura Int        @id @default(autoincrement())
+  id_tipo_factura Int               @id @default(autoincrement())
   nombre          String
-  estado          Estado     @default(ACTIVO)
-  Facturas        Facturas[]
+  estado          Estado            @default(ACTIVO)
+  Bloques FacturasBloques[]
+}
+
+model FacturasBloques {
+  id_bloque      Int      @id @default(autoincrement())
+  tira           String
+  desde          Int
+  hasta          Int
+  actual         Int
+  serie          String
+  fecha_creacion DateTime @default(now())
+
+  id_tipo_factura Int           @default(0)
+  Tipo            FacturasTipos @relation(fields: [id_tipo_factura], references: [id_tipo_factura], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_bloque_tipo")
+  estado          Estado        @default(ACTIVO)
+
+  Facturas Facturas[]
+
+  @@index([id_tipo_factura], name: "fk_fatura_bloque_tipo_id")
 }
 
 model Departamentos {
@@ -137,18 +155,18 @@ model Facturas {
   id_municipio Int        @default(0)
   Municipio    Municipios @relation(fields: [id_municipio], references: [id_municipio], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_municipio")
 
-  id_tipo_factura Int           @default(0)
-  Tipo            FacturasTipos @relation(fields: [id_tipo_factura], references: [id_tipo_factura], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_tipo")
+  id_bloque Int             @default(0)
+  Bloque    FacturasBloques @relation(fields: [id_bloque], references: [id_bloque], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_bloque")
 
-  subtotal        Float?          @default(0)
-  descuento       Float?          @default(0)
-  iva             Float?          @default(0)
-  total           Float?          @default(0)
+  subtotal        Float?            @default(0)
+  descuento       Float?            @default(0)
+  iva             Float?            @default(0)
+  total           Float?            @default(0)
   estado          EstadoFactura     @default(ACTIVO)
   FacturasDetalle FacturasDetalle[]
 
   @@index([id_municipio], name: "fk_fatura_municipio_id")
-  @@index([id_tipo_factura], name: "fk_fatura_tipo_id")
+  @@index([id_bloque], name: "fk_fatura_bloque_id")
 }
 
 model FacturasDetalle {
@@ -161,13 +179,13 @@ model FacturasDetalle {
   codigo         String?  @db.Text
   nombre         String
   descripcion    String?  @db.Text
-  precio_sin_iva Float? @default(0)
-  precio_con_iva Float? @default(0)
+  precio_sin_iva Float?   @default(0)
+  precio_con_iva Float?   @default(0)
   cantidad       Int      @default(0)
-  subtotal       Float? @default(0)
-  descuento      Float? @default(0)
-  iva            Float? @default(0)
-  total          Float? @default(0)
+  subtotal       Float?   @default(0)
+  descuento      Float?   @default(0)
+  iva            Float?   @default(0)
+  total          Float?   @default(0)
 
   @@index([id_factura], name: "fk_fatura_detalle_id")
   @@index([id_catalogo], name: "fk_factura_detalle_catalogo_id")

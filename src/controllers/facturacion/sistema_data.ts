@@ -4,15 +4,12 @@ const request = expres.request;
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getTiposFactura = async (_ = request, resp = response) => { 
+export const getDatosSistema = async (_ = request, resp = response) => { 
   try {
-    const data = await prisma.facturasTipos.findMany({
-      where: { estado: "ACTIVO" },
-      include:{ Bloques: { where :{ estado:'ACTIVO' }} }
-    });
+    const data = await prisma.generalData.findFirst();
     resp.json({
       status: true,
-      msg: "Listado de registros",
+      msg: "Registros",
       data,
     });
   } catch (error) {
