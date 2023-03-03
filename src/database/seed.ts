@@ -4,6 +4,12 @@ const prisma = new PrismaClient();
 
 const execute = async () => {
   try {
+    await prisma.facturasTipos.createMany({
+      data: [
+        { id_tipo_factura:2, nombre: "Consumidor Final" }, 
+        { id_tipo_factura:1, nombre: "Credito Fiscal" }, 
+      ],
+    });
     await prisma.departamentos.createMany({
       data: [
         { id_departamento: 1, nombre: "Ahuachapán", codigo_iso: "SV-AH" },
@@ -535,7 +541,7 @@ const execute = async () => {
 
     await prisma.generalData.create({
       data: {
-        nombre: "Sistema Administrativo",
+        nombre_sistema: "Sistema Administrativo",
         impuesto:0.13
       },
     });
