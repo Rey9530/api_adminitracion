@@ -39,12 +39,12 @@ export const login= async (req=request,resp=response)=>{
             });
         } 
         const token = await getenerarJWT(usaurioDB.id);
-
-
+        const dataGeneral = await prisma.generalData.findFirst();
+        dataGeneral!.id_general = 0; 
         resp.json({
             status:true,
             msg:"Logueado con exito",
-            data:{ ...usaurioDB, token }, 
+            data:{ ...usaurioDB, token,...dataGeneral }, 
         });
     } catch (error) {
         console.log(error);
@@ -66,10 +66,12 @@ export const loginRenew= async (req=request,resp=response)=>{
             estado:'ACTIVO'
         }
     });
+    const dataGeneral = await prisma.generalData.findFirst();
+    dataGeneral!.id_general = 0;
     resp.json({
         status:true,
         msg: "Token renovado",
-        data:{ ...usaurioDB,token }
+        data:{ ...usaurioDB,token,...dataGeneral }
     });
 }
 

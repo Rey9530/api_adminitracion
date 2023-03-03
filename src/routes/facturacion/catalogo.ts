@@ -21,7 +21,8 @@ router.post(
     check('id_categoria','La categoria ers requerida').custom( (e) => validar_dato(e,"positivo")),  
     check("codigo", "El codigo es requerido").not().isEmpty(), 
     check("nombre", "El nombre es requerido").not().isEmpty(), 
-    check('precio','El precio es requerido').custom( (e) => validar_dato(e,"positivo_0")),
+    check('precio_con_iva','El precio con iva es requerido').custom( (e) => validar_dato(e,"positivo_0")),
+    check('precio_sin_iva','El precio sin iva es requerido').custom( (e) => validar_dato(e,"positivo_0")),
     validarCampos,
   ],
   crearRegistro
@@ -34,7 +35,8 @@ router.put(
     check('id_categoria','La categoria ers requerida').custom( (e) => validar_dato(e,"positivo")),  
     check("codigo", "El codigo es requerido").not().isEmpty(), 
     check("nombre", "El nombre es requerido").not().isEmpty(), 
-    check('precio','El precio es requerido').custom( (e) => validar_dato(e,"positivo_0")),
+    check('precio_con_iva','El precio con iva es requerido').custom( (e) => validar_dato(e,"positivo_0")),
+    check('precio_sin_iva','El precio sin iva es requerido').custom( (e) => validar_dato(e,"positivo_0")),
     validarCampos,
   ],
   actualizarRegistro
