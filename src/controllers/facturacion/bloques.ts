@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export const getRegistros = async (__: any, resp = response) => {
   const registros = await prisma.facturasBloques.findMany({
     where: { estado: "ACTIVO" },
-    include:{Tipo:true}
+    include: { Tipo: true },
   });
   const total = await registros.length;
   resp.json({
@@ -21,7 +21,7 @@ export const getRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   const registros = await prisma.facturasBloques.findFirst({
     where: { id_bloque: uid, estado: "ACTIVO" },
-    include:{Tipo:true}
+    include: { Tipo: true },
   });
 
   if (!registros) {
@@ -48,6 +48,13 @@ export const crearRegistro = async (req = request, resp = response) => {
     id_tipo_factura = 0,
   } = req.body;
   try {
+    if (actual < desde || actual > hasta) {
+      return resp.json({
+        status: false,
+        msg: "El actual esta fuera de rango de los campos DESDE y HASTA",
+        data: null,
+      });
+    }
     const data = await prisma.facturasBloques.create({
       data: {
         tira,
@@ -73,6 +80,7 @@ export const crearRegistro = async (req = request, resp = response) => {
 };
 
 export const actualizarRegistro = async (req = request, resp = response) => {
+  // validar que el actual no sea mayor que el +hasta+ o menor que el +desde+
   let uid: number = Number(req.params.id);
   try {
     const registro = await prisma.facturasBloques.findFirst({
@@ -92,6 +100,14 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       serie = "",
       id_tipo_factura = 0,
     } = req.body;
+
+    if (actual < desde || actual > hasta) {
+      return resp.json({
+        status: false,
+        msg: "El actual esta fuera de rango de los campos DESDE y HASTA",
+        data: null,
+      });
+    }
     const registroActualizado = await prisma.facturasBloques.update({
       where: { id_bloque: uid },
       data: {
@@ -148,12 +164,11 @@ export const eliminarRegistro = async (req = request, resp = response) => {
   return;
 };
 
-
-export const getTiposFactura = async (_ = request, resp = response) => { 
+export const getTiposFactura = async (_ = request, resp = response) => {
   try {
     const data = await prisma.facturasTipos.findMany({
       where: { estado: "ACTIVO" },
-      include:{ Bloques: { where :{ estado:'ACTIVO' }} }
+      include: { Bloques: { where: { estado: "ACTIVO" } } },
     });
     resp.json({
       status: true,
@@ -168,4 +183,3 @@ export const getTiposFactura = async (_ = request, resp = response) => {
   }
   return;
 };
-
