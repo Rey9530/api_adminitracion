@@ -147,3 +147,25 @@ export const eliminarRegistro = async (req = request, resp = response) => {
   }
   return;
 };
+
+
+export const getTiposFactura = async (_ = request, resp = response) => { 
+  try {
+    const data = await prisma.facturasTipos.findMany({
+      where: { estado: "ACTIVO" },
+      include:{ Bloques: { where :{ estado:'ACTIVO' }} }
+    });
+    resp.json({
+      status: true,
+      msg: "Listado de registros",
+      data,
+    });
+  } catch (error) {
+    resp.status(500).json({
+      status: false,
+      msg: "Error inesperado reviosar log",
+    });
+  }
+  return;
+};
+

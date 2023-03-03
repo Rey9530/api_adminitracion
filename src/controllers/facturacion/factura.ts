@@ -4,7 +4,7 @@ const request = expres.request;
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getTiposFactura = async (_ = request, resp = response) => { 
+export const getTiposFacturaEliminar = async (_ = request, resp = response) => {  //todo: eliminar
   try {
     const data = await prisma.facturasTipos.findMany({
       where: { estado: "ACTIVO" },

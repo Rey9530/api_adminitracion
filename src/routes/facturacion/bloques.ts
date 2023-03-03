@@ -9,6 +9,7 @@ import {
   crearRegistro,
   actualizarRegistro,
   eliminarRegistro,
+  getTiposFactura,
 } from "../../controllers/facturacion/bloques";
 
 router.get("/", validarJWT, getRegistros);
@@ -41,6 +42,8 @@ router.put(
   ],
   actualizarRegistro
 );
+
+router.get("/factura/tipos", validarJWT, getTiposFactura);
 
 router.delete("/:id", validarJWT, eliminarRegistro);
 
