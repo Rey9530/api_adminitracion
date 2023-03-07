@@ -5,9 +5,8 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getRegistros = async (__: any, resp = response) => {
-  const registros = await prisma.facturasBloques.findMany({
+  const registros = await prisma.facturasDescuentos.findMany({
     where: { estado: "ACTIVO" },
-    include: { Tipo: true },
   });
   const total = await registros.length;
   resp.json({
@@ -17,11 +16,26 @@ export const getRegistros = async (__: any, resp = response) => {
     total,
   });
 };
+
+export const getRegistrosActivos = async (__: any, resp = response) => {
+  const data = await prisma.facturasDescuentos.findMany({
+    where: {
+      estado: "ACTIVO",
+      OR: [{ isItem: "AMBOS" }, { isItem: "GLOBAL" }, { isItem: "ITEM" }],
+    },
+  });
+  const total = await data.length;
+  resp.json({
+    status: true,
+    msg: "Listado de registros",
+    data,
+    total,
+  });
+};
 export const getRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
-  const registros = await prisma.facturasBloques.findFirst({
-    where: { id_bloque: uid, estado: "ACTIVO" },
-    include: { Tipo: true },
+  const registros = await prisma.facturasDescuentos.findFirst({
+    where: { id_descuento: uid, estado: "ACTIVO" },
   });
 
   if (!registros) {
@@ -39,32 +53,13 @@ export const getRegistro = async (req = request, resp = response) => {
 };
 
 export const crearRegistro = async (req = request, resp = response) => {
-  let {
-    autorizacion = "",
-    tira = "",
-    desde = 0,
-    hasta = 0,
-    actual = 0,
-    serie = "",
-    id_tipo_factura = 0,
-  } = req.body;
+  let { nombre = "", porcentaje = 0, isItem = "AMBOS" } = req.body;
   try {
-    if (actual < desde || actual > hasta) {
-      return resp.json({
-        status: false,
-        msg: "El actual esta fuera de rango de los campos DESDE y HASTA",
-        data: null,
-      });
-    }
-    const data = await prisma.facturasBloques.create({
+    const data = await prisma.facturasDescuentos.create({
       data: {
-        autorizacion,
-        tira,
-        desde,
-        hasta,
-        actual,
-        serie,
-        id_tipo_factura,
+        nombre,
+        porcentaje,
+        isItem,
       },
     });
     resp.json({
@@ -85,8 +80,8 @@ export const actualizarRegistro = async (req = request, resp = response) => {
   // validar que el actual no sea mayor que el +hasta+ o menor que el +desde+
   let uid: number = Number(req.params.id);
   try {
-    const registro = await prisma.facturasBloques.findFirst({
-      where: { id_bloque: uid, estado: "ACTIVO" },
+    const registro = await prisma.facturasDescuentos.findFirst({
+      where: { id_descuento: uid, estado: "ACTIVO" },
     });
     if (!registro) {
       return resp.status(400).json({
@@ -94,33 +89,14 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         msg: "El registro no existe",
       });
     }
-    let {
-      autorizacion = "",
-      tira = "",
-      desde = 0,
-      hasta = 0,
-      actual = 0,
-      serie = "",
-      id_tipo_factura = 0,
-    } = req.body;
+    let { nombre = "", porcentaje = 0, isItem = "AMBOS" } = req.body;
 
-    if (actual < desde || actual > hasta) {
-      return resp.json({
-        status: false,
-        msg: "El actual esta fuera de rango de los campos DESDE y HASTA",
-        data: null,
-      });
-    }
-    const registroActualizado = await prisma.facturasBloques.update({
-      where: { id_bloque: uid },
+    const registroActualizado = await prisma.facturasDescuentos.update({
+      where: { id_descuento: uid },
       data: {
-        autorizacion,
-        tira,
-        desde,
-        hasta,
-        actual,
-        serie,
-        id_tipo_factura,
+        nombre,
+        porcentaje,
+        isItem,
       },
     });
     resp.json({
@@ -141,8 +117,8 @@ export const actualizarRegistro = async (req = request, resp = response) => {
 export const eliminarRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {
-    const registro = await prisma.facturasBloques.findFirst({
-      where: { id_bloque: uid, estado: "ACTIVO" },
+    const registro = await prisma.facturasDescuentos.findFirst({
+      where: { id_descuento: uid, estado: "ACTIVO" },
     });
     if (!registro) {
       return resp.status(400).json({
@@ -150,9 +126,9 @@ export const eliminarRegistro = async (req = request, resp = response) => {
         msg: "El registro no existe",
       });
     }
-    await prisma.facturasBloques.update({
+    await prisma.facturasDescuentos.update({
       data: { estado: "INACTIVO" },
-      where: { id_bloque: uid },
+      where: { id_descuento: uid },
     });
     resp.json({
       status: true,
@@ -168,16 +144,12 @@ export const eliminarRegistro = async (req = request, resp = response) => {
   return;
 };
 
-export const getTiposFactura = async (_ = request, resp = response) => {
+export const getTiposDescuentos = async (_ = request, resp = response) => {
   try {
-    const data = await prisma.facturasTipos.findMany({
-      where: { estado: "ACTIVO" },
-      include: { Bloques: { where: { estado: "ACTIVO" } } },
-    });
     resp.json({
       status: true,
-      msg: "Listado de registros",
-      data,
+      msg: "Success",
+      data: ["ITEM", "GLOBAL", "AMBOS", "INACTIVO"],
     });
   } catch (error) {
     resp.status(500).json({

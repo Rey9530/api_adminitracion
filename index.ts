@@ -16,6 +16,7 @@ import catalogo_categorias from "./src/routes/facturacion/catalogo_categorias";
 import catalogo from "./src/routes/facturacion/catalogo"; 
 import factura from "./src/routes/facturacion/factura"; 
 import bloques from "./src/routes/facturacion/bloques"; 
+import decuentos from "./src/routes/facturacion/decuentos"; 
 import sistema_data from "./src/routes/facturacion/sistema_data"; 
 
 //intanciando rutas
@@ -28,6 +29,7 @@ app.use('/api/facturacion/catalogo', catalogo);
 app.use('/api/facturacion/catalogo_tipos', catalogo_tipos);  
 app.use('/api/facturacion/catalogo_categorias', catalogo_categorias);  
 app.use('/api/facturacion/bloques', bloques);  
+app.use('/api/facturacion/descuentos', decuentos);  
 app.use('/api/facturacion/sistema_data', sistema_data);  
 
 const port = process.env.PORT || 4000;

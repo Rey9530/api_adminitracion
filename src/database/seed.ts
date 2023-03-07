@@ -6,8 +6,18 @@ const execute = async () => {
   try {
     await prisma.facturasTipos.createMany({
       data: [
-        { id_tipo_factura:2, nombre: "Consumidor Final" }, 
-        { id_tipo_factura:1, nombre: "Credito Fiscal" }, 
+        { id_tipo_factura:1, nombre: "Consumidor Final" }, 
+        { id_tipo_factura:2, nombre: "Credito Fiscal" }, 
+      ],
+    });
+    await prisma.facturasMetodosDePago.createMany({
+      data: [
+        { id_tipo_factura:1, nombre: "Efectivo" }, 
+        { id_tipo_factura:2, nombre: "Tarjeta" }, 
+        { id_tipo_factura:3, nombre: "Cheque" }, 
+        { id_tipo_factura:4, nombre: "Transferencia" }, 
+        { id_tipo_factura:5, nombre: "Mixto" }, 
+        { id_tipo_factura:6, nombre: "Credito" },
       ],
     });
     await prisma.departamentos.createMany({

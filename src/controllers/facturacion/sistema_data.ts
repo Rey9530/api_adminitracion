@@ -24,12 +24,25 @@ export const getDatosSistema = async (_ = request, resp = response) => {
 export const updateDatosSistema = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {
-    let { nombre_sistema = 0, impuesto = 0 } = req.body;
-     await prisma.generalData.update({
+    let {
+      nombre_sistema = 0,
+      impuesto = 0,
+      direccion = "",
+      razon = "",
+      nit = "",
+      nrc = "",
+      contactos = "",
+    } = req.body;
+    await prisma.generalData.update({
       where: { id_general: uid },
       data: {
         nombre_sistema,
         impuesto,
+        direccion,
+        razon,
+        nit,
+        nrc,
+        contactos,
       },
     });
     resp.json({
