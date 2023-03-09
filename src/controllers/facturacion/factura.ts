@@ -73,6 +73,73 @@ export const obntenerMetodosDePago = async (_ = request, resp = response) => {
   });
 };
 
+export const obntenerListadoFacturas = async (
+  req = request,
+  resp = response
+) => {
+  var desde: any = req.query.desde!.toString();
+  var hasta: any = req.query.hasta!.toString();
+
+  // fecha.setDate(fecha.getDate() + dias);
+  desde = new Date(desde);
+  hasta = new Date(hasta);
+  hasta.setDate(hasta.getDate() + 1);
+
+  var total_facturado = 0;
+  var total_facturas = 0;
+  var total_consumidor_final = 0;
+  var total_facturas_consumidor_final = 0;
+  var total_credito_fiscal = 0;
+  var total_facturas_credito_fiscal = 0;
+  var total_anuladas = 0;
+  var total_facturas_anuladas = 0;
+
+  const data = await prisma.facturas.findMany({
+    where: {
+      fecha_creacion: {
+        gte: desde,
+        lte: hasta,
+      },
+    },
+    include: { Bloque: { include: { Tipo: true } } },
+    orderBy: [
+      {
+        id_factura: "asc",
+      },
+    ],
+  });
+  data.forEach((e) => {
+    total_facturas++;
+    total_facturado += e.total ?? 0;
+    if (e.estado == "ANULADA") {
+      total_anuladas += e.total ?? 0;
+      total_facturas_anuladas++;
+    } else if (e.Bloque.Tipo.id_tipo_factura == 1) {
+      total_consumidor_final += e.total ?? 0;
+      total_facturas_consumidor_final++;
+    } else {
+      total_credito_fiscal += e.total ?? 0;
+      total_facturas_credito_fiscal++;
+    }
+  });
+
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data,
+    contadores: {
+      total_facturado,
+      total_facturas,
+      total_consumidor_final,
+      total_facturas_consumidor_final,
+      total_credito_fiscal,
+      total_facturas_credito_fiscal,
+      total_anuladas,
+      total_facturas_anuladas,
+    },
+  });
+};
+
 export const obntenerDepartamentos = async (_ = request, resp = response) => {
   const data = await prisma.departamentos.findMany({
     where: { estado: "ACTIVO" },
@@ -93,6 +160,66 @@ export const obntenerMunicipios = async (req = request, resp = response) => {
     status: true,
     msg: "Success",
     data,
+  });
+};
+
+export const obntenerFactura = async (req = request, resp = response) => {
+  let id_factura: number = Number(req.params.id);
+  const data = await prisma.facturas.findUnique({
+    where: { id_factura },
+    include: {
+      FacturasDetalle: true,
+      Bloque: {
+        select: {
+          Tipo: { select: { nombre: true , id_tipo_factura:true} },
+          tira: true,
+          serie: true,
+        },
+      },
+      Municipio:{ select:{ nombre:true, Departamento:true} },
+      Metodo:true
+    },
+  });
+
+  if (!data) {
+    return resp.json({
+      status: false,
+      msg: "La factura no existe",
+      data: null,
+    });
+  }
+
+  const data_sistema = await prisma.generalData.findFirst();
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data,
+    data_sistema,
+  });
+};
+
+export const anularFactura = async (req = request, resp = response) => {
+  let id_factura: number = Number(req.params.id);
+  const data = await prisma.facturas.findMany({ 
+    where: { estado: "ACTIVO", id_factura },
+  });
+  if (!data) {
+    return resp.json({
+      status: false,
+      msg: "La factura no existe",
+      data: null,
+    });
+  }
+
+  await prisma.facturas.update({
+    where: { id_factura },
+    data: { estado: "ANULADA" },
+  });
+
+  return resp.json({
+    status: true,
+    msg: "Factura anulada con exito",
+    data: null,
   });
 };
 
@@ -212,7 +339,7 @@ export const crearFactura = async (req = request, resp = response) => {
     }
     const bloque = tipoFactura?.Bloques[0];
     const id_bloque = tipoFactura?.Bloques[0].id_bloque;
-    const numero_factura = bloque?.actual.toString();
+    const numero_factura = bloque?.actual.toString().padStart(6, "0");
     const factura = await prisma.facturas.create({
       data: {
         cliente,

@@ -2,10 +2,13 @@ import expres from "express";
 const router = expres.Router();
 import { check } from "express-validator";
 import {
+  anularFactura,
   buscarEnCatalogo,
   crearFactura,
   getNumeroFactura,
   obntenerDepartamentos,
+  obntenerFactura,
+  obntenerListadoFacturas,
   obntenerMetodosDePago,
   obntenerMunicipios,
 } from "../../controllers/facturacion/factura";
@@ -16,23 +19,20 @@ router.post(
   "/",
   [
     validarJWT,
-    check("cliente", "El cliente es requerido").not().isEmpty(), 
-    check("id_metodo_pago", "El metodo de pago es obligatorio").custom((e) => validar_dato(e, "positivo_0") ),
-    check("id_tipo_factura", "El tipo de factura es obligatorio").custom((e) => validar_dato(e, "positivo_0") ),
+    check("cliente", "El cliente es requerido").not().isEmpty(),
+    check("id_metodo_pago", "El metodo de pago es obligatorio").custom((e) =>
+      validar_dato(e, "positivo_0")
+    ),
+    check("id_tipo_factura", "El tipo de factura es obligatorio").custom((e) =>
+      validar_dato(e, "positivo_0")
+    ),
     check("detalle_factura", "El tipo de factura es requerido").custom((e) =>
       validar_dato(e, "is_array")
     ),
     validarCampos,
   ],
   crearFactura
-);
-
-// efectivo
-// tarjeta
-// cheque
-// transferencia
-// credito
-// id_metodo_pago
+); 
 
 router.get("/obtener/:id", validarJWT, getNumeroFactura);
 
@@ -47,7 +47,19 @@ router.post(
 );
 
 router.get("/obtener_metodos_pago", validarJWT, obntenerMetodosDePago);
+router.get(
+  "/obtener_listado_facturas",
+  [
+    validarJWT,
+    check("desde", "El parametro desde es requerido y debe ser formato fecha YYYY-mm-dd").not().isEmpty().isDate(),
+    check("hasta", "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd").not().isEmpty().isDate(),
+    validarCampos,
+  ],
+  obntenerListadoFacturas
+);
 router.get("/obtener_departamentos", validarJWT, obntenerDepartamentos);
 router.get("/obtener_municipios/:id", validarJWT, obntenerMunicipios);
+router.get("/obtener_factura/:id", validarJWT, obntenerFactura);
+router.delete("/anular_factura/:id", validarJWT, anularFactura);
 
 export default router;
