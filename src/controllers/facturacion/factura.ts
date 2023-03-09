@@ -62,6 +62,48 @@ export const buscarEnCatalogo = async (req = request, resp = response) => {
   });
 };
 
+
+export const buscarClientes = async (req = request, resp = response) => {
+  let { query = "" } = req.body;
+  if (query.length == 0) {
+    return resp.json({
+      status: false,
+      msg: "El parametro no es valido",
+      data: null,
+    });
+  }
+  let arrayQuery = query.split(" ");
+  const data = await prisma.facturas.findMany({
+    select: {
+      cliente: true,
+      no_registro: true,
+      nit: true,
+      Municipio: { include: { Departamento: true } },
+      giro: true,
+      direccion:true
+    },
+    where: {
+      AND: arrayQuery.map((contains: any) => {
+        return {
+          cliente: {
+            contains,
+            mode: "insensitive",
+          },
+        }; 
+      }),
+    },
+    orderBy: {
+      id_factura: "desc",
+    },
+    take: 1,
+  });
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data,
+  });
+};
+
 export const obntenerMetodosDePago = async (_ = request, resp = response) => {
   const data = await prisma.facturasMetodosDePago.findMany({
     where: { estado: "ACTIVO" },
@@ -153,6 +195,14 @@ export const obntenerDepartamentos = async (_ = request, resp = response) => {
 
 export const obntenerMunicipios = async (req = request, resp = response) => {
   let id_departamento: number = Number(req.params.id);
+  if(!(id_departamento>0)){
+    return resp.json({
+      status: false,
+      msg: "Identificador de departamento incorrecto",
+      data:null,
+    });
+
+  }
   const data = await prisma.municipios.findMany({
     where: { estado: "ACTIVO", id_departamento },
   });
@@ -171,13 +221,13 @@ export const obntenerFactura = async (req = request, resp = response) => {
       FacturasDetalle: true,
       Bloque: {
         select: {
-          Tipo: { select: { nombre: true , id_tipo_factura:true} },
+          Tipo: { select: { nombre: true, id_tipo_factura: true } },
           tira: true,
           serie: true,
         },
       },
-      Municipio:{ select:{ nombre:true, Departamento:true} },
-      Metodo:true
+      Municipio: { select: { nombre: true, Departamento: true } },
+      Metodo: true,
     },
   });
 
@@ -200,7 +250,7 @@ export const obntenerFactura = async (req = request, resp = response) => {
 
 export const anularFactura = async (req = request, resp = response) => {
   let id_factura: number = Number(req.params.id);
-  const data = await prisma.facturas.findMany({ 
+  const data = await prisma.facturas.findMany({
     where: { estado: "ACTIVO", id_factura },
   });
   if (!data) {
@@ -259,8 +309,10 @@ export const crearFactura = async (req = request, resp = response) => {
     transferencia = Number(transferencia);
     credito = Number(credito);
     id_municipio = Number(id_municipio);
+    id_tipo_factura = Number(id_tipo_factura);
     id_descuento = id_descuento > 0 ? id_descuento : null;
     id_municipio = id_municipio > 0 ? id_municipio : null;
+    id_tipo_factura = id_tipo_factura > 0 ? id_tipo_factura : 0;
 
     const tipoFactura = await prisma.facturasTipos.findFirst({
       where: { id_tipo_factura },

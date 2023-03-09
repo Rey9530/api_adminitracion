@@ -3,6 +3,7 @@ const router = expres.Router();
 import { check } from "express-validator";
 import {
   anularFactura,
+  buscarClientes,
   buscarEnCatalogo,
   crearFactura,
   getNumeroFactura,
@@ -44,6 +45,16 @@ router.post(
     validarCampos,
   ],
   buscarEnCatalogo
+);
+
+router.post(
+  "/buscar/clientes",
+  [
+    validarJWT,
+    check("query", "El cliente es requerido").not().isEmpty(),
+    validarCampos,
+  ],
+  buscarClientes
 );
 
 router.get("/obtener_metodos_pago", validarJWT, obntenerMetodosDePago);
