@@ -36,7 +36,7 @@ export const getRegistros = async (req: any, resp = response) => {
     });
   }
   const where = { AND: [{ estado: "ACTIVO" }, ...consultas] };
-  const total = await prisma.cliente.count();
+  const total = await prisma.cliente.count({where});
   const data = await prisma.cliente.findMany({
     where,
     include: { Municipio: true },

@@ -62,7 +62,6 @@ export const buscarEnCatalogo = async (req = request, resp = response) => {
   });
 };
 
-
 export const buscarClientes = async (req = request, resp = response) => {
   let { query = "" } = req.body;
   if (query.length == 0) {
@@ -73,29 +72,22 @@ export const buscarClientes = async (req = request, resp = response) => {
     });
   }
   let arrayQuery = query.split(" ");
-  const data = await prisma.facturas.findMany({
-    select: {
-      cliente: true,
-      no_registro: true,
-      nit: true,
-      Municipio: { include: { Departamento: true } },
-      giro: true,
-      direccion:true
-    },
+  const data = await prisma.cliente.findMany({
     where: {
       AND: arrayQuery.map((contains: any) => {
         return {
-          cliente: {
+          nombre: {
             contains,
             mode: "insensitive",
           },
-        }; 
+        };
       }),
     },
     orderBy: {
-      id_factura: "desc",
+      nombre: "desc",
     },
-    take: 1,
+    take: 20,
+    include: { Municipio: true },
   });
   return resp.json({
     status: true,
@@ -195,13 +187,12 @@ export const obntenerDepartamentos = async (_ = request, resp = response) => {
 
 export const obntenerMunicipios = async (req = request, resp = response) => {
   let id_departamento: number = Number(req.params.id);
-  if(!(id_departamento>0)){
+  if (!(id_departamento > 0)) {
     return resp.json({
       status: false,
       msg: "Identificador de departamento incorrecto",
-      data:null,
+      data: null,
     });
-
   }
   const data = await prisma.municipios.findMany({
     where: { estado: "ACTIVO", id_departamento },
