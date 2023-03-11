@@ -4,24 +4,54 @@ const request = expres.request;
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getRegistros = async (__: any, resp = response) => {
+export const getRegistros = async (req: any, resp = response) => {
+  let { pagina = 1, registrosXpagina = 10, query = "" } = req.query;
+  pagina = Number(pagina);
+  registrosXpagina = Number(registrosXpagina);
+  pagina = pagina > 0 ? pagina : 0;
+  registrosXpagina = registrosXpagina > 0 ? registrosXpagina : 10;
+
+  let consultas = [];
+  if (query.length > 3) {
+    let array = query.split(" ");
+    consultas = array.map((contains: any) => {
+      return {
+        AND: [
+          {
+            OR: [
+              { codigo: { contains } },
+              { nombre: { contains } },
+              { descripcion: { contains } }, 
+            ],
+          },
+        ],
+      };
+    });
+  }
+  const where = { AND: [{ estado: "ACTIVO" }, ...consultas] }; 
+  const total = await prisma.catalogo.count({ where });
   const registros = await prisma.catalogo.findMany({
-    where: { estado: "ACTIVO" },
-    include:{ Tipo:true,Categorias:true }
+    where,
+    include: { Tipo: true, Categorias: true },
+    take: registrosXpagina,
+    skip: (pagina - 1) * registrosXpagina,
   });
-  const total = await registros.length;
+  const totalFiltrado = await registros.length;
   resp.json({
     status: true,
     msg: "Listado de registros",
-    registros,
     total,
+    totalFiltrado,
+    pagina,
+    registrosXpagina,
+    registros,
   });
 };
 export const getRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   const registros = await prisma.catalogo.findFirst({
     where: { id_catalogo: uid, estado: "ACTIVO" },
-    include:{ Tipo:true,Categorias:true }
+    include: { Tipo: true, Categorias: true },
   });
 
   if (!registros) {
@@ -56,7 +86,7 @@ export const crearRegistro = async (req = request, resp = response) => {
       await prisma.catalogoCategorias.findFirst({
         where: { id_categoria },
       }),
-    ]); 
+    ]);
     if (!tipo) {
       return resp.status(400).json({
         status: false,
@@ -76,8 +106,8 @@ export const crearRegistro = async (req = request, resp = response) => {
         codigo,
         nombre,
         descripcion,
-        precio_con_iva ,
-        precio_sin_iva ,
+        precio_con_iva,
+        precio_sin_iva,
       },
     });
     resp.json({
@@ -114,7 +144,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       descripcion = "",
       precio_con_iva = 0,
       precio_sin_iva = 0,
-    } = req.body;  
+    } = req.body;
     const [tipo, categoria] = await Promise.all([
       await prisma.catalogoTipo.findFirst({
         where: { id_tipo },
@@ -122,7 +152,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       await prisma.catalogoCategorias.findFirst({
         where: { id_categoria },
       }),
-    ]); 
+    ]);
     if (!tipo) {
       return resp.status(400).json({
         status: false,
@@ -144,7 +174,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         nombre,
         descripcion,
         precio_con_iva,
-        precio_sin_iva
+        precio_sin_iva,
       },
     });
     resp.json({
