@@ -15,6 +15,7 @@ import catalogo_tipos from "./src/routes/facturacion/catalogo_tipos";
 import catalogo_categorias from "./src/routes/facturacion/catalogo_categorias"; 
 import catalogo from "./src/routes/facturacion/catalogo"; 
 import factura from "./src/routes/facturacion/factura"; 
+import cliente from "./src/routes/facturacion/cliente"; 
 import bloques from "./src/routes/facturacion/bloques"; 
 import decuentos from "./src/routes/facturacion/decuentos"; 
 import sistema_data from "./src/routes/facturacion/sistema_data"; 
@@ -24,6 +25,7 @@ app.use('/api/usuarios', usuarios );
 app.use('/api/auth', auth);  
 
 //Facturacion
+app.use('/api/facturacion/cliente', cliente);  
 app.use('/api/facturacion/factura', factura);  
 app.use('/api/facturacion/catalogo', catalogo);  
 app.use('/api/facturacion/catalogo_tipos', catalogo_tipos);  

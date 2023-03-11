@@ -12,12 +12,12 @@ const execute = async () => {
     });
     await prisma.facturasMetodosDePago.createMany({
       data: [
-        { id_tipo_factura:1, nombre: "Efectivo" }, 
-        { id_tipo_factura:2, nombre: "Tarjeta" }, 
-        { id_tipo_factura:3, nombre: "Cheque" }, 
-        { id_tipo_factura:4, nombre: "Transferencia" }, 
-        { id_tipo_factura:5, nombre: "Mixto" }, 
-        { id_tipo_factura:6, nombre: "Credito" },
+        { nombre: "Efectivo" }, 
+        { nombre: "Tarjeta" }, 
+        { nombre: "Cheque" }, 
+        { nombre: "Transferencia" }, 
+        { nombre: "Mixto" }, 
+        { nombre: "Credito" },
       ],
     });
     await prisma.departamentos.createMany({
@@ -552,7 +552,12 @@ const execute = async () => {
     await prisma.generalData.create({
       data: {
         nombre_sistema: "Sistema Administrativo",
-        impuesto:0.13
+        impuesto:0.13, 
+        direccion:"San Salvador",
+        razon:"Razon",
+        nit:"123456789",
+        nrc:"1234",
+        contactos:"234567890", 
       },
     });
   } catch (err) {
