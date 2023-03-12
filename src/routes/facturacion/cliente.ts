@@ -9,12 +9,14 @@ import {
   crearRegistro,
   actualizarRegistro,
   eliminarRegistro,
+  getFacturas,
 } from "../../controllers/facturacion/cliente";
 import fileUpload from "express-fileupload";
 
 router.use(fileUpload()); 
 router.get("/", validarJWT, getRegistros);
 router.get("/:id", validarJWT, getRegistro);
+router.get("/facturas/:id", validarJWT, getFacturas);
 router.post(
   "/",
   [

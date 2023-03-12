@@ -57,6 +57,8 @@ model Usuarios {
   id_sucursal Int
   Sucursales  Sucursales @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
 
+  Facturas Facturas[]
+
   @@index([id_rol], name: "fk_usuario_rol_id")
   @@index([id_sucursal], name: "fk_usuario_sucursal_id")
 }
@@ -215,6 +217,8 @@ model Facturas {
   Descuento       FacturasDescuentos?   @relation(fields: [id_descuento], references: [id_descuento], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_descuento")
   id_metodo_pago  Int                   @default(0)
   Metodo          FacturasMetodosDePago @relation(fields: [id_metodo_pago], references: [id_metodo_pago], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_methodo_pago")
+  id_usuario      Int                   @default(0)
+  Usuario         Usuarios              @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_usuario")
   efectivo        Float?                @default(0)
   tarjeta         Float?                @default(0)
   cheque          Float?                @default(0)
@@ -227,6 +231,7 @@ model Facturas {
   estado          EstadoFactura         @default(ACTIVO)
   FacturasDetalle FacturasDetalle[]
 
+  @@index([id_usuario], name: "fk_fatura_usuario_id")
   @@index([id_cliente], name: "fk_fatura_cliente_id")
   @@index([id_metodo_pago], name: "fk_fatura_methodo_pago_id")
   @@index([id_descuento], name: "fk_fatura_descuento_id")

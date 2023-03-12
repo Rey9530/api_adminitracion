@@ -3,7 +3,7 @@ version: '3.1'
 services:
 
   db:
-    image: postgres:15.1-alpine
+    image: postgres:15.2-alpine
     container_name: ${DB_NAME} 
     restart: always
     ports:
@@ -12,6 +12,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_NAME}
+      TZ: 'America/El_Salvador'
+      PGTZ: 'America/El_Salvador'
 
 
   # db:

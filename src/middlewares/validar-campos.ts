@@ -21,9 +21,9 @@ export const validarCampos = (
 
 export const validar_dato = (
   valor: any,
-  tipo: "positivo" |  "positivo_0" | "positivo_decimal" | "is_array" | "string"
-) => { 
-  if (valor === undefined || valor===null) {
+  tipo: "positivo" | "positivo_0" | "positivo_decimal" | "is_array" | "string"
+) => {
+  if (valor === undefined || valor === null) {
     return false;
   }
   if (tipo == "positivo") {
@@ -38,5 +38,5 @@ export const validar_dato = (
   if (tipo == "is_array") {
     return Array.isArray(valor) && valor.length > 0 ? true : false;
   }
-  return true; 
+  return true;
 };

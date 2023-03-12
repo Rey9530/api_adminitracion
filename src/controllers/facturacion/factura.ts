@@ -288,6 +288,9 @@ export const crearFactura = async (req = request, resp = response) => {
       id_descuento = null,
       detalle_factura = [],
     } = req.body;
+
+    const { uid } = req.params;
+    const id_usuario = Number(uid);
     if (detalle_factura == null || detalle_factura.length == 0) {
       return resp.json({
         status: false,
@@ -312,11 +315,13 @@ export const crearFactura = async (req = request, resp = response) => {
       include: { Bloques: { where: { estado: "ACTIVO" } } },
     });
     const clientedB = await prisma.cliente.findFirst({
-      where: { id_cliente }, 
+      where: { id_cliente },
     });
 
     let error = "";
-    if (clientedB == null) {
+    if (!(id_usuario > 0)) {
+      error = "Error de token, no se detecta al usuario";
+    } else if (clientedB == null) {
       error = "Por favor seleccione un cliente";
     } else if (tipoFactura == null) {
       error = "El tipo de factura no existe";
@@ -412,6 +417,7 @@ export const crearFactura = async (req = request, resp = response) => {
         descuento,
         iva,
         total,
+        id_usuario,
       },
     });
     if (factura == null) {

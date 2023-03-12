@@ -36,7 +36,7 @@ export const getRegistros = async (req: any, resp = response) => {
     });
   }
   const where = { AND: [{ estado: "ACTIVO" }, ...consultas] };
-  const total = await prisma.cliente.count({where});
+  const total = await prisma.cliente.count({ where });
   const data = await prisma.cliente.findMany({
     where,
     include: { Municipio: true },
@@ -74,6 +74,32 @@ export const getRegistro = async (req = request, resp = response) => {
       registros,
     });
   }
+};
+
+export const getFacturas = async (req = request, resp = response) => {
+  let uid: number = Number(req.params.id);
+  uid = uid > 0 ? uid : 0;
+  const registros = await prisma.cliente.findFirst({
+    where: { id_cliente: uid, estado: "ACTIVO" },
+    include: { Municipio: true },
+  });
+
+  if (!registros) {
+    return resp.status(400).json({
+      status: false,
+      msg: "El registro no existe",
+    });
+  }
+  const data = await prisma.facturas.findMany({
+    where: { id_cliente: uid },
+    include: { Bloque: { include: { Tipo: true } } },
+  });
+  resp.json({
+    status: true,
+    msg: "Exito",
+    data,
+  });
+  return;
 };
 
 export const crearRegistro = async (req = request, resp = response) => {
@@ -179,7 +205,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       telefono = "",
       correo = "",
       dui = "",
-      registro_nrc=""
+      registro_nrc = "",
     } = req.body;
 
     let foto_obj_nrc: any = registro.foto_obj_nrc;
