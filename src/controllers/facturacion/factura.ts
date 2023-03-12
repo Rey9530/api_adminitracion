@@ -284,6 +284,7 @@ export const crearFactura = async (req = request, resp = response) => {
       transferencia = 0,
       credito = 0,
       id_metodo_pago = 0,
+      id_cliente = 0,
       id_descuento = null,
       detalle_factura = [],
     } = req.body;
@@ -295,6 +296,7 @@ export const crearFactura = async (req = request, resp = response) => {
       });
     }
     efectivo = Number(efectivo);
+    id_cliente = Number(id_cliente);
     tarjeta = Number(tarjeta);
     cheque = Number(cheque);
     transferencia = Number(transferencia);
@@ -309,9 +311,14 @@ export const crearFactura = async (req = request, resp = response) => {
       where: { id_tipo_factura },
       include: { Bloques: { where: { estado: "ACTIVO" } } },
     });
+    const clientedB = await prisma.cliente.findFirst({
+      where: { id_cliente }, 
+    });
 
     let error = "";
-    if (tipoFactura == null) {
+    if (clientedB == null) {
+      error = "Por favor seleccione un cliente";
+    } else if (tipoFactura == null) {
       error = "El tipo de factura no existe";
     } else if (tipoFactura.Bloques.length == 0) {
       error = "El tipo de factura no tiene un bloque activo asignado";
@@ -395,6 +402,7 @@ export const crearFactura = async (req = request, resp = response) => {
         id_bloque,
         efectivo,
         id_descuento,
+        id_cliente,
         tarjeta,
         cheque,
         transferencia,
