@@ -49,7 +49,6 @@ export const subirArchivo = async (file:any) => {
       }
     });
   }).then((resp) => {
-    // console.log(resp);
     return resp;
   });
 };

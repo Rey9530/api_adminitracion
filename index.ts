@@ -4,8 +4,8 @@ import expres from 'express';
 import cors from 'cors';  
 
 const app = expres();
-app.use(cors())
-app.use(expres.static('public'))
+app.use(cors());
+app.use(expres.static('public')) ;
 app.use(expres.json());
 
 //listado de rutas
@@ -15,6 +15,7 @@ import catalogo_tipos from "./src/routes/facturacion/catalogo_tipos";
 import catalogo_categorias from "./src/routes/facturacion/catalogo_categorias"; 
 import catalogo from "./src/routes/facturacion/catalogo"; 
 import factura from "./src/routes/facturacion/factura"; 
+import reportes from "./src/routes/facturacion/reportes"; 
 import cliente from "./src/routes/facturacion/cliente"; 
 import bloques from "./src/routes/facturacion/bloques"; 
 import decuentos from "./src/routes/facturacion/decuentos"; 
@@ -23,6 +24,9 @@ import sistema_data from "./src/routes/facturacion/sistema_data";
 //intanciando rutas
 app.use('/api/usuarios', usuarios );
 app.use('/api/auth', auth);  
+
+//reportes
+app.use('/api/reportes/facturacion', reportes);  
 
 //Facturacion
 app.use('/api/facturacion/cliente', cliente);  
@@ -37,4 +41,4 @@ app.use('/api/facturacion/sistema_data', sistema_data);
 const port = process.env.PORT || 4000;
 app.listen(process.env.PORT,()=>{
     console.log('Servidor corriendo:',port)
-});  
+}); 

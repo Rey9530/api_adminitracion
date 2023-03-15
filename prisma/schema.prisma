@@ -240,25 +240,24 @@ model Facturas {
 }
 
 model FacturasDetalle {
-  id_factura_detalle Int      @id @default(autoincrement())
+  id_factura_detalle Int                 @id @default(autoincrement())
   id_factura         Int
-  Factura            Facturas @relation(fields: [id_factura], references: [id_factura], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_detalle")
-
-  id_catalogo    Int      @default(0)
-  Catalogo       Catalogo @relation(fields: [id_catalogo], references: [id_catalogo], onDelete: NoAction, onUpdate: NoAction, map: "fk_factura_detalle_catalogo")
-  codigo         String?  @db.Text
-  nombre         String
-  descripcion    String?  @db.Text
-  precio_sin_iva Float?   @default(0)
-  precio_con_iva Float?   @default(0)
-  cantidad       Int      @default(0)
-  subtotal       Float?   @default(0)
-  descuento      Float?   @default(0)
-  iva            Float?   @default(0)
-  total          Float?   @default(0)
-
-  id_descuento Int?                @default(0)
-  Descuento    FacturasDescuentos? @relation(fields: [id_descuento], references: [id_descuento], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_detalle_descuento")
+  Factura            Facturas            @relation(fields: [id_factura], references: [id_factura], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_detalle")
+  id_catalogo        Int                 @default(0)
+  Catalogo           Catalogo            @relation(fields: [id_catalogo], references: [id_catalogo], onDelete: NoAction, onUpdate: NoAction, map: "fk_factura_detalle_catalogo")
+  codigo             String?             @db.Text
+  nombre             String
+  descripcion        String?             @db.Text
+  precio_sin_iva     Float?              @default(0)
+  precio_con_iva     Float?              @default(0)
+  cantidad           Float                 @default(0)
+  subtotal           Float?              @default(0)
+  descuento          Float?              @default(0)
+  iva                Float?              @default(0)
+  total              Float?              @default(0)
+  fecha_creacion     DateTime            @default(now())
+  id_descuento       Int?                @default(0)
+  Descuento          FacturasDescuentos? @relation(fields: [id_descuento], references: [id_descuento], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_detalle_descuento")
 
   @@index([id_descuento], name: "fk_fatura_detalle_descuento_id")
   @@index([id_factura], name: "fk_fatura_detalle_id")
