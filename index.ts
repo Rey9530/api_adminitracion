@@ -22,21 +22,21 @@ import decuentos from "./src/routes/facturacion/decuentos";
 import sistema_data from "./src/routes/facturacion/sistema_data"; 
 
 //intanciando rutas
-app.use('/api/usuarios', usuarios );
-app.use('/api/auth', auth);  
+app.use('/usuarios', usuarios );
+app.use('/auth', auth);  
 
 //reportes
-app.use('/api/reportes/facturacion', reportes);  
+app.use('/reportes/facturacion', reportes);  
 
 //Facturacion
-app.use('/api/facturacion/cliente', cliente);  
-app.use('/api/facturacion/factura', factura);  
-app.use('/api/facturacion/catalogo', catalogo);  
-app.use('/api/facturacion/catalogo_tipos', catalogo_tipos);  
-app.use('/api/facturacion/catalogo_categorias', catalogo_categorias);  
-app.use('/api/facturacion/bloques', bloques);  
-app.use('/api/facturacion/descuentos', decuentos);  
-app.use('/api/facturacion/sistema_data', sistema_data);  
+app.use('/facturacion/cliente', cliente);  
+app.use('/facturacion/factura', factura);  
+app.use('/facturacion/catalogo', catalogo);  
+app.use('/facturacion/catalogo_tipos', catalogo_tipos);  
+app.use('/facturacion/catalogo_categorias', catalogo_categorias);  
+app.use('/facturacion/bloques', bloques);  
+app.use('/facturacion/descuentos', decuentos);  
+app.use('/facturacion/sistema_data', sistema_data);  
 
 const port = process.env.PORT || 4000;
 app.listen(process.env.PORT,()=>{
