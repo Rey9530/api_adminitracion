@@ -103,6 +103,8 @@ export const getFacturas = async (req = request, resp = response) => {
 };
 
 export const crearRegistro = async (req = request, resp = response) => {
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   let {
     nombre = "",
     giro = "",
@@ -151,6 +153,7 @@ export const crearRegistro = async (req = request, resp = response) => {
         telefono,
         correo,
         dui,
+        id_sucursal
       },
       select: {
         id_cliente: true,

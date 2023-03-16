@@ -13,8 +13,9 @@ export const validarJWT = (req=request, resp=response, next:Function)=>{
     }
 
     try {
-        const { uid }:any = jwt.verify(token, process.env.JWT_SECRET || "1234"  )  ; 
+        const { uid, ids }:any = jwt.verify(token, process.env.JWT_SECRET || "1234"  )  ; 
         req.params.uid = uid;
+        req.params.ids = ids;
         next();
     } catch (error) {
         return resp.status(401).json(

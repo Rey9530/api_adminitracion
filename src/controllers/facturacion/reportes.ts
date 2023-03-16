@@ -57,7 +57,7 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
     ]);
 
     var ventas_locales = 0;
-    facturas.forEach((item) => {
+    facturas.forEach((item:any) => {
       ventas_locales += item.total ?? 0;
     });
 

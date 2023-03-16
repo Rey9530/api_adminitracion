@@ -6,6 +6,8 @@ const prisma = new PrismaClient();
 
 export const getNumeroFactura = async (req = request, resp = response) => {
   let id_tipo_factura: number = Number(req.params.id);
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   if (!(id_tipo_factura > 0)) {
     return resp.json({
       status: false,
@@ -15,7 +17,7 @@ export const getNumeroFactura = async (req = request, resp = response) => {
   }
   let tipoFactura: any = await prisma.facturasTipos.findFirst({
     where: { id_tipo_factura },
-    include: { Bloques: { where: { estado: "ACTIVO" }, take: 1 } },
+    include: { Bloques: { where: { estado: "ACTIVO",id_sucursal }, take: 1 } },
   });
   if (tipoFactura == null || tipoFactura.Bloques.length == 0) {
     return resp.json({
@@ -113,6 +115,8 @@ export const obntenerListadoFacturas = async (
 ) => {
   var desde: any = req.query.desde!.toString();
   var hasta: any = req.query.hasta!.toString();
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
 
   // fecha.setDate(fecha.getDate() + dias);
   desde = new Date(desde);
@@ -134,6 +138,7 @@ export const obntenerListadoFacturas = async (
         gte: desde,
         lte: hasta,
       },
+      id_sucursal
     },
     include: { Bloque: { include: { Tipo: true } } },
     orderBy: [
@@ -142,7 +147,7 @@ export const obntenerListadoFacturas = async (
       },
     ],
   });
-  data.forEach((e) => {
+  data.forEach((e:any) => {
     total_facturas++;
     total_facturado += e.total ?? 0;
     if (e.estado == "ANULADA") {
@@ -206,8 +211,10 @@ export const obntenerMunicipios = async (req = request, resp = response) => {
 
 export const obntenerFactura = async (req = request, resp = response) => {
   let id_factura: number = Number(req.params.id);
-  const data = await prisma.facturas.findUnique({
-    where: { id_factura },
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
+  const data = await prisma.facturas.findFirst({
+    where: { id_factura,id_sucursal },
     include: {
       FacturasDetalle: true,
       Bloque: {
@@ -241,8 +248,10 @@ export const obntenerFactura = async (req = request, resp = response) => {
 
 export const anularFactura = async (req = request, resp = response) => {
   let id_factura: number = Number(req.params.id);
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   const data = await prisma.facturas.findMany({
-    where: { estado: "ACTIVO", id_factura },
+    where: { estado: "ACTIVO", id_factura,id_sucursal },
   });
   if (!data) {
     return resp.json({
@@ -288,6 +297,8 @@ export const crearFactura = async (req = request, resp = response) => {
       id_descuento = null,
       detalle_factura = [],
     } = req.body;
+    let { ids = 0 } = req.params;
+    let id_sucursal = Number(ids);
 
     const { uid } = req.params;
     const id_usuario = Number(uid);
@@ -397,6 +408,7 @@ export const crearFactura = async (req = request, resp = response) => {
     const numero_factura = bloque?.actual.toString().padStart(6, "0");
     const factura = await prisma.facturas.create({
       data: {
+        id_sucursal,
         cliente,
         numero_factura,
         direccion,

@@ -34,10 +34,13 @@ model Roles {
 }
 
 model Sucursales {
-  id_sucursal Int        @id @default(autoincrement())
-  nombre      String
-  estado      Estado     @default(ACTIVO)
-  Usuarios    Usuarios[]
+  id_sucursal     Int               @id @default(autoincrement())
+  nombre          String
+  estado          Estado            @default(ACTIVO)
+  Usuarios        Usuarios[]
+  FacturasBloques FacturasBloques[]
+  Cliente         Cliente[]
+  Facturas        Facturas[]
 }
 
 model Usuarios {
@@ -125,32 +128,32 @@ model FacturasMetodosDePago {
 }
 
 model FacturasDescuentos {
-  id_descuento Int                    @id @default(autoincrement())
-  nombre       String
-  porcentaje   Int
-  isItem       FacturaTiposDescuentos @default(AMBOS)
-  estado       Estado                 @default(ACTIVO)
-
+  id_descuento    Int                    @id @default(autoincrement())
+  nombre          String
+  porcentaje      Int
+  isItem          FacturaTiposDescuentos @default(AMBOS)
+  estado          Estado                 @default(ACTIVO)
   Facturas        Facturas[]
   FacturasDetalle FacturasDetalle[]
 }
 
 model FacturasBloques {
-  id_bloque      Int      @id @default(autoincrement())
-  tira           String
-  autorizacion   String   @default("")
-  desde          Int
-  hasta          Int
-  actual         Int
-  serie          String
-  fecha_creacion DateTime @default(now())
-
+  id_bloque       Int           @id @default(autoincrement())
+  tira            String
+  autorizacion    String        @default("")
+  desde           Int
+  hasta           Int
+  actual          Int
+  serie           String
+  fecha_creacion  DateTime      @default(now())
   id_tipo_factura Int           @default(0)
   Tipo            FacturasTipos @relation(fields: [id_tipo_factura], references: [id_tipo_factura], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_bloque_tipo")
+  id_sucursal     Int?
+  Sucursal        Sucursales?   @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_fatura_bloque_sucursal")
   estado          Estado        @default(ACTIVO)
+  Facturas        Facturas[]
 
-  Facturas Facturas[]
-
+  @@index([id_sucursal], name: "fk_fatura_bloque_sucursal_id")
   @@index([id_tipo_factura], name: "fk_fatura_bloque_tipo_id")
 }
 
@@ -195,6 +198,10 @@ model Cliente {
   fecha_creacion DateTime    @default(now())
   Facturas       Facturas[]
 
+  id_sucursal Int?
+  Sucursal    Sucursales? @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_sucursal")
+
+  @@index([id_sucursal], name: "fk_cliente_sucursal_id")
   @@index([id_municipio], name: "fk_cliente_municipio_id")
 }
 
@@ -230,7 +237,10 @@ model Facturas {
   total           Float?                @default(0)
   estado          EstadoFactura         @default(ACTIVO)
   FacturasDetalle FacturasDetalle[]
+  id_sucursal     Int?
+  Sucursal        Sucursales?            @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_facturacion_sucursal")
 
+  @@index([id_sucursal], name: "fk_facturacion_sucursal_id")
   @@index([id_usuario], name: "fk_fatura_usuario_id")
   @@index([id_cliente], name: "fk_fatura_cliente_id")
   @@index([id_metodo_pago], name: "fk_fatura_methodo_pago_id")
@@ -250,7 +260,7 @@ model FacturasDetalle {
   descripcion        String?             @db.Text
   precio_sin_iva     Float?              @default(0)
   precio_con_iva     Float?              @default(0)
-  cantidad           Float                 @default(0)
+  cantidad           Float               @default(0)
   subtotal           Float?              @default(0)
   descuento          Float?              @default(0)
   iva                Float?              @default(0)

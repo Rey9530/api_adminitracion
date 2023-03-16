@@ -4,9 +4,11 @@ const request = expres.request;
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getRegistros = async (__: any, resp = response) => {
+export const getRegistros = async (req = request, resp = response) => {
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   const registros = await prisma.facturasBloques.findMany({
-    where: { estado: "ACTIVO" },
+    where: { estado: "ACTIVO", id_sucursal },
     include: { Tipo: true },
   });
   const total = await registros.length;
@@ -19,8 +21,10 @@ export const getRegistros = async (__: any, resp = response) => {
 };
 export const getRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   const registros = await prisma.facturasBloques.findFirst({
-    where: { id_bloque: uid, estado: "ACTIVO" },
+    where: { id_bloque: uid, estado: "ACTIVO", id_sucursal },
     include: { Tipo: true },
   });
 
@@ -39,6 +43,8 @@ export const getRegistro = async (req = request, resp = response) => {
 };
 
 export const crearRegistro = async (req = request, resp = response) => {
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   let {
     autorizacion = "",
     tira = "",
@@ -65,6 +71,7 @@ export const crearRegistro = async (req = request, resp = response) => {
         actual,
         serie,
         id_tipo_factura,
+        id_sucursal,
       },
     });
     resp.json({
@@ -84,9 +91,11 @@ export const crearRegistro = async (req = request, resp = response) => {
 export const actualizarRegistro = async (req = request, resp = response) => {
   // validar que el actual no sea mayor que el +hasta+ o menor que el +desde+
   let uid: number = Number(req.params.id);
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   try {
     const registro = await prisma.facturasBloques.findFirst({
-      where: { id_bloque: uid, estado: "ACTIVO" },
+      where: { id_bloque: uid, estado: "ACTIVO", id_sucursal },
     });
     if (!registro) {
       return resp.status(400).json({
@@ -121,6 +130,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         actual,
         serie,
         id_tipo_factura,
+        id_sucursal,
       },
     });
     resp.json({
@@ -140,9 +150,11 @@ export const actualizarRegistro = async (req = request, resp = response) => {
 
 export const eliminarRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   try {
     const registro = await prisma.facturasBloques.findFirst({
-      where: { id_bloque: uid, estado: "ACTIVO" },
+      where: { id_bloque: uid, estado: "ACTIVO", id_sucursal },
     });
     if (!registro) {
       return resp.status(400).json({
@@ -168,11 +180,13 @@ export const eliminarRegistro = async (req = request, resp = response) => {
   return;
 };
 
-export const getTiposFactura = async (_ = request, resp = response) => {
+export const getTiposFactura = async (req = request, resp = response) => {
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   try {
     const data = await prisma.facturasTipos.findMany({
       where: { estado: "ACTIVO" },
-      include: { Bloques: { where: { estado: "ACTIVO" } } },
+      include: { Bloques: { where: { estado: "ACTIVO", id_sucursal } } },
     });
     resp.json({
       status: true,
