@@ -18,8 +18,7 @@ jobs:
           DB_PORT=${{secrets.DB_PORT}}
           CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}
           CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}
-          CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}
-          DATABASE_URL=postgresql://${{secrets.DB_NAME}}:${{secrets.DB_PASSWORD}}@localhost:${{secrets.DB_PORT}}/${{secrets.DB_NAME}}?schema=public
+          CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}} 
         with:
           host: ${{secrets.HOST}}
           username: ${{secrets.USERNAME}}
@@ -27,18 +26,24 @@ jobs:
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            cd /var/www/api-admin.relex-dev.com
-            sudo rm -r html
-            git clone https://github.com/Rey9530/api_administracion.git html && cd html 
+            echo $JWT_SECRET
+# cd /var/www/api-admin.relex-dev.com
+# sudo rm -r html
+# git clone https://github.com/Rey9530/api_administracion.git html && cd html 
 
-            yarn install
+# yarn install
 
-            sudo rm -r .git
-            yarn install
-            npx prisma migrate deploy
-            yarn run tsc
-            pm2 restart mi-api
+# sudo rm -r .git
+# yarn install
+# npx prisma migrate deploy
+# yarn run tsc
+# pm2 restart mi-api
             
+
+
+
+
+
 # export NVM_DIR=~/.nvm
 # source ~/.nvm/nvm.sh
 # rm -rf test
