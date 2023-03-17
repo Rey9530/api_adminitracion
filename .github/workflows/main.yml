@@ -24,7 +24,6 @@ jobs:
 
             echo "Configuran Variables en ENV" 
 
-            sudo echo "PORT=${{secrets.PORT_API}}" >> .env
             sudo echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env
             sudo echo "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> .env
             sudo echo "DB_NAME=${{secrets.DB_NAME}}" >> .env
@@ -34,6 +33,7 @@ jobs:
             sudo echo "CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}" >> .env
             sudo echo "CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}" >> .env 
             sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME}}:${{secrets.DB_PASSWORD}}@localhost:${{secrets.DB_PORT}}/${{secrets.DB_NAME}}?schema=public" >> .env 
+            sudo echo "PORT=${{secrets.PORT_API}}" >> .env
 
             echo "Fin Variables en ENV"
 
