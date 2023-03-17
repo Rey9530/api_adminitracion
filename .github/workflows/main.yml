@@ -6,8 +6,19 @@ jobs:
   deploy:
 
     runs-on: ubuntu-latest
-
+ 
     steps:
+    - uses: actions/checkout@v3
+    - name: Se define la version de node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18 
+    - name: instalar npm y compilar
+      run: |
+        npm install
+        npm run tsc
+        
+         
     - uses: actions/checkout@master
     - name: Copiar el contenido del repositorio con scp.
       uses: appleboy/scp-action@master 
