@@ -16,6 +16,8 @@ jobs:
           script: |
             cd /home
             mkdir test
+            cd /test
+            echo "Mira papa sin manos" > abreme.txt
 # export NVM_DIR=~/.nvm
 # source ~/.nvm/nvm.sh
 # rm -rf test
