@@ -16,6 +16,8 @@ jobs:
       run: |
         npm install
         npm run tsc
+    - name: Mostrando archivos
+      run: ls
         
          
     - uses: actions/checkout@master
