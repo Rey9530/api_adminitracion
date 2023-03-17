@@ -34,16 +34,16 @@ jobs:
 
             echo "Configuran Variables en ENV" 
 
-            echo "PORT=$API_PORT" >> .env
-            echo "JWT_SECRET=$JWT_SECRET" >> .env
-            echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-            echo "DB_NAME=$DB_NAME" >> .env
-            echo "DB_HOST=$DB_HOST" >> .env
-            echo "DB_PORT=$DB_PORT" >> .env
-            echo "CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME" >> .env
-            echo "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" >> .env
-            echo "CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET" >> .env 
-            echo "DATABASE_URL=postgresql://${DB_NAME}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}?schema=public" >> .env 
+            sudo echo "PORT=$API_PORT" >> .env
+            sudo echo "JWT_SECRET=$JWT_SECRET" >> .env
+            sudo echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+            sudo echo "DB_NAME=$DB_NAME" >> .env
+            sudo echo "DB_HOST=$DB_HOST" >> .env
+            sudo echo "DB_PORT=$DB_PORT" >> .env
+            sudo echo "CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME" >> .env
+            sudo echo "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" >> .env
+            sudo echo "CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET" >> .env 
+            sudo echo "DATABASE_URL=postgresql://${DB_NAME}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}?schema=public" >> .env 
 
             echo "Fin Variables en ENV"
 
