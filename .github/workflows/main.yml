@@ -30,4 +30,6 @@ jobs:
         port: ${{ secrets.PORT }}
         source: "build/*"
         target: "/var/www/html"
-        strip_components: 1
+        strip_components: 1  
+        overwrite: --overwrite
+        
