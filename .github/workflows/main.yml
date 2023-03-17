@@ -10,7 +10,7 @@ jobs:
       - name: Despliegue en Droplet de DigitalOcean
         uses: appleboy/ssh-action@master
         env:
-          PORT=${{secrets.PORT}}
+          API_PORT=${{secrets.API_PORT}}
           JWT_SECRET=${{secrets.JWT_SECRET}}
           DB_PASSWORD=${{secrets.DB_PASSWORD}}
           DB_NAME=${{secrets.DB_NAME}}
