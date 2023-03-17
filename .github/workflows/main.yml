@@ -16,7 +16,7 @@ jobs:
       run: |
         npm install
         npm run tsc
-        cp .env build/
+        cp .env build/.env
     - name: Mostrando archivos
       run: ls
         
