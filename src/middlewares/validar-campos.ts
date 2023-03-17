@@ -21,13 +21,16 @@ export const validarCampos = (
 
 export const validar_dato = (
   valor: any,
-  tipo: "positivo" | "positivo_decimal" | "is_array" | "string"
-) => { 
-  if (valor === undefined || valor===null) {
+  tipo: "positivo" | "positivo_0" | "positivo_decimal" | "is_array" | "string"
+) => {
+  if (valor === undefined || valor === null) {
     return false;
   }
   if (tipo == "positivo") {
     return parseInt(valor) > 0 ? true : false;
+  }
+  if (tipo == "positivo_0") {
+    return parseInt(valor) >= 0 ? true : false;
   }
   if (tipo == "positivo_decimal") {
     return parseFloat(valor) > 0 ? true : false;
@@ -35,5 +38,5 @@ export const validar_dato = (
   if (tipo == "is_array") {
     return Array.isArray(valor) && valor.length > 0 ? true : false;
   }
-  return true; 
+  return true;
 };
