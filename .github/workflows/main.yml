@@ -9,6 +9,16 @@ jobs:
     steps:
       - name: Despliegue en Droplet de DigitalOcean
         uses: appleboy/ssh-action@master
+        env:
+          PORT=${{secrets.PORT}}
+          JWT_SECRET=${{secrets.JWT_SECRET}}
+          DB_PASSWORD=${{secrets.DB_PASSWORD}}
+          DB_NAME=${{secrets.DB_NAME}}
+          DB_HOST=${{secrets.DB_HOST}}
+          DB_PORT=${{secrets.DB_PORT}}
+          CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}
+          CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}
+          CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}
         with:
           host: ${{secrets.HOST}}
           username: ${{secrets.USERNAME}}
@@ -19,6 +29,25 @@ jobs:
             cd /var/www/api-admin.relex-dev.com
             sudo rm -r html
             git clone https://github.com/Rey9530/api_administracion.git html && cd html
+
+
+            echo "Configuran Variables en ENV" 
+
+            echo "PORT=$API_PORT" >> .env
+            echo "JWT_SECRET=$JWT_SECRET" >> .env
+            echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+            echo "DB_NAME=$DB_NAME" >> .env
+            echo "DB_HOST=$DB_HOST" >> .env
+            echo "DB_PORT=$DB_PORT" >> .env
+            echo "CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME" >> .env
+            echo "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" >> .env
+            echo "CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET" >> .env 
+            echo "DATABASE_URL=postgresql://${DB_NAME}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}?schema=public" >> .env 
+
+            echo "Fin Variables en ENV"
+
+            yarn install
+
             sudo rm -r .git
             yarn install
             npx prisma migrate deploy
