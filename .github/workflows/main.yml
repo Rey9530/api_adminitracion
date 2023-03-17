@@ -4,20 +4,25 @@ on: [push]
 
 
 jobs:
-  deploy:
+  Deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to DigitalOcean Droplet
+      - name: Despliegue en Droplet de DigitalOcean
         uses: appleboy/ssh-action@master
         with:
           host: ${{secrets.HOST}}
           username: ${{secrets.USERNAME}}
           key: ${{secrets.KEY}}
           script: |
-            cd /home
-            mkdir test
-            cd /test
-            echo "Mira papa sin manos" > abreme.txt
+            cd /var/www/api-admin.relex-dev.com
+            rm -r html
+            git clone https://github.com/Rey9530/api_administracion.git html && cd html
+            rm -r .git
+            yarn install
+            npx prisma migrate deploy
+            yarn run tsc
+            node build/index.js
+            
 # export NVM_DIR=~/.nvm
 # source ~/.nvm/nvm.sh
 # rm -rf test
