@@ -29,7 +29,8 @@ jobs:
             cd /var/www/api-admin.relex-dev.com
             sudo rm -r html
             git clone https://github.com/Rey9530/api_administracion.git html && cd html
-
+ 
+            sudo rm -r .env
 
             echo "Configuran Variables en ENV" 
 
