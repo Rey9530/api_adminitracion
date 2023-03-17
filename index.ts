@@ -41,4 +41,4 @@ app.use('/facturacion/sistema_data', sistema_data);
 const port = process.env.PORT || 4000;
 app.listen(process.env.PORT,()=>{
     console.log('Servidor corriendo:',port)
-}); 
+});
