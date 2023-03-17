@@ -19,6 +19,7 @@ jobs:
           CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}
           CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}
           CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}
+          DATABASE_URL=postgresql://${{secrets.DB_NAME}}:${{secrets.DB_PASSWORD}}@localhost:${{secrets.DB_PORT}}/${{secrets.DB_NAME}}?schema=public
         with:
           host: ${{secrets.HOST}}
           username: ${{secrets.USERNAME}}
@@ -28,24 +29,7 @@ jobs:
             source ~/.nvm/nvm.sh
             cd /var/www/api-admin.relex-dev.com
             sudo rm -r html
-            git clone https://github.com/Rey9530/api_administracion.git html && cd html
- 
-            sudo rm -r .env
-
-            echo "Configuran Variables en ENV" 
-
-            sudo echo "PORT=${PORT_API}" >> .env
-            sudo echo "JWT_SECRET=${JWT_SECRET}" >> .env
-            sudo echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
-            sudo echo "DB_NAME=${DB_NAME}" >> .env
-            sudo echo "DB_HOST=${DB_HOST}" >> .env
-            sudo echo "DB_PORT=${DB_PORT}" >> .env
-            sudo echo "CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}" >> .env
-            sudo echo "CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}" >> .env
-            sudo echo "CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}" >> .env 
-            sudo echo "DATABASE_URL=postgresql://${DB_NAME}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}?schema=public" >> .env 
-
-            echo "Fin Variables en ENV"
+            git clone https://github.com/Rey9530/api_administracion.git html && cd html 
 
             yarn install
 
@@ -63,3 +47,18 @@ jobs:
 # git clone git@github.com:username/projectname
 # echo 'Deployment to digital ocean finished'
 
+
+
+
+# echo "Configuran Variables en ENV"  
+# sudo echo "PORT=${PORT_API}" >> .env
+# sudo echo "JWT_SECRET=${JWT_SECRET}" >> .env
+# sudo echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+# sudo echo "DB_NAME=${DB_NAME}" >> .env
+# sudo echo "DB_HOST=${DB_HOST}" >> .env
+# sudo echo "DB_PORT=${DB_PORT}" >> .env
+# sudo echo "CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}" >> .env
+# sudo echo "CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}" >> .env
+# sudo echo "CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}" >> .env 
+# sudo echo "DATABASE_URL=postgresql://${DB_NAME}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}?schema=public" >> .env  
+# echo "Fin Variables en ENV"
