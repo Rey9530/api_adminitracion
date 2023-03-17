@@ -17,7 +17,8 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             cd /var/www/api-admin.relex-dev.com/html
-            git pull 
+            git pull
+            sudo rm -r .env 
             echo "Configuran Variables en ENV"  
             sudo echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env
             sudo echo "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> .env
