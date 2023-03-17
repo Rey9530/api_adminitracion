@@ -17,13 +17,13 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             cd /var/www/api-admin.relex-dev.com
-            rm -r html
+            sudo rm -r html
             git clone https://github.com/Rey9530/api_administracion.git html && cd html
-            rm -r .git
+            sudo rm -r .git
             yarn install
             npx prisma migrate deploy
             yarn run tsc
-            node build/index.js
+            pm2 restart mi-api
             
 # export NVM_DIR=~/.nvm
 # source ~/.nvm/nvm.sh
