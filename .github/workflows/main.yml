@@ -9,16 +9,6 @@ jobs:
     steps:
       - name: Despliegue en Droplet de DigitalOcean
         uses: appleboy/ssh-action@master
-        env:
-          PORT_API=${{secrets.PORT_API}}
-          JWT_SECRET=${{secrets.JWT_SECRET}}
-          DB_PASSWORD=${{secrets.DB_PASSWORD}}
-          DB_NAME=${{secrets.DB_NAME}}
-          DB_HOST=${{secrets.DB_HOST}}
-          DB_PORT=${{secrets.DB_PORT}}
-          CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}
-          CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}
-          CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}} 
         with:
           host: ${{secrets.HOST}}
           username: ${{secrets.USERNAME}}
@@ -26,7 +16,7 @@ jobs:
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            echo $JWT_SECRET
+            echo ${{secrets.JWT_SECRET}}
 # cd /var/www/api-admin.relex-dev.com
 # sudo rm -r html
 # git clone https://github.com/Rey9530/api_administracion.git html && cd html 
@@ -40,6 +30,18 @@ jobs:
 # pm2 restart mi-api
             
 
+
+
+# env:
+#   PORT_API=${{secrets.PORT_API}}
+#   JWT_SECRET=${{secrets.JWT_SECRET}}
+#   DB_PASSWORD=${{secrets.DB_PASSWORD}}
+#   DB_NAME=${{secrets.DB_NAME}}
+#   DB_HOST=${{secrets.DB_HOST}}
+#   DB_PORT=${{secrets.DB_PORT}}
+#   CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}
+#   CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}
+#   CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}} 
 
 
 
