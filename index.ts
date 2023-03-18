@@ -1,4 +1,5 @@
-require('dotenv').config();
+import * as dotenv from 'dotenv';
+dotenv.config();
 import expres from 'express';
 import cors from 'cors';  
 
@@ -11,6 +12,7 @@ app.use(expres.json());
 import usuarios from "./src/routes/usuarios";
 import auth from "./src/routes/auth"; 
 import catalogo_tipos from "./src/routes/facturacion/catalogo_tipos"; 
+import sucursales from "./src/routes/facturacion/sucursales"; 
 import catalogo_categorias from "./src/routes/facturacion/catalogo_categorias"; 
 import catalogo from "./src/routes/facturacion/catalogo"; 
 import factura from "./src/routes/facturacion/factura"; 
@@ -31,6 +33,7 @@ app.use('/reportes/facturacion', reportes);
 app.use('/facturacion/cliente', cliente);  
 app.use('/facturacion/factura', factura);  
 app.use('/facturacion/catalogo', catalogo);  
+app.use('/facturacion/sucursales', sucursales);  
 app.use('/facturacion/catalogo_tipos', catalogo_tipos);  
 app.use('/facturacion/catalogo_categorias', catalogo_categorias);  
 app.use('/facturacion/bloques', bloques);  
