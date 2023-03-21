@@ -11,7 +11,7 @@ import {
   obntenerFactura,
   obntenerListadoFacturas,
   obntenerMetodosDePago,
-  obntenerMunicipios,
+  obntenerMunicipios, 
 } from "../../controllers/facturacion/factura";
 import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt";
@@ -69,7 +69,7 @@ router.get(
   obntenerListadoFacturas
 );
 router.get("/obtener_departamentos", validarJWT, obntenerDepartamentos);
-router.get("/obtener_municipios/:id", validarJWT, obntenerMunicipios);
+router.get("/obtener_municipios/:id", validarJWT, obntenerMunicipios); 
 router.get("/obtener_factura/:id", validarJWT, obntenerFactura);
 router.delete("/anular_factura/:id", validarJWT, anularFactura);
 

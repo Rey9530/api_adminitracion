@@ -190,6 +190,8 @@ export const obntenerDepartamentos = async (_ = request, resp = response) => {
   });
 };
 
+
+
 export const obntenerMunicipios = async (req = request, resp = response) => {
   let id_departamento: number = Number(req.params.id);
   if (!(id_departamento > 0)) {

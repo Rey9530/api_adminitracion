@@ -179,28 +179,37 @@ model Municipios {
   @@index([id_departamento], name: "fk_municipio_departamento_id")
 }
 
+model TiposCliente {
+  id_tipo_cliente Int       @id @default(autoincrement())
+  nombre          String
+  estado          Estado    @default(ACTIVO)
+  Cliente         Cliente[]
+}
+
 model Cliente {
-  id_cliente     Int         @id @default(autoincrement())
-  nombre         String?     @default("")
-  giro           String?     @default("")
-  razon_social   String?     @default("")
-  registro_nrc   String?     @default("")
-  nit            String?     @default("")
-  id_municipio   Int?        @default(0)
-  Municipio      Municipios? @relation(fields: [id_municipio], references: [id_municipio], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_municipio")
-  direccion      String?     @default("")
-  telefono       String?     @default("")
-  correo         String?     @default("")
-  dui            String?     @default("")
-  foto_url_nrc   String?     @default("")
-  foto_obj_nrc   String?     @db.Text
-  estado         Estado      @default(ACTIVO)
-  fecha_creacion DateTime    @default(now())
-  Facturas       Facturas[]
+  id_cliente      Int           @id @default(autoincrement())
+  nombre          String?       @default("")
+  giro            String?       @default("")
+  razon_social    String?       @default("")
+  registro_nrc    String?       @default("")
+  nit             String?       @default("")
+  id_municipio    Int?          @default(0)
+  Municipio       Municipios?   @relation(fields: [id_municipio], references: [id_municipio], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_municipio")
+  direccion       String?       @default("")
+  telefono        String?       @default("")
+  correo          String?       @default("")
+  dui             String?       @default("")
+  foto_url_nrc    String?       @default("")
+  foto_obj_nrc    String?       @db.Text
+  estado          Estado        @default(ACTIVO)
+  fecha_creacion  DateTime      @default(now())
+  Facturas        Facturas[]
+  id_sucursal     Int?
+  Sucursal        Sucursales?   @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_sucursal")
+  id_tipo_cliente Int?          
+  TipoCliente     TiposCliente? @relation(fields: [id_tipo_cliente], references: [id_tipo_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_tipo")
 
-  id_sucursal Int?
-  Sucursal    Sucursales? @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_sucursal")
-
+  @@index([id_tipo_cliente], name: "fk_cliente_tipo_id")
   @@index([id_sucursal], name: "fk_cliente_sucursal_id")
   @@index([id_municipio], name: "fk_cliente_municipio_id")
 }
@@ -238,7 +247,7 @@ model Facturas {
   estado          EstadoFactura         @default(ACTIVO)
   FacturasDetalle FacturasDetalle[]
   id_sucursal     Int?
-  Sucursal        Sucursales?            @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_facturacion_sucursal")
+  Sucursal        Sucursales?           @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_facturacion_sucursal")
 
   @@index([id_sucursal], name: "fk_facturacion_sucursal_id")
   @@index([id_usuario], name: "fk_fatura_usuario_id")

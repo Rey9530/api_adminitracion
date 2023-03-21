@@ -9,7 +9,7 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
 
   mes = mes > 0 ? mes : 0;
   let diasMes: any = new Date(anio, mes, 0);
-  mes = mes > 0 ? mes - 1 : 0; 
+  mes = mes > 0 ? mes - 1 : 0;
   diasMes = diasMes.getDate();
   var arrayDatos: any[] = [];
   // for (let index = 14; index <= 15; index++) {
@@ -57,8 +57,10 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
     ]);
 
     var ventas_locales = 0;
-    facturas.forEach((item:any) => {
-      ventas_locales += item.total ?? 0;
+    facturas.forEach((item) => {
+      if (item.estado == "ACTIVO") {
+        ventas_locales += item.total ?? 0;
+      }
     });
 
     totales.ventas_locales += ventas_locales;
@@ -89,9 +91,9 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
 export const getCreditoFiscal = async (req = request, resp = response) => {
   var desde1: any = req.query.desde!.toString().split("-");
   var hasta1: any = req.query.hasta!.toString().split("-");
-  var desde = new Date(desde1[0], (desde1[1]-1), desde1[2], 0, 0, 0);
-  var hasta = new Date(hasta1[0], (hasta1[1]-1), hasta1[2], 23, 59, 59); 
-  var totales: any[] = []; 
+  var desde = new Date(desde1[0], desde1[1] - 1, desde1[2], 0, 0, 0);
+  var hasta = new Date(hasta1[0], hasta1[1] - 1, hasta1[2], 23, 59, 59);
+  var totales: any[] = [];
   var data = await prisma.facturas.findMany({
     where: {
       fecha_creacion: {

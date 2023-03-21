@@ -10,6 +10,7 @@ import {
   actualizarRegistro,
   eliminarRegistro,
   getFacturas,
+  obntenerTiposContribuyentes,
 } from "../../controllers/facturacion/cliente";
 import fileUpload from "express-fileupload";
 
@@ -41,5 +42,8 @@ router.put(
 );
 
 router.delete("/:id", validarJWT, eliminarRegistro);
+
+
+router.get("/obtener/tipos/contribuyentes", validarJWT, obntenerTiposContribuyentes);
 
 export default router;

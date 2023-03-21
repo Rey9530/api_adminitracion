@@ -39,7 +39,7 @@ export const getRegistros = async (req: any, resp = response) => {
   const total = await prisma.cliente.count({ where });
   const data = await prisma.cliente.findMany({
     where,
-    include: { Municipio: true },
+    include: { Municipio: true , TipoCliente:true},
     take: registrosXpagina,
     skip: (pagina - 1) * registrosXpagina,
   });
@@ -59,7 +59,7 @@ export const getRegistro = async (req = request, resp = response) => {
   uid = uid > 0 ? uid : 0;
   const registros = await prisma.cliente.findFirst({
     where: { id_cliente: uid, estado: "ACTIVO" },
-    include: { Municipio: true },
+    include: { Municipio: true , TipoCliente:true},
   });
 
   if (!registros) {
@@ -112,6 +112,7 @@ export const crearRegistro = async (req = request, resp = response) => {
     registro_nrc = "",
     nit = "",
     id_municipio = 0,
+    id_tipo_cliente = 0,
     direccion = "",
     telefono = "",
     correo = "",
@@ -125,6 +126,19 @@ export const crearRegistro = async (req = request, resp = response) => {
     let foto_obj_nrc = JSON.stringify(respImagen);
     let foto_url_nrc = respImagen.secure_url ? respImagen.secure_url : "";
 
+    id_tipo_cliente = Number(id_tipo_cliente);
+    id_tipo_cliente = id_tipo_cliente > 0 ? id_tipo_cliente : null; 
+    if(id_tipo_cliente>0){
+      const tipoCliente = await prisma.tiposCliente.findFirst({
+        where: { id_tipo_cliente },
+      }); 
+      if (!tipoCliente) {
+        return resp.status(400).json({
+          status: false,
+          msg: "El tipo de cliente seleccionado no existe ",
+        });
+      } 
+    }
     id_municipio = Number(id_municipio);
     if (id_municipio > 0) {
       const municipio = await prisma.municipios.findFirst({
@@ -153,7 +167,8 @@ export const crearRegistro = async (req = request, resp = response) => {
         telefono,
         correo,
         dui,
-        id_sucursal
+        id_sucursal,
+        id_tipo_cliente
       },
       select: {
         id_cliente: true,
@@ -168,6 +183,7 @@ export const crearRegistro = async (req = request, resp = response) => {
         telefono: true,
         correo: true,
         dui: true,
+        id_tipo_cliente: true,
       },
     });
     resp.json({
@@ -204,6 +220,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       razon_social = "",
       nit = "",
       id_municipio = 0,
+      id_tipo_cliente = 0,
       direccion = "",
       telefono = "",
       correo = "",
@@ -230,6 +247,21 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       } catch (error) {
         console.log(error);
       }
+    }
+
+
+    id_tipo_cliente = Number(id_tipo_cliente);
+    id_tipo_cliente = id_tipo_cliente > 0 ? id_tipo_cliente : null; 
+    if(id_tipo_cliente>0){
+      const tipoCliente = await prisma.tiposCliente.findFirst({
+        where: { id_tipo_cliente },
+      }); 
+      if (!tipoCliente) {
+        return resp.status(400).json({
+          status: false,
+          msg: "El tipo de cliente seleccionado no existe ",
+        });
+      } 
     }
 
     id_municipio = Number(id_municipio);
@@ -261,6 +293,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         telefono,
         correo,
         dui,
+        id_tipo_cliente,
       },
       select: {
         id_cliente: true,
@@ -275,6 +308,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         telefono: true,
         correo: true,
         dui: true,
+        id_tipo_cliente: true,
       },
     });
     resp.json({
@@ -321,4 +355,18 @@ export const eliminarRegistro = async (req = request, resp = response) => {
     });
   }
   return;
+};
+
+export const obntenerTiposContribuyentes = async (
+  _ = request,
+  resp = response
+) => {
+  const data = await prisma.tiposCliente.findMany({
+    where: { estado: "ACTIVO" },
+  });
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data,
+  });
 };

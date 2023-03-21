@@ -7,7 +7,14 @@ const execute = async () => {
     await prisma.facturasTipos.createMany({
       data: [
         { id_tipo_factura:1, nombre: "Consumidor Final" }, 
-        { id_tipo_factura:2, nombre: "Credito Fiscal" }, 
+        { id_tipo_factura:2, nombre: "Credito Fiscal" },  
+      ],
+    });
+    await prisma.tiposCliente.createMany({
+      data: [
+        { id_tipo_cliente:1, nombre: "Grandes Contribuyentes" }, 
+        { id_tipo_cliente:2, nombre: "Medianos Contribuyentes" }, 
+        { id_tipo_cliente:3, nombre: "Otros Contribuyentes" }, 
       ],
     });
     await prisma.facturasMetodosDePago.createMany({
