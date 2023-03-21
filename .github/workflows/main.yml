@@ -1,11 +1,57 @@
 name: Deploy
 
-on: [push]
+on: 
+  push:
+    branches:
+      - "main"
 
 
 jobs:
+  Test:
+      runs-on: ubuntu-latest
+      # Service containers to run with `container-job`
+      services:
+        # Label used to access the service container
+        postgres:
+          # Docker Hub image
+          image: postgres
+          # Provide the password for postgres
+          env:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+          options: >-
+            --health-cmd pg_isready
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 5
+          ports: 
+            - 5432:5432
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grading-app
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-node@v1
+          with:
+            node-version: '18.x'
+        - run: npm ci
+        # run the migration in the test database
+        - run: npm run db:push
+        - run: npm run test
+
+  Build:
+    runs-on: ubuntu-latest 
+    needs: Test
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci
+      - name: Run production migration
+        run: npm run migrate:deploy
+        env:
+          DATABASE_URL: postgresql://${{secrets.DB_NAME}}:${{secrets.DB_PASSWORD}}@${{secrets.HOST}}:${{secrets.DB_PORT}}/${{secrets.DB_NAME}}?schema=public
+
   Deploy:
     runs-on: ubuntu-latest
+    needs: Build
     steps:
       - name: Despliegue en Droplet de DigitalOcean
         uses: appleboy/ssh-action@master 
@@ -33,9 +79,11 @@ jobs:
             echo "Fin Variables en ENV"
 
             yarn install  
-            npx prisma migrate deploy
             yarn run tsc
             pm2 restart mi-api
+
+
+# npx prisma migrate deploy  // Esto va antes de yarn install
 
 
 # sudo rm -r html
