@@ -38,6 +38,7 @@ jobs:
         - run: npm ci
         # run the migration in the test database
         - run: npm run db:push
+        - run: npm run datos
         - run: npm run test
 
   Build:
