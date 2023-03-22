@@ -5,6 +5,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getConsumidorFinal = async (req = request, resp = response) => {
+
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   let { mes = 0, anio = 0 }: any = req.query;
 
   mes = mes > 0 ? mes : 0;
@@ -37,12 +40,14 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
         where: {
           ...fecha_creacio,
           Bloque: { Tipo: { id_tipo_factura: 1 } },
+          id_sucursal
         },
       }),
       await prisma.facturas.findFirst({
         where: {
           ...fecha_creacio,
           Bloque: { Tipo: { id_tipo_factura: 1 } },
+          id_sucursal
         },
         orderBy: {
           id_factura: "desc",
@@ -52,6 +57,7 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
         where: {
           ...fecha_creacio,
           Bloque: { Tipo: { id_tipo_factura: 1 } },
+          id_sucursal
         },
       }),
     ]);
@@ -89,6 +95,9 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
 };
 
 export const getCreditoFiscal = async (req = request, resp = response) => {
+
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   var desde1: any = req.query.desde!.toString().split("-");
   var hasta1: any = req.query.hasta!.toString().split("-");
   var desde = new Date(desde1[0], desde1[1] - 1, desde1[2], 0, 0, 0);
@@ -101,6 +110,7 @@ export const getCreditoFiscal = async (req = request, resp = response) => {
         lte: hasta,
       },
       Bloque: { Tipo: { id_tipo_factura: 2 } },
+      id_sucursal
     },
   });
 

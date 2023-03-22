@@ -5,6 +5,8 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getVentasMensuales = async (req = request, resp = response) => {
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   let { anio = 2023 }: any = req.query;
 
   var data: any[] = [];
@@ -23,6 +25,7 @@ export const getVentasMensuales = async (req = request, resp = response) => {
           gte: desde,
           lte: hasta,
         },
+        id_sucursal
       },
     });
     data.push(result._sum.total ?? 0);
@@ -39,6 +42,8 @@ export const getVentasXTipoDocumento = async (
   req = request,
   resp = response
 ) => {
+  let { ids = 0 } = req.params;
+  let id_sucursal = Number(ids);
   var desde1: any = req.query.desde!.toString().split("-");
   var hasta1: any = req.query.hasta!.toString().split("-");
   var desde = new Date(desde1[0], desde1[1] - 1, desde1[2], 0, 0, 0);
@@ -58,7 +63,7 @@ export const getVentasXTipoDocumento = async (
         fecha_creacion: {
           gte: desde,
           lte: hasta,
-        },
+        },id_sucursal
       },
     });
     data_pie.push({
@@ -82,7 +87,7 @@ export const getVentasXTipoDocumento = async (
         fecha_creacion: {
           gte: dia_desde,
           lte: dia_hasta,
-        },
+        },id_sucursal
       },
     });
     data_fechas.push({
