@@ -112,6 +112,7 @@ export const getCreditoFiscal = async (req = request, resp = response) => {
       Bloque: { Tipo: { id_tipo_factura: 2 } },
       id_sucursal
     },
+    include:{Bloque: { include:{Tipo:true} },}
   });
 
   resp.json({

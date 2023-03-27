@@ -116,6 +116,7 @@ enum FacturaTiposDescuentos {
 model FacturasTipos {
   id_tipo_factura Int               @id @default(autoincrement())
   nombre          String
+  codigo          String?
   estado          Estado            @default(ACTIVO)
   Bloques         FacturasBloques[]
 }
@@ -244,6 +245,7 @@ model Facturas {
   descuento       Float?                @default(0)
   iva             Float?                @default(0)
   total           Float?                @default(0)
+  clase           Int?                  @default(1) // 1==Imprenta o tikets, 2==Formulario unico, 4==Factura electronica(dte)
   estado          EstadoFactura         @default(ACTIVO)
   FacturasDetalle FacturasDetalle[]
   id_sucursal     Int?
