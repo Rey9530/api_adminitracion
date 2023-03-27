@@ -527,10 +527,14 @@ const execute = async () => {
     });
 
     //SUCURSAL DEMO
-    let sucursal = await prisma.sucursales.create({
-      data: {
-        nombre: "Sucursal Matriz",
-      },
+    await prisma.sucursales.createMany({
+      data: [
+        { nombre: "Sucursal 1" },
+        { nombre: "Sucursal 2" },
+        { nombre: "Sucursal 3" },
+        { nombre: "Sucursal 4" },
+        { nombre: "Sucursal 5" },
+      ]
     });
 
     //ROLS DEMO
@@ -552,7 +556,52 @@ const execute = async () => {
         dui: "1234567890",
         password: password,
         id_rol: rol.id_rol,
-        id_sucursal: sucursal.id_sucursal,
+        id_sucursal: 1,
+      },
+    }); 
+    await prisma.usuarios.create({
+      data: {
+        nombres: "Usuario",
+        apellidos: "Demo",
+        usuario: "miguelmunoz_19@hotmail.es",
+        dui: "1234567890",
+        password: password,
+        id_rol: rol.id_rol,
+        id_sucursal: 2,
+      },
+    }); 
+    await prisma.usuarios.create({
+      data: {
+        nombres: "Usuario",
+        apellidos: "Demo",
+        usuario: "palomo_naza@yahoo.com",
+        dui: "1234567890",
+        password: password,
+        id_rol: rol.id_rol,
+        id_sucursal: 3,
+      },
+    });
+
+    await prisma.usuarios.create({
+      data: {
+        nombres: "Usuario",
+        apellidos: "Demo",
+        usuario: "balcaceressteven@gmail.com",
+        dui: "1234567890",
+        password: password,
+        id_rol: rol.id_rol,
+        id_sucursal: 4,
+      },
+    });
+    await prisma.usuarios.create({
+      data: {
+        nombres: "Usuario",
+        apellidos: "Demo",
+        usuario: "giovanniartiga@yahoo.com",
+        dui: "1234567890",
+        password: password,
+        id_rol: rol.id_rol,
+        id_sucursal: 5,
       },
     });
 
