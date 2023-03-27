@@ -82,7 +82,8 @@ jobs:
             sudo echo "PORT=${{secrets.PORT_API}}" >> .env 
             echo "Fin Variables en ENV"
 
-            yarn install  
+            yarn install 
+            yarn run migrate:deploy
             yarn run tsc
             pm2 restart mi-api
 
