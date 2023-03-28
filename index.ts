@@ -32,16 +32,15 @@ app.use('/reportes/facturacion', reportes);
 app.use('/estadisticas/facturacion', estadisticas);  
 
 //Facturacion
-app.use('/facturacion/cliente', cliente);  
-app.use('/facturacion/factura', factura);  
-app.use('/facturacion/catalogo', catalogo);  
-app.use('/facturacion/sucursales', sucursales);  
-app.use('/facturacion/catalogo_tipos', catalogo_tipos);  
-app.use('/facturacion/catalogo_categorias', catalogo_categorias);  
-app.use('/facturacion/bloques', bloques);  
-app.use('/facturacion/descuentos', decuentos);  
-app.use('/facturacion/sistema_data', sistema_data);  
-app.use('/facturacion/sistema_data', sistema_data);  
+app.use('/facturacion/cliente', cliente);
+app.use('/facturacion/factura', factura);
+app.use('/facturacion/catalogo', catalogo);
+app.use('/facturacion/sucursales', sucursales);
+app.use('/facturacion/catalogo_tipos', catalogo_tipos);
+app.use('/facturacion/catalogo_categorias', catalogo_categorias);
+app.use('/facturacion/bloques', bloques);
+app.use('/facturacion/descuentos', decuentos);
+app.use('/facturacion/sistema_data', sistema_data); 
 
 const port = process.env.PORT || 4000;
 app.listen(process.env.PORT,()=>{

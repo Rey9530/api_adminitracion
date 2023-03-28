@@ -11,14 +11,18 @@ datasource db {
 }
 
 model GeneralData {
-  id_general     Int     @id @default(autoincrement())
-  nombre_sistema String
-  direccion      String?
-  razon          String?
-  nit            String?
-  nrc            String?
-  contactos      String?
-  impuesto       Float?  @default(0.13)
+  id_general            Int           @id @default(autoincrement())
+  nombre_sistema        String
+  direccion             String?
+  razon                 String?
+  nit                   String?
+  nrc                   String?
+  contactos             String?
+  impuesto              Float?        @default(0.13)
+  id_tipo_contribuyente Int?
+  TipoCliente           TiposCliente? @relation(fields: [id_tipo_contribuyente], references: [id_tipo_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_tipo")
+
+  @@index([id_tipo_contribuyente], name: "fk_sistema_tipo_id")
 }
 
 enum Estado {
@@ -181,10 +185,11 @@ model Municipios {
 }
 
 model TiposCliente {
-  id_tipo_cliente Int       @id @default(autoincrement())
+  id_tipo_cliente Int           @id @default(autoincrement())
   nombre          String
-  estado          Estado    @default(ACTIVO)
+  estado          Estado        @default(ACTIVO)
   Cliente         Cliente[]
+  GeneralData     GeneralData[]
 }
 
 model Cliente {
@@ -207,7 +212,7 @@ model Cliente {
   Facturas        Facturas[]
   id_sucursal     Int?
   Sucursal        Sucursales?   @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_sucursal")
-  id_tipo_cliente Int?          
+  id_tipo_cliente Int?
   TipoCliente     TiposCliente? @relation(fields: [id_tipo_cliente], references: [id_tipo_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_tipo")
 
   @@index([id_tipo_cliente], name: "fk_cliente_tipo_id")
@@ -244,6 +249,8 @@ model Facturas {
   subtotal        Float?                @default(0)
   descuento       Float?                @default(0)
   iva             Float?                @default(0)
+  iva_retenido    Float?                @default(0)
+  iva_percivido   Float?                @default(0)
   total           Float?                @default(0)
   clase           Int?                  @default(1) // 1==Imprenta o tikets, 2==Formulario unico, 4==Factura electronica(dte)
   estado          EstadoFactura         @default(ACTIVO)

@@ -288,6 +288,8 @@ export const crearFactura = async (req = request, resp = response) => {
       subtotal = 0,
       descuento = 0,
       iva = 0,
+      iva_retenido = 0,
+      iva_percivido = 0,
       total = 0,
       efectivo = 0,
       tarjeta = 0,
@@ -314,6 +316,8 @@ export const crearFactura = async (req = request, resp = response) => {
     efectivo = Number(efectivo);
     id_cliente = Number(id_cliente);
     tarjeta = Number(tarjeta);
+    iva_retenido = Number(iva_retenido); 
+    iva_retenido = Number(iva_retenido);
     cheque = Number(cheque);
     transferencia = Number(transferencia);
     credito = Number(credito);
@@ -430,6 +434,8 @@ export const crearFactura = async (req = request, resp = response) => {
         subtotal,
         descuento,
         iva,
+        iva_retenido,
+        iva_percivido,
         total,
         id_usuario,
       },
