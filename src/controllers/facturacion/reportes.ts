@@ -24,6 +24,7 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
   totales.ventas_totales = 0;
   totales.ventas_terceros = 0;
 
+  var listadoFactura:any[] = [];
   for (let index = 1; index <= diasMes; index++) {
     var fecha = new Date(anio, mes, index);
     var desde = new Date(anio, mes, index, 0, 0, 0);
@@ -59,8 +60,13 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
           Bloque: { Tipo: { id_tipo_factura: 1 } },
           id_sucursal
         },
+        include:{Bloque: { include:{Tipo:true} },}
       }),
     ]);
+
+    if(facturas.length>0){
+      listadoFactura.push(...facturas);
+    }
 
     var ventas_locales = 0; 
     facturas.forEach((item) => {
@@ -86,10 +92,12 @@ export const getConsumidorFinal = async (req = request, resp = response) => {
     };
     arrayDatos.push(fila);
   }
+ 
   resp.json({
     status: true,
     msg: "Listado de registros",
     data: arrayDatos,
+    listado:listadoFactura,
     totales,
   });
 };
