@@ -52,6 +52,7 @@ export const crearRegistro = async (req = request, resp = response) => {
     hasta = 0,
     actual = 0,
     serie = "",
+    resolucion = "",
     id_tipo_factura = 0,
   } = req.body;
   try {
@@ -72,6 +73,7 @@ export const crearRegistro = async (req = request, resp = response) => {
         serie,
         id_tipo_factura,
         id_sucursal,
+        resolucion
       },
     });
     resp.json({
@@ -110,6 +112,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       hasta = 0,
       actual = 0,
       serie = "",
+      resolucion = "",
       id_tipo_factura = 0,
     } = req.body;
 
@@ -131,6 +134,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         serie,
         id_tipo_factura,
         id_sucursal,
+        resolucion,
       },
     });
     resp.json({

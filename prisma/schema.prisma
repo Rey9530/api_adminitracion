@@ -146,6 +146,7 @@ model FacturasBloques {
   id_bloque       Int           @id @default(autoincrement())
   tira            String
   autorizacion    String        @default("")
+  resolucion      String?        @default("")
   desde           Int
   hasta           Int
   actual          Int
