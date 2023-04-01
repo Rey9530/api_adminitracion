@@ -22,7 +22,7 @@ export const getRegistro = async (req = request, resp = response) => {
     where: { id_categoria: uid, estado: "ACTIVO" },
   });
 
-  if (!registros) {
+  if (!registros) { 
     resp.status(400).json({
       status: false,
       msg: "El registro no existe",

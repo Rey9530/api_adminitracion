@@ -76,6 +76,7 @@ export const buscarClientes = async (req = request, resp = response) => {
   let arrayQuery = query.split(" ");
   const data = await prisma.cliente.findMany({
     where: {
+      estado:'ACTIVO',
       AND: arrayQuery.map((contains: any) => {
         return {
           nombre: {
