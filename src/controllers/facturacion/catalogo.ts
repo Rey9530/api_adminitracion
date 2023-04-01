@@ -77,6 +77,8 @@ export const crearRegistro = async (req = request, resp = response) => {
     descripcion = "",
     precio_con_iva = 0,
     precio_sin_iva = 0,
+    existencias_minimas = 0,
+    existencias_maximas = 0,
   } = req.body;
   try {
     const [tipo, categoria] = await Promise.all([
@@ -108,6 +110,8 @@ export const crearRegistro = async (req = request, resp = response) => {
         descripcion,
         precio_con_iva,
         precio_sin_iva,
+        existencias_minimas,
+        existencias_maximas
       },
     });
     resp.json({
@@ -143,7 +147,9 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       nombre = "",
       descripcion = "",
       precio_con_iva = 0,
-      precio_sin_iva = 0,
+      precio_sin_iva = 0, 
+      existencias_minimas=0,
+      existencias_maximas=0
     } = req.body;
     const [tipo, categoria] = await Promise.all([
       await prisma.catalogoTipo.findFirst({
@@ -175,6 +181,8 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         descripcion,
         precio_con_iva,
         precio_sin_iva,
+        existencias_minimas,
+        existencias_maximas
       },
     });
     resp.json({
