@@ -14,9 +14,7 @@ export const getVentasMensuales = async (req = request, resp = response) => {
     var diasTotales = new Date(anio, index + 1, 0).getDate() - 1;
     var desde = new Date(anio, index, 1, 0, 0, 0);
     var hasta = new Date(anio, index, diasTotales, 23, 59, 59);
-
-    console.log(desde)
-    console.log(hasta)
+ 
     var result = await prisma.facturas.aggregate({
       _sum: {
         total: true,
