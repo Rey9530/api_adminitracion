@@ -23,6 +23,8 @@ import bloques from "./src/routes/facturacion/bloques";
 import decuentos from "./src/routes/facturacion/decuentos"; 
 import sistema_data from "./src/routes/facturacion/sistema_data"; 
 
+import bodegas from "./src/routes/inventario/bodegas"; 
+
 //intanciando rutas
 app.use('/usuarios', usuarios );
 app.use('/auth', auth);  
@@ -42,6 +44,9 @@ app.use('/facturacion/bloques', bloques);
 app.use('/facturacion/descuentos', decuentos);
 app.use('/facturacion/sistema_data', sistema_data); 
 
+
+// inventario
+app.use('/inventario/bodegas', bodegas);
 const port = process.env.PORT || 4000;
 app.listen(process.env.PORT,()=>{
     console.log('Servidor corriendo:',port)
