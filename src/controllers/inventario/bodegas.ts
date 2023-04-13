@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 export const getRegistros = async (__: any, resp = response) => {
   const registros = await prisma.bodegas.findMany({
     where: { estado: "ACTIVO" },
+    include:{ Sucursales:true }
   });
   const total = await registros.length;
   resp.json({

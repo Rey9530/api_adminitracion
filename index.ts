@@ -24,6 +24,7 @@ import decuentos from "./src/routes/facturacion/decuentos";
 import sistema_data from "./src/routes/facturacion/sistema_data"; 
 
 import bodegas from "./src/routes/inventario/bodegas"; 
+import proveedores from "./src/routes/inventario/proveedores"; 
 
 //intanciando rutas
 app.use('/usuarios', usuarios );
@@ -47,6 +48,9 @@ app.use('/facturacion/sistema_data', sistema_data);
 
 // inventario
 app.use('/inventario/bodegas', bodegas);
+app.use('/inventario/proveedores', proveedores);
+
+
 const port = process.env.PORT || 4000;
 app.listen(process.env.PORT,()=>{
     console.log('Servidor corriendo:',port)
