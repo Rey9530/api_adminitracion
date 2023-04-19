@@ -354,15 +354,9 @@ model Proveedores {
 model Compras {
   id_compras     Int              @id @default(autoincrement())
   numero_factura String           @default("0")
-  fecha_creacion DateTime         @default(now())
-  proveedor      String           @default("")
-  direccion      String?          @default("")
-  no_registro    String?          @default("")
-  nit            String?          @default("")
-  giro           String?          @default("")
   id_proveedor   Int?
   Proveedor      Proveedores?     @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_proveedor")
-  tipo_pago      Int              @default(1) // 1=contado, 2=credito 
+  tipo_pago      TipoPago         @default(CONTADO) // 1=contado, 2=credito 
   id_usuario     Int              @default(0)
   Usuario        Usuarios         @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_compra_usuario")
   dias_credito   Int?             @default(0)
@@ -372,15 +366,28 @@ model Compras {
   iva_retenido   Float?           @default(0)
   iva_percivido  Float?           @default(0)
   total          Float?           @default(0)
-  clase          Int?             @default(1) // 1==Imprenta o tikets, 2==Formulario unico, 4==Factura electronica(dte)
+  clase          ClaseFactura     @default(IMPRENTAOTICKETS) // 1==Imprenta o tikets, 2==Formulario unico, 4==Factura electronica(dte)
   estado         EstadoFactura    @default(ACTIVO)
   id_bodega      Int?
   Bodegas        Bodegas?         @relation(fields: [id_bodega], references: [id_bodega], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_bodega")
   ComprasDetalle ComprasDetalle[]
+  fecha_creacion DateTime         @default(now())
+  fecha_factura  DateTime?
 
   @@index([id_bodega], name: "fk_compras_bodega_id")
   @@index([id_usuario], name: "fk_compra_usuario_id")
   @@index([id_proveedor], name: "fk_compras_proveedor_id")
+}
+
+enum TipoPago {
+  CONTADO
+  CREDITO
+}
+
+enum ClaseFactura {
+  IMPRENTAOTICKETS
+  FROMUNICO
+  FACELECTRONICA
 }
 
 model ComprasDetalle {
@@ -392,8 +399,7 @@ model ComprasDetalle {
   codigo               String?      @db.Text
   nombre               String
   descripcion          String?      @db.Text
-  precio_sin_iva       Float?       @default(0)
-  precio_con_iva       Float?       @default(0)
+  costo_unitario       Float?       @default(0)
   cantidad             Float        @default(0)
   subtotal             Float?       @default(0)
   descuento_porcentaje Float?       @default(0)
@@ -416,9 +422,9 @@ model Inventario {
   ComprasDetalle     ComprasDetalle? @relation(fields: [id_compras_detalle], references: [id_compras_detalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventario_detalle")
   id_bodega          Int?
   Bodegas            Bodegas?        @relation(fields: [id_bodega], references: [id_bodega], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventario_bodega")
-  costo              Float?          @default(0)
-  cantidad           Float?          @default(0)
-  total              Float?          @default(0)
+  costo_unitario     Float?          @default(0)
+  existencia         Float?          @default(0)
+  costo_total        Float?          @default(0)
 
   @@index([id_bodega], name: "fk_inventario_bodega_id")
   @@index([id_catalogo], name: "fk_inventario_catalogo_id")

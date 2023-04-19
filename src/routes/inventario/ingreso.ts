@@ -1,0 +1,69 @@
+import expres from "express";
+const router = expres.Router();
+import { check } from "express-validator";
+import { 
+  buscarProveedor,
+  buscarEnCatalogo,
+  crearFactura,   
+  obntenerFactura,
+  obntenerListadoFacturas,  
+  obtenerBodegas, 
+} from "../../controllers/inventario/ingreso";
+import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
+import { validarJWT } from "../../middlewares/validar-jwt";
+
+router.post(
+  "/",
+  [
+    validarJWT, 
+    check("id_proveedor", "El seleccione un proveedor valido").custom((e) =>
+      validar_dato(e, "positivo")
+    ),
+    // check("id_metodo_pago", "El metodo de pago es obligatorio").custom((e) =>
+    //   validar_dato(e, "positivo_0")
+    // ),
+    check("id_tipo_factura", "El tipo de factura es obligatorio").custom((e) =>
+      validar_dato(e, "positivo_0")
+    ),
+    check("detalle_factura", "El tipo de factura es requerido").custom((e) =>
+      validar_dato(e, "is_array")
+    ),
+    validarCampos,
+  ],
+  crearFactura
+); 
+ 
+
+router.post(
+  "/buscar/catalogo",
+  [
+    validarJWT,
+    check("query", "El cliente es requerido").not().isEmpty(),
+    validarCampos,
+  ],
+  buscarEnCatalogo
+);
+
+router.post(
+  "/buscar/proveedores",
+  [
+    validarJWT,
+    check("query", "El proveedor es requerido").not().isEmpty(),
+    validarCampos,
+  ],
+  buscarProveedor
+);
+ 
+router.get("/obtener/bodegas/:id", validarJWT, obtenerBodegas);
+router.get(
+  "/obtener_listado_facturas",
+  [
+    validarJWT,
+    check("desde", "El parametro desde es requerido y debe ser formato fecha YYYY-mm-dd").not().isEmpty().isDate(),
+    check("hasta", "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd").not().isEmpty().isDate(),
+    validarCampos,
+  ],
+  obntenerListadoFacturas 
+); 
+router.get("/obtener_factura/:id", validarJWT, obntenerFactura); 
+export default router;

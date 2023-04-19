@@ -25,6 +25,7 @@ import sistema_data from "./src/routes/facturacion/sistema_data";
 
 import bodegas from "./src/routes/inventario/bodegas"; 
 import proveedores from "./src/routes/inventario/proveedores"; 
+import ingreso from "./src/routes/inventario/ingreso"; 
 
 //intanciando rutas
 app.use('/usuarios', usuarios );
@@ -49,6 +50,7 @@ app.use('/facturacion/sistema_data', sistema_data);
 // inventario
 app.use('/inventario/bodegas', bodegas);
 app.use('/inventario/proveedores', proveedores);
+app.use('/inventario/ingreso', ingreso);
 
 
 const port = process.env.PORT || 4000;
