@@ -354,14 +354,20 @@ model Proveedores {
 model Compras {
   id_compras     Int              @id @default(autoincrement())
   numero_factura String           @default("0")
+  detalle        String?           @db.Text
   id_proveedor   Int?
   Proveedor      Proveedores?     @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_proveedor")
-  tipo_pago      TipoPago         @default(CONTADO) // 1=contado, 2=credito 
+  tipo_pago      TipoPago         @default(CONTADO)
+  tipo_compra    TipoCompra       @default(INTERNA)
+  tipo_factura   TipoCompraFact   @default(GRABADO)
   id_usuario     Int              @default(0)
   Usuario        Usuarios         @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_compra_usuario")
   dias_credito   Int?             @default(0)
   subtotal       Float?           @default(0)
   descuento      Float?           @default(0)
+  cesc            Float?           @default(0)
+  fovial            Float?           @default(0)
+  cotrans            Float?           @default(0)
   iva            Float?           @default(0)
   iva_retenido   Float?           @default(0)
   iva_percivido  Float?           @default(0)
@@ -382,6 +388,16 @@ model Compras {
 enum TipoPago {
   CONTADO
   CREDITO
+}
+
+enum TipoCompra {
+  INTERNA
+  IMPORTACION
+}
+
+enum TipoCompraFact {
+  GRABADO
+  EXCENTO
 }
 
 enum ClaseFactura {

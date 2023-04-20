@@ -213,6 +213,63 @@ export const obntenerFactura = async (req = request, resp = response) => {
   });
 };
 
+export const crearCompraServicio = async (req = request, resp = response) => {
+  const { uid } = req.params;
+  const id_usuario = Number(uid);
+  try {
+    let {
+      numero_factura = "",
+      fecha_factura = new Date(),
+      tipo_pago = "CONTADO",
+      tipo_compra = "INTERNA",
+      tipo_factura = "GRABADO",
+      dias_credito = 0,
+      detalle = "",
+      iva = 0,
+      cesc = 0,
+      iva_percivido = 0,
+      monto = 2,
+      fovial = 0,
+      cotrans = 0,
+      total = 0,
+      id_proveedor = 0,
+    } = req.body;
+
+    fecha_factura = new Date(fecha_factura);
+    const compra = await prisma.compras.create({
+      data: {
+        numero_factura,
+        fecha_factura,
+        tipo_pago,
+        tipo_compra,
+        tipo_factura,
+        dias_credito,
+        detalle,
+        iva,
+        cesc,
+        iva_percivido,
+        subtotal: monto,
+        fovial,
+        cotrans,
+        total,
+        id_proveedor,
+        id_usuario,
+      },
+    });
+
+    resp.json({
+      status: true,
+      msg: "Factura creada con exito",
+      data: compra,
+    });
+  } catch (error) {
+    console.log(error);
+    resp.status(500).json({
+      status: false,
+      msg: "Error inesperado reviosar log",
+    });
+  }
+};
 export const crearFactura = async (req = request, resp = response) => {
   try {
     let {
