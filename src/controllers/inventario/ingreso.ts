@@ -214,8 +214,9 @@ export const obntenerFactura = async (req = request, resp = response) => {
 };
 
 export const crearCompraServicio = async (req = request, resp = response) => {
-  const { uid } = req.params;
+  const { uid = 0, ids = 0 } = req.params;
   const id_usuario = Number(uid);
+  let id_sucursal = Number(ids);
   try {
     let {
       numero_factura = "",
@@ -235,6 +236,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
       id_proveedor = 0,
     } = req.body;
 
+    dias_credito = Number(dias_credito);
     fecha_factura = new Date(fecha_factura);
     const compra = await prisma.compras.create({
       data: {
@@ -254,6 +256,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
         total,
         id_proveedor,
         id_usuario,
+        id_sucursal,
       },
     });
 
@@ -289,6 +292,8 @@ export const crearFactura = async (req = request, resp = response) => {
       total = 0,
     } = req.body;
 
+    let { ids = 0 } = req.params;
+    let id_sucursal = Number(ids);
     fecha_factura = new Date(fecha_factura);
     dias_credito = dias_credito > 0 ? dias_credito : null;
     const { uid } = req.params;
@@ -393,6 +398,7 @@ export const crearFactura = async (req = request, resp = response) => {
         id_usuario,
         dias_credito,
         id_bodega,
+        id_sucursal,
       },
     });
     if (compra == null) {

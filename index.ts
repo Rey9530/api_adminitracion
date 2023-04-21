@@ -17,6 +17,7 @@ import catalogo_categorias from "./src/routes/facturacion/catalogo_categorias";
 import catalogo from "./src/routes/facturacion/catalogo"; 
 import factura from "./src/routes/facturacion/factura"; 
 import reportes from "./src/routes/facturacion/reportes"; 
+import reportes_compras from "./src/routes/facturacion/reportes_compras"; 
 import estadisticas from "./src/routes/facturacion/estadisticas"; 
 import cliente from "./src/routes/facturacion/cliente"; 
 import bloques from "./src/routes/facturacion/bloques"; 
@@ -33,6 +34,7 @@ app.use('/auth', auth);
 
 //reportes
 app.use('/reportes/facturacion', reportes);  
+app.use('/reportes/compras', reportes_compras);  
 app.use('/estadisticas/facturacion', estadisticas);  
 
 //Facturacion

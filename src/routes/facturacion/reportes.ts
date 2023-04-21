@@ -23,8 +23,5 @@ router.get(
     validarCampos,
   ],
   getCreditoFiscal
-);
-// router.get("/obtener_departamentos", validarJWT, obntenerDepartamentos);
-// router.get("/obtener_municipios/:id", validarJWT, obntenerMunicipios);
-// router.get("/obtener_factura/:id", validarJWT, obntenerFactura); 
+); 
 export default router;
