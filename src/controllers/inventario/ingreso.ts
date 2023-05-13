@@ -220,6 +220,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
   try {
     let {
       numero_factura = "",
+      numero_quedan = "",
       fecha_factura = new Date(),
       tipo_pago = "CONTADO",
       tipo_compra = "INTERNA",
@@ -238,6 +239,10 @@ export const crearCompraServicio = async (req = request, resp = response) => {
 
     dias_credito = Number(dias_credito);
     fecha_factura = new Date(fecha_factura);
+    var fecha_de_pago = new Date();
+    if (tipo_pago == "CREDITO" && dias_credito>0) {
+      fecha_de_pago.setDate(fecha_de_pago.getDate() + dias_credito);
+    }
     const compra = await prisma.compras.create({
       data: {
         numero_factura,
@@ -257,6 +262,9 @@ export const crearCompraServicio = async (req = request, resp = response) => {
         id_proveedor,
         id_usuario,
         id_sucursal,
+        numero_quedan,
+        fecha_de_pago,
+        estado_pago: tipo_pago == "CREDITO" ? "PENDIENTE" : "PAGADO",
       },
     });
 

@@ -356,6 +356,7 @@ model Proveedores {
 model Compras {
   id_compras     Int              @id @default(autoincrement())
   numero_factura String           @default("0")
+  numero_quedan  String?          @default("0")
   detalle        String?          @db.Text
   id_proveedor   Int?
   Proveedor      Proveedores?     @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_proveedor")
@@ -383,11 +384,19 @@ model Compras {
   ComprasDetalle ComprasDetalle[]
   fecha_creacion DateTime         @default(now())
   fecha_factura  DateTime?
+  fecha_de_pago  DateTime?
+  estado_pago    EstadoPago       @default(PENDIENTE)
 
   @@index([id_sucursal], name: "fk_compras_sucursal_id")
   @@index([id_bodega], name: "fk_compras_bodega_id")
   @@index([id_usuario], name: "fk_compra_usuario_id")
   @@index([id_proveedor], name: "fk_compras_proveedor_id")
+}
+
+enum EstadoPago {
+  PENDIENTE
+  ENCHEQUE
+  PAGADO
 }
 
 enum TipoPago {

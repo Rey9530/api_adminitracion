@@ -41,7 +41,7 @@ router.post(
     check("id_proveedor", "El seleccione un proveedor valido").custom((e) =>
       validar_dato(e, "positivo")
     ), 
-    check("numero_factura", "El numero de factura es requerido").not().isEmpty(),
+    check("numero_factura", "El numero de factura es requerido").not().isEmpty(), 
     check("tipo_compra", "El tipo de compra es requerido").not().isEmpty(),
     check("tipo_factura", "El tipo de factura es requerido").not().isEmpty(),
     check("fecha_factura", "La fecha es requerida").isDate(),
