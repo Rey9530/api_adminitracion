@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fieldReference"]
 }
 
 datasource db {
@@ -443,7 +444,7 @@ model Inventario {
   id_bodega          Int?
   Bodegas            Bodegas?        @relation(fields: [id_bodega], references: [id_bodega], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventario_bodega")
   costo_unitario     Float?          @default(0)
-  existencia         Float?          @default(0)
+  existencia         Int?            @default(0)
   costo_total        Float?          @default(0)
 
   @@index([id_bodega], name: "fk_inventario_bodega_id")
