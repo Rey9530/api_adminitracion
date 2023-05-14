@@ -35,7 +35,7 @@ app.use('/auth', auth);
 //reportes
 app.use('/reportes/facturacion', reportes);  
 app.use('/reportes/compras', reportes_compras);  
-app.use('/estadisticas/facturacion', estadisticas);  
+app.use('/estadisticas', estadisticas);  
 
 //Facturacion
 app.use('/facturacion/cliente', cliente);
