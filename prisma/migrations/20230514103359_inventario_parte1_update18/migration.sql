@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Compras" ADD COLUMN     "fecha_actualizacion" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

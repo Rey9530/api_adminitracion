@@ -354,38 +354,39 @@ model Proveedores {
 }
 
 model Compras {
-  id_compras     Int              @id @default(autoincrement())
-  numero_factura String           @default("0")
-  numero_quedan  String?          @default("0")
-  detalle        String?          @db.Text
-  id_proveedor   Int?
-  Proveedor      Proveedores?     @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_proveedor")
-  tipo_pago      TipoPago         @default(CONTADO)
-  tipo_compra    TipoCompra       @default(INTERNA)
-  tipo_factura   TipoCompraFact   @default(GRABADO)
-  id_usuario     Int              @default(0)
-  Usuario        Usuarios         @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_compra_usuario")
-  dias_credito   Int?             @default(0)
-  subtotal       Float?           @default(0)
-  descuento      Float?           @default(0)
-  cesc           Float?           @default(0)
-  fovial         Float?           @default(0)
-  cotrans        Float?           @default(0)
-  iva            Float?           @default(0)
-  iva_retenido   Float?           @default(0)
-  iva_percivido  Float?           @default(0)
-  total          Float?           @default(0)
-  clase          ClaseFactura     @default(IMPRENTAOTICKETS) // 1==Imprenta o tikets, 2==Formulario unico, 4==Factura electronica(dte)
-  estado         EstadoFactura    @default(ACTIVO)
-  id_sucursal    Int?
-  Sucursales     Sucursales?      @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_sucursal")
-  id_bodega      Int?
-  Bodegas        Bodegas?         @relation(fields: [id_bodega], references: [id_bodega], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_bodega")
-  ComprasDetalle ComprasDetalle[]
-  fecha_creacion DateTime         @default(now())
-  fecha_factura  DateTime?
-  fecha_de_pago  DateTime?
-  estado_pago    EstadoPago       @default(PENDIENTE)
+  id_compras          Int              @id @default(autoincrement())
+  numero_factura      String           @default("0")
+  numero_quedan       String?          @default("0")
+  detalle             String?          @db.Text
+  id_proveedor        Int?
+  Proveedor           Proveedores?     @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_proveedor")
+  tipo_pago           TipoPago         @default(CONTADO)
+  tipo_compra         TipoCompra       @default(INTERNA)
+  tipo_factura        TipoCompraFact   @default(GRABADO)
+  id_usuario          Int              @default(0)
+  Usuario             Usuarios         @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_compra_usuario")
+  dias_credito        Int?             @default(0)
+  subtotal            Float?           @default(0)
+  descuento           Float?           @default(0)
+  cesc                Float?           @default(0)
+  fovial              Float?           @default(0)
+  cotrans             Float?           @default(0)
+  iva                 Float?           @default(0)
+  iva_retenido        Float?           @default(0)
+  iva_percivido       Float?           @default(0)
+  total               Float?           @default(0)
+  clase               ClaseFactura     @default(IMPRENTAOTICKETS) // 1==Imprenta o tikets, 2==Formulario unico, 4==Factura electronica(dte)
+  estado              EstadoFactura    @default(ACTIVO)
+  id_sucursal         Int?
+  Sucursales          Sucursales?      @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_sucursal")
+  id_bodega           Int?
+  Bodegas             Bodegas?         @relation(fields: [id_bodega], references: [id_bodega], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_bodega")
+  ComprasDetalle      ComprasDetalle[]
+  fecha_creacion      DateTime         @default(now())
+  fecha_actualizacion DateTime         @default(now())
+  fecha_factura       DateTime?
+  fecha_de_pago       DateTime?
+  estado_pago         EstadoPago       @default(PENDIENTE)
 
   @@index([id_sucursal], name: "fk_compras_sucursal_id")
   @@index([id_bodega], name: "fk_compras_bodega_id")

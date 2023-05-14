@@ -9,7 +9,8 @@ import {
   obtenerBodegas,
   crearCompraServicio, 
   obntenerCompra,
-  comprasACheque, 
+  comprasACheque,
+  pagarCheque, 
 } from "../../controllers/inventario/ingreso";
 import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt";
@@ -86,6 +87,15 @@ router.post(
     validarCampos,
   ],
   comprasACheque
+);
+router.post(
+  "/generar_a_cheque",
+  [
+    validarJWT,
+    check("idsProveedores", "Las compras son requerido").not().isEmpty(),
+    validarCampos,
+  ],
+  pagarCheque
 );
  
 router.get("/obtener/bodegas/:id", validarJWT, obtenerBodegas);

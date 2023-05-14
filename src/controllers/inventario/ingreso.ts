@@ -76,6 +76,43 @@ export const comprasACheque = async (req = request, resp = response) => {
   });
 };
 
+export const pagarCheque = async (req = request, resp = response) => {
+  let { idsProveedores = [], id_sucursal = 0 } = req.body;
+
+  if (!(idsProveedores.length > 0)) {
+    return resp.json({
+      status: false,
+      msg: "El listado de compras no es valido",
+      data: null,
+    });
+  }
+  id_sucursal= Number(id_sucursal);
+  let wSucursal = {};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
+  }
+
+  const data = await prisma.compras.updateMany({
+    where: {
+      OR: idsProveedores.map((contains: number) => {
+        return {
+          id_proveedor: Number(contains),
+          estado_pago: "ENCHEQUE",
+          ...wSucursal,
+        };
+      }),
+    },
+    data: {
+      estado_pago: "PAGADO",
+      fecha_actualizacion: new Date(),
+    },
+  });
+  return resp.json({
+    status: data.count > 0,
+    msg: data.count > 0 ? "Compras procesadas" : "Ha ocurrido un error",
+  });
+};
+
 export const buscarProveedor = async (req = request, resp = response) => {
   let { query = "" } = req.body;
   if (query.length == 0) {
@@ -238,6 +275,86 @@ export const obntenerListadoFacturasAlCredito = async (
     status: true,
     msg: "Success",
     data,
+  });
+};
+export const obntenerListadoPrecheques = async (
+  req = request,
+  resp = response
+) => {
+  let id_sucursal: number = Number(req.params.id_sucursal);
+  let wSucursal = {};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
+  }
+  const [deudaPendiente, deudaEnCheque] = await Promise.all([
+    await prisma.compras.aggregate({
+      where: {
+        ...wSucursal,
+        tipo_pago: "CREDITO",
+        estado_pago: "PENDIENTE",
+      },
+      _sum: {
+        total: true,
+      },
+    }),
+    await prisma.compras.aggregate({
+      where: {
+        ...wSucursal,
+        tipo_pago: "CREDITO",
+        estado_pago: "ENCHEQUE",
+      },
+      _sum: {
+        total: true,
+      },
+    }),
+  ]);
+
+  var proveedores = await prisma.compras.groupBy({
+    by: ["id_proveedor"],
+    where: {
+      ...wSucursal,
+      tipo_pago: "CREDITO",
+      estado_pago: "ENCHEQUE",
+    },
+  });
+
+  var data = [];
+  for (let index = 0; index < proveedores.length; index++) {
+    const element = proveedores[index];
+    var provv = await prisma.proveedores.findFirst({
+      where: { id_proveedor: element.id_proveedor ?? 0 },
+      select: { nombre: true, id_proveedor: true },
+    });
+    var registro = await prisma.compras.aggregate({
+      _sum: {
+        total: true,
+      },
+      where: {
+        id_proveedor: element.id_proveedor,
+        estado_pago: "ENCHEQUE",
+        ...wSucursal,
+      },
+    });
+    data.push({
+      proveedor: provv?.nombre ?? "",
+      id_proveedor: provv?.id_proveedor ?? 0,
+      monto: registro._sum.total ?? 0,
+    });
+  }
+
+  var pending = deudaPendiente._sum.total ?? 0;
+  var cheques = deudaEnCheque._sum.total ?? 0;
+  var total = pending + cheques;
+
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data,
+    contadores: {
+      pending,
+      cheques,
+      total,
+    },
   });
 };
 
