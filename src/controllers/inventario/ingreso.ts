@@ -66,13 +66,13 @@ export const comprasACheque = async (req = request, resp = response) => {
         };
       }),
     },
-    data:{
-      estado_pago:"ENCHEQUE"
-    }
+    data: {
+      estado_pago: "ENCHEQUE",
+    },
   });
   return resp.json({
-    status: data.count>0,
-    msg: data.count>0 ? "Compras procesadas":"Ha ocurrido un error"
+    status: data.count > 0,
+    msg: data.count > 0 ? "Compras procesadas" : "Ha ocurrido un error",
   });
 };
 
@@ -273,7 +273,6 @@ export const obntenerCompra = async (req = request, resp = response) => {
 export const crearCompraServicio = async (req = request, resp = response) => {
   const { uid = 0, ids = 0 } = req.params;
   const id_usuario = Number(uid);
-  let id_sucursal = Number(ids);
   try {
     let {
       numero_factura = "",
@@ -283,6 +282,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
       tipo_compra = "INTERNA",
       tipo_factura = "GRABADO",
       dias_credito = 0,
+      id_sucursal = 0,
       detalle = "",
       iva = 0,
       cesc = 0,
@@ -294,6 +294,8 @@ export const crearCompraServicio = async (req = request, resp = response) => {
       id_proveedor = 0,
     } = req.body;
 
+    id_sucursal = Number(id_sucursal);
+    id_sucursal = id_sucursal > 0 ? id_sucursal : Number(ids);
     dias_credito = Number(dias_credito);
     fecha_factura = new Date(fecha_factura);
     var fecha_de_pago = new Date();
