@@ -47,6 +47,35 @@ export const buscarEnCatalogo = async (req = request, resp = response) => {
   });
 };
 
+export const comprasACheque = async (req = request, resp = response) => {
+  let { idsCompras = [] } = req.body;
+
+  if (!(idsCompras.length > 0)) {
+    return resp.json({
+      status: false,
+      msg: "El listado de compras no es valido",
+      data: null,
+    });
+  }
+
+  const data = await prisma.compras.updateMany({
+    where: {
+      OR: idsCompras.map((contains: number) => {
+        return {
+          id_compras: contains,
+        };
+      }),
+    },
+    data:{
+      estado_pago:"ENCHEQUE"
+    }
+  });
+  return resp.json({
+    status: data.count>0,
+    msg: data.count>0 ? "Compras procesadas":"Ha ocurrido un error"
+  });
+};
+
 export const buscarProveedor = async (req = request, resp = response) => {
   let { query = "" } = req.body;
   if (query.length == 0) {
@@ -176,23 +205,51 @@ export const obntenerListadoFacturas = async (
   });
 };
 
-export const obntenerFactura = async (req = request, resp = response) => {
-  let id_factura: number = Number(req.params.id);
+export const obntenerListadoFacturasAlCredito = async (
+  req = request,
+  resp = response
+) => {
+  let id_sucursal: number = Number(req.params.id_sucursal);
+  let wSucursal = {};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
+  }
+  let id_proveedor: number = Number(req.params.id_proveedor);
+  let wProveedor = {};
+  if (id_proveedor > 0) {
+    wProveedor = { id_proveedor };
+  }
+  const data = await prisma.compras.findMany({
+    where: {
+      ...wSucursal,
+      ...wProveedor,
+      estado_pago: "PENDIENTE",
+      tipo_pago: "CREDITO",
+    },
+    include: { Proveedor: true },
+    orderBy: [
+      {
+        fecha_de_pago: "asc",
+      },
+    ],
+  });
+
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data,
+  });
+};
+
+export const obntenerCompra = async (req = request, resp = response) => {
+  let id_compras: number = Number(req.params.id);
   let { ids = 0 } = req.params;
   let id_sucursal = Number(ids);
-  const data = await prisma.facturas.findFirst({
-    where: { id_factura, id_sucursal },
+  const data = await prisma.compras.findFirst({
+    where: { id_compras, id_sucursal },
     include: {
-      FacturasDetalle: true,
-      Bloque: {
-        select: {
-          Tipo: { select: { nombre: true, id_tipo_factura: true } },
-          tira: true,
-          serie: true,
-        },
-      },
-      Municipio: { select: { nombre: true, Departamento: true } },
-      Metodo: true,
+      ComprasDetalle: true,
+      Proveedor: true,
     },
   });
 
@@ -240,7 +297,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
     dias_credito = Number(dias_credito);
     fecha_factura = new Date(fecha_factura);
     var fecha_de_pago = new Date();
-    if (tipo_pago == "CREDITO" && dias_credito>0) {
+    if (tipo_pago == "CREDITO" && dias_credito > 0) {
       fecha_de_pago.setDate(fecha_de_pago.getDate() + dias_credito);
     }
     const compra = await prisma.compras.create({
@@ -303,7 +360,6 @@ export const crearFactura = async (req = request, resp = response) => {
     let { ids = 0 } = req.params;
     let id_sucursal = Number(ids);
     fecha_factura = new Date(fecha_factura);
-    dias_credito = dias_credito > 0 ? dias_credito : null;
     const { uid } = req.params;
     const id_usuario = Number(uid);
     if (detalle_factura == null || detalle_factura.length == 0) {
@@ -313,6 +369,12 @@ export const crearFactura = async (req = request, resp = response) => {
         data: null,
       });
     }
+    dias_credito = dias_credito > 0 ? dias_credito : null;
+    var fecha_de_pago = new Date();
+    if (tipo_pago == "CREDITO" && dias_credito > 0) {
+      fecha_de_pago.setDate(fecha_de_pago.getDate() + dias_credito);
+    }
+
     id_proveedor = Number(id_proveedor);
     iva_retenido = Number(iva_retenido);
     id_tipo_factura = Number(id_tipo_factura);
@@ -407,6 +469,8 @@ export const crearFactura = async (req = request, resp = response) => {
         dias_credito,
         id_bodega,
         id_sucursal,
+        fecha_de_pago,
+        estado_pago: tipo_pago == "CREDITO" ? "PENDIENTE" : "PAGADO",
       },
     });
     if (compra == null) {

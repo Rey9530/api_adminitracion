@@ -4,6 +4,7 @@ import { check } from "express-validator";
 import { validarCampos } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt"; 
 import { libroCompras, obtenerListadoCompras } from "../../controllers/facturacion/reportes_compras";
+import { obntenerListadoFacturasAlCredito } from "../../controllers/inventario/ingreso";
  
 router.get(
   "/libro_compras",
@@ -26,4 +27,9 @@ router.get(
   ],
   obtenerListadoCompras
 );
+router.get(
+  "/obtener_listado_compras_al_credito/:id_sucursal/:id_proveedor",
+  validarJWT, 
+  obntenerListadoFacturasAlCredito 
+); 
 export default router;
