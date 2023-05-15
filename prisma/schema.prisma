@@ -41,6 +41,7 @@ model Roles {
 model Sucursales {
   id_sucursal     Int               @id @default(autoincrement())
   nombre          String
+  color           String?
   estado          Estado            @default(ACTIVO)
   Bodegas         Bodegas[]
   Usuarios        Usuarios[]
@@ -48,6 +49,7 @@ model Sucursales {
   Cliente         Cliente[]
   Facturas        Facturas[]
   Compras         Compras[]
+  Agenda          Agenda[]
 }
 
 model Bodegas {
@@ -82,6 +84,7 @@ model Usuarios {
   Facturas    Facturas[]
   Proveedores Proveedores[]
   Compras     Compras[]
+  Agenda      Agenda[]
 
   @@index([id_rol], name: "fk_usuario_rol_id")
   @@index([id_sucursal], name: "fk_usuario_sucursal_id")
@@ -479,4 +482,30 @@ model Kardex {
 
   @@index([id_catalogo], name: "fk_kardex_catalogo_id")
   @@index([id_compras_detalle], name: "fk_kardex_detalle_id")
+}
+
+model Agenda {
+  id_agenda      Int          @id @default(autoincrement())
+  zona           String?
+  id_sucursal    Int?
+  Sucursales     Sucursales?  @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_sucursal")
+  no_personas    String?
+  nombre         String?
+  telefono       String?
+  inicio         DateTime
+  fin            DateTime
+  nota           String?      @db.Text
+  id_usuario     Int?
+  Usuario        Usuarios?    @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_usuario")
+  estado         EstadoAgenda @default(PENDIENTE)
+  fecha_creacion DateTime     @default(now()) @db.Timestamp()
+
+  @@index([id_sucursal], name: "fk_agenda_sucursal_id")
+  @@index([id_usuario], name: "fk_agenda_usuario_id")
+}
+
+enum EstadoAgenda {
+  PENDIENTE
+  CONFIRMADA
+  CANCELADA
 }

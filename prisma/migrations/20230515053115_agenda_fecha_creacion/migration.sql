@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Agenda" ADD COLUMN     "fecha_creacion" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;

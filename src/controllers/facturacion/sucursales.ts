@@ -1,6 +1,6 @@
 import expres from "express";
 const response = expres.response;
-const request = expres.request;  
+const request = expres.request;
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
@@ -38,13 +38,14 @@ export const getRegistro = async (req = request, resp = response) => {
 };
 
 export const crearRegistro = async (req = request, resp = response) => {
-  let { nombre="" } = req.body;
-  try {   
+  let { nombre = "", color = "" } = req.body;
+  try {
     const data = await prisma.sucursales.create({
       data: {
-        nombre
+        nombre,
+        color,
       },
-    }); 
+    });
     resp.json({
       status: true,
       msg: "Registro creado con Éxito",
@@ -63,18 +64,18 @@ export const actualizarRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {
     const registro = await prisma.sucursales.findFirst({
-      where: { id_sucursal: uid ,estado: "ACTIVO"},
+      where: { id_sucursal: uid, estado: "ACTIVO" },
     });
     if (!registro) {
       return resp.status(400).json({
         status: false,
         msg: "El registro no existe",
       });
-    } 
-    let { nombre="" } = req.body;  
+    }
+    let { nombre = "", color =""} = req.body;
     const registroActualizado = await prisma.sucursales.update({
       where: { id_sucursal: uid },
-      data: { nombre },
+      data: { nombre,color },
     });
     resp.json({
       status: true,
