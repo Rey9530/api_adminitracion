@@ -73,7 +73,7 @@ model Usuarios {
   dui            String?
   foto           String?  @unique
   estado         Estado   @default(ACTIVO)
-  fecha_creacion DateTime @default(now()) @db.Timestamp()
+  fecha_creacion DateTime @default(now()) @db.Timestamptz()
 
   id_rol Int
   Roles  Roles @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
@@ -119,7 +119,7 @@ model Catalogo {
   Tipo                CatalogoTipo       @relation(fields: [id_tipo], references: [id_tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_tipo_catalogo")
   Categorias          CatalogoCategorias @relation(fields: [id_categoria], references: [id_categoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_categoria_sefvicio")
   estado              Estado             @default(ACTIVO)
-  fecha_creacion      DateTime           @default(now()) @db.Timestamp()
+  fecha_creacion      DateTime           @default(now()) @db.Timestamptz()
 
   FacturasDetalle FacturasDetalle[]
   ComprasDetalle  ComprasDetalle[]
@@ -498,7 +498,7 @@ model Agenda {
   id_usuario     Int?
   Usuario        Usuarios?    @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_usuario")
   estado         EstadoAgenda @default(PENDIENTE)
-  fecha_creacion DateTime     @default(now()) @db.Timestamp()
+  fecha_creacion DateTime     @default(now()) @db.Timestamptz()
 
   @@index([id_sucursal], name: "fk_agenda_sucursal_id")
   @@index([id_usuario], name: "fk_agenda_usuario_id")
