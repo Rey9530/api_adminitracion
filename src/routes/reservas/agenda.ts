@@ -8,7 +8,8 @@ import {
   getRegistro,
   crearRegistro,
   actualizarRegistro,
-  eliminarRegistro, 
+  eliminarRegistro,
+  actualizarEstadoRegistro, 
 } from "../../controllers/reservas/agenda";
 
 router.get("/", validarJWT, getRegistros); 
@@ -46,6 +47,15 @@ router.put(
     validarCampos,
   ],
   actualizarRegistro
+);
+router.put(
+  "/cambiar_estado/:id",
+  [
+    validarJWT,
+    check("estado", "El estado es obligatorio").not().isEmpty(), 
+    validarCampos,
+  ],
+  actualizarEstadoRegistro
 );
 
 router.delete("/:id", validarJWT, eliminarRegistro);

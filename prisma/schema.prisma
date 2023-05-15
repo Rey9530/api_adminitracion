@@ -507,5 +507,6 @@ model Agenda {
 enum EstadoAgenda {
   PENDIENTE
   CONFIRMADA
+  COMPLETADA
   CANCELADA
 }

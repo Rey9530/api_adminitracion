@@ -32,11 +32,13 @@ export const getRegistrosDelDia = async (id_sucursal = 0) => {
   if (id_sucursal > 0) {
     wSucursal = { id_sucursal };
   }
-  var desde = new Date();
-  var hasta = new Date();
+  var ahora = new Date();
+  var y = ahora.getFullYear();
+  var m = ahora.getMonth();
+  var d = ahora.getDate();
+  var desde = new Date(y, m, d, 0, 0, 0);
+  var hasta = new Date(y, m, d, 0, 0, 0);
   hasta.setHours(hasta.getHours() + 23);
-  console.log(desde);
-  console.log(hasta);
   const registros = await prisma.agenda.findMany({
     include: { Sucursales: true },
     where: {
@@ -45,6 +47,17 @@ export const getRegistrosDelDia = async (id_sucursal = 0) => {
         gte: desde,
         lte: hasta,
       },
+      OR:[
+        {
+          estado:"CONFIRMADA",
+        },
+        {
+          estado:"PENDIENTE",
+        }
+      ]
+    },
+    orderBy: {
+      inicio: "asc",
     },
   });
   return registros;
@@ -137,8 +150,17 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       nota = "",
     } = req.body;
     id_sucursal = Number(id_sucursal);
-    console.log(date);
-    console.log(start);
+
+    date = date.split("T")[0];
+    start = start.split(":");
+    var inicio = new Date(date);
+    inicio.setHours(inicio.getHours() + Number(start[0]));
+    inicio.setMinutes(inicio.getMinutes() + Number(start[1]));
+
+    var fin = new Date(date);
+    fin.setHours(fin.getHours() + Number(start[0]));
+    fin.setMinutes(fin.getMinutes() + Number(start[1]));
+    fin.setHours(fin.getHours() + 2);
 
     const [registro, sucursal] = await Promise.all([
       await prisma.agenda.findFirst({
@@ -162,10 +184,47 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         no_personas,
         nombre,
         telefono,
-        inicio: new Date(),
-        fin: new Date(),
+        inicio,
+        fin,
         nota,
-        id_usuario: uid,
+      },
+    });
+    resp.json({
+      status: true,
+      msg: "Registro Actualizado",
+      data: registroActualizado,
+    });
+  } catch (error) {
+    console.log(error);
+    resp.status(500).json({
+      status: false,
+      msg: "Error inesperado reviosar log",
+    });
+  }
+  return;
+};
+export const actualizarEstadoRegistro = async (
+  req = request,
+  resp = response
+) => {
+  let uid: number = Number(req.params.id);
+  try {
+    let { estado = "" } = req.body;
+    const [registro] = await Promise.all([
+      await prisma.agenda.findFirst({
+        where: { id_agenda: uid },
+      }),
+    ]);
+    if (!registro) {
+      return resp.status(400).json({
+        status: false,
+        msg: "El registro no existe",
+      });
+    }
+    const registroActualizado = await prisma.agenda.update({
+      where: { id_agenda: uid },
+      data: {
+        estado,
       },
     });
     resp.json({
