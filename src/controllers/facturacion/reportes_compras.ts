@@ -32,8 +32,8 @@ export const obtenerListadoCompras = async (
 ) => {
   var desde: any = req.query.desde!.toString();
   var hasta: any = req.query.hasta!.toString();
-  let { ids = 0 } = req.params;
-  let id_sucursal = Number(ids);
+  // let { ids = 0 } = req.params;
+  // let id_sucursal = Number(ids);
 
   // fecha.setDate(fecha.getDate() + dias);
   desde = new Date(desde);
@@ -45,10 +45,9 @@ export const obtenerListadoCompras = async (
       fecha_creacion: {
         gte: desde,
         lte: hasta,
-      },
-      id_sucursal,
+      }, 
     },
-    include: { Proveedor: true },
+    include: { Proveedor: true, Sucursales:true },
     orderBy: [
       {
         id_compras: "asc",
