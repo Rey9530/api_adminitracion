@@ -25,6 +25,88 @@ export const getRegistros = async (req = request, resp = response) => {
     ahora,
   });
 };
+export const getRegistrosFiltrados = async (req = request, resp = response) => {
+  let {
+    id_sucursal = 0,
+    anio = new Date().getFullYear(),
+    mes = new Date().getUTCMonth(),
+  } = req.params;
+  anio = Number(anio);
+  mes = Number(mes);
+
+  if (mes > 0) {
+    mes = mes > 0 ? mes : 0;
+    var diasMes: any = new Date(anio, mes, 0);
+    mes = mes > 0 ? mes - 1 : 0;
+    diasMes = diasMes.getDate();
+    var desde = new Date(anio, mes, 1, 0, 0, 0);
+    var hasta = new Date(anio, mes, diasMes, 23, 59, 59);
+  } else {
+    var desde = new Date(anio, 0, 1, 0, 0, 0);
+    var hasta = new Date(anio, 11, 31, 23, 59, 59);
+  }
+  var wMes = {
+    fecha_creacion: {
+      gte: desde,
+      lte: hasta,
+    },
+  };
+  id_sucursal = Number(id_sucursal);
+  var wSucursal = {};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
+  }
+
+  const [pendiente, confirmada, completada, cancelada] = await Promise.all([
+    await prisma.agenda.count({
+      where: {
+        estado: "PENDIENTE",
+        ...wSucursal,
+        ...wMes,
+      },
+    }),
+    await prisma.agenda.count({
+      where: {
+        estado: "CONFIRMADA",
+        ...wSucursal,
+        ...wMes,
+      },
+    }),
+    await prisma.agenda.count({
+      where: {
+        estado: "COMPLETADA",
+        ...wSucursal,
+        ...wMes,
+      },
+    }),
+    await prisma.agenda.count({
+      where: {
+        estado: "CANCELADA",
+        ...wSucursal,
+        ...wMes,
+      },
+    }),
+  ]);
+
+  const registros = await prisma.agenda.findMany({
+    include: { Sucursales: true },
+    where: { ...wSucursal, ...wMes },
+    orderBy:{
+      inicio:"asc"
+    }
+  });  
+  resp.json({
+    status: true,
+    msg: "Listado de registros",
+    registros,  
+    contadores: {
+      pendiente,
+      confirmada,
+      completada,
+      cancelada,
+    },
+  });
+};
 
 export const getRegistrosDelDia = async (id_sucursal = 0) => {
   id_sucursal = Number(id_sucursal);
@@ -47,14 +129,14 @@ export const getRegistrosDelDia = async (id_sucursal = 0) => {
         gte: desde,
         lte: hasta,
       },
-      OR:[
+      OR: [
         {
-          estado:"CONFIRMADA",
+          estado: "CONFIRMADA",
         },
         {
-          estado:"PENDIENTE",
-        }
-      ]
+          estado: "PENDIENTE",
+        },
+      ],
     },
     orderBy: {
       inicio: "asc",

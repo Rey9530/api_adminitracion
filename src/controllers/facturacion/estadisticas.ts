@@ -66,7 +66,7 @@ export const porMesSucursal = async (req = request, resp = response) => {
           id_sucursal: sucursal.id_sucursal,
         },
       });
-      totales.push(result._sum.total ?? 0);
+      totales.push(Number((result._sum.total ?? 0).toFixed(2)));
     }
     data.push({ name: sucursal.nombre, data: totales });
   }
@@ -178,7 +178,7 @@ export const porProveedores = async (req = request, resp = response) => {
     });
     data.push({
       nombre: proveedor?.nombre,
-      monto: element._sum.total ?? 0,
+      monto: Number((element._sum.total ?? 0).toFixed(2)),
       id_proveedor: element.id_proveedor,
     });
   }

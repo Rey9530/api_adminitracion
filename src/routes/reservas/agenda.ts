@@ -9,10 +9,12 @@ import {
   crearRegistro,
   actualizarRegistro,
   eliminarRegistro,
-  actualizarEstadoRegistro, 
+  actualizarEstadoRegistro,
+  getRegistrosFiltrados, 
 } from "../../controllers/reservas/agenda";
 
 router.get("/", validarJWT, getRegistros); 
+router.get("/:id_sucursal/:anio/:mes", validarJWT, getRegistrosFiltrados); 
 router.get("/:id", validarJWT, getRegistro);
 router.post(
   "/",
