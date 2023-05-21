@@ -10,7 +10,8 @@ import {
   crearCompraServicio, 
   obntenerCompra,
   comprasACheque,
-  pagarCheque, 
+  pagarCheque,
+  crearCompraServicioR, 
 } from "../../controllers/inventario/ingreso";
 import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt";
@@ -56,6 +57,20 @@ router.post(
     validarCampos,
   ],
   crearCompraServicio
+); 
+
+router.post(
+  "/servicio_r",
+  [
+    validarJWT,  
+    check("numero_factura", "El numero de factura es requerido").not().isEmpty(), 
+    check("fecha_factura", "La fecha es requerida").isDate(),
+    check("monto", "El tipo de factura es obligatorio").custom((e) =>
+      validar_dato(e, "positivo")
+    ), 
+    validarCampos,
+  ],
+  crearCompraServicioR
 ); 
  
 

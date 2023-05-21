@@ -86,7 +86,7 @@ export const pagarCheque = async (req = request, resp = response) => {
       data: null,
     });
   }
-  id_sucursal= Number(id_sucursal);
+  id_sucursal = Number(id_sucursal);
   let wSucursal = {};
   if (id_sucursal > 0) {
     wSucursal = { id_sucursal };
@@ -398,6 +398,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
       tipo_pago = "CONTADO",
       tipo_compra = "INTERNA",
       tipo_factura = "GRABADO",
+      tipo_inventario = "MP",
       dias_credito = 0,
       id_sucursal = 0,
       detalle = "",
@@ -427,6 +428,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
         tipo_compra,
         tipo_factura,
         dias_credito,
+        tipo_inventario,
         detalle,
         iva,
         cesc,
@@ -447,6 +449,59 @@ export const crearCompraServicio = async (req = request, resp = response) => {
     resp.json({
       status: true,
       msg: "Factura creada con exito",
+      data: compra,
+    });
+  } catch (error) {
+    console.log(error);
+    resp.status(500).json({
+      status: false,
+      msg: "Error inesperado reviosar log",
+    });
+  }
+};
+
+export const crearCompraServicioR = async (req = request, resp = response) => {
+  const { uid = 0, ids = 0 } = req.params;
+  const id_usuario = Number(uid);
+  try {
+    let {
+      id_sucursal = 0,
+      id_tipo_factura = 3,
+      numero_factura = "",
+      nombre_proveedor = "",
+      tipo_inventario = "MP",
+      tipo_pago = "CONTADO",
+      dui_proveedor = "",
+      fecha_factura = new Date(),
+      detalle = "",
+      monto = 0,
+    } = req.body;
+    var fecha_de_pago = new Date();
+
+    id_sucursal = Number(id_sucursal);
+    id_sucursal = id_sucursal > 0 ? id_sucursal : Number(ids); 
+    fecha_factura = new Date(fecha_factura); 
+    const compra = await prisma.compras.create({
+      data: {
+        numero_factura,
+        fecha_factura,
+        tipo_pago,
+        dui_proveedor, 
+        tipo_inventario,
+        detalle, 
+        nombre_proveedor, 
+        subtotal: monto, 
+        total:monto,
+        id_usuario,
+        id_sucursal, 
+        fecha_de_pago,
+        id_tipo_factura,
+        estado_pago: "PAGADO"
+      },
+    }); 
+    resp.json({
+      status: true,
+      msg: "Compra ingresada con exito",
       data: compra,
     });
   } catch (error) {

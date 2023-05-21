@@ -148,6 +148,7 @@ model FacturasTipos {
   codigo          String?
   estado          Estado            @default(ACTIVO)
   Bloques         FacturasBloques[]
+  Compras         Compras[]
 }
 
 model FacturasMetodosDePago {
@@ -360,8 +361,11 @@ model Compras {
   id_compras          Int              @id @default(autoincrement())
   numero_factura      String           @default("0")
   numero_quedan       String?          @default("0")
+  tipo_inventario     String?          @default("MP") //MP o CI
   detalle             String?          @db.Text
   id_proveedor        Int?
+  nombre_proveedor    String?          @default("")
+  dui_proveedor       String?          @default("")
   Proveedor           Proveedores?     @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_proveedor")
   tipo_pago           TipoPago         @default(CONTADO)
   tipo_compra         TipoCompra       @default(INTERNA)
@@ -384,6 +388,8 @@ model Compras {
   Sucursales          Sucursales?      @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_sucursal")
   id_bodega           Int?
   Bodegas             Bodegas?         @relation(fields: [id_bodega], references: [id_bodega], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_bodega")
+  id_tipo_factura     Int?             @default(2)
+  FacturasTipos       FacturasTipos?   @relation(fields: [id_tipo_factura], references: [id_tipo_factura], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_tipo_factura")
   ComprasDetalle      ComprasDetalle[]
   fecha_creacion      DateTime         @default(now())
   fecha_actualizacion DateTime         @default(now())
@@ -391,6 +397,7 @@ model Compras {
   fecha_de_pago       DateTime?
   estado_pago         EstadoPago       @default(PENDIENTE)
 
+  @@index([id_tipo_factura], name: "fk_compras_tipo_factura_id")
   @@index([id_sucursal], name: "fk_compras_sucursal_id")
   @@index([id_bodega], name: "fk_compras_bodega_id")
   @@index([id_usuario], name: "fk_compra_usuario_id")
