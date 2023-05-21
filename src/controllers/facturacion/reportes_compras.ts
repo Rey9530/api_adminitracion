@@ -26,16 +26,9 @@ export const libroCompras = async (req = request, resp = response) => {
   });
 };
 
-export const obtenerListadoCompras = async (
-  req = request,
-  resp = response
-) => {
+export const obtenerListadoCompras = async (req = request, resp = response) => {
   var desde: any = req.query.desde!.toString();
   var hasta: any = req.query.hasta!.toString();
-  // let { ids = 0 } = req.params;
-  // let id_sucursal = Number(ids);
-
-  // fecha.setDate(fecha.getDate() + dias);
   desde = new Date(desde);
   hasta = new Date(hasta);
   hasta.setDate(hasta.getDate() + 1);
@@ -45,9 +38,9 @@ export const obtenerListadoCompras = async (
       fecha_creacion: {
         gte: desde,
         lte: hasta,
-      }, 
+      },
     },
-    include: { Proveedor: true, Sucursales:true },
+    include: { Proveedor: true, Sucursales: true, FacturasTipos: true },
     orderBy: [
       {
         id_compras: "asc",
