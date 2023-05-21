@@ -50,6 +50,7 @@ model Sucursales {
   Facturas        Facturas[]
   Compras         Compras[]
   Agenda          Agenda[]
+  CierresDiarios  CierresDiarios[]
 }
 
 model Bodegas {
@@ -65,26 +66,24 @@ model Bodegas {
 }
 
 model Usuarios {
-  id             Int      @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
   usuario        String
   password       String
   nombres        String
   apellidos      String
   dui            String?
-  foto           String?  @unique
-  estado         Estado   @default(ACTIVO)
-  fecha_creacion DateTime @default(now()) @db.Timestamptz()
-
-  id_rol Int
-  Roles  Roles @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
-
-  id_sucursal Int
-  Sucursales  Sucursales @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
-
-  Facturas    Facturas[]
-  Proveedores Proveedores[]
-  Compras     Compras[]
-  Agenda      Agenda[]
+  foto           String?          @unique
+  estado         Estado           @default(ACTIVO)
+  fecha_creacion DateTime         @default(now()) @db.Timestamptz()
+  id_rol         Int
+  Roles          Roles            @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
+  id_sucursal    Int
+  Sucursales     Sucursales       @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
+  Facturas       Facturas[]
+  Proveedores    Proveedores[]
+  Compras        Compras[]
+  CierresDiarios CierresDiarios[]
+  Agenda         Agenda[]
 
   @@index([id_rol], name: "fk_usuario_rol_id")
   @@index([id_sucursal], name: "fk_usuario_sucursal_id")
@@ -516,4 +515,36 @@ enum EstadoAgenda {
   CONFIRMADA
   COMPLETADA
   CANCELADA
+}
+
+model CierresDiarios {
+  id_cierre          Int         @id @default(autoincrement())
+  venta_bruta        Float?      @default(0)
+  para_llevar        Float?      @default(0)
+  tarjeta_credomatic Float?      @default(0)
+  tarjeta_serfinza   Float?      @default(0)
+  tarjeta_promerica  Float?      @default(0)
+  bitcoin            Float?      @default(0)
+  syke               Float?      @default(0)
+  total_restante     Float?      @default(0)
+  propina            Float?      @default(0)
+  venta_nota_sin_iva Float?      @default(0)
+  cortecia           Float?      @default(0)
+  anti_cobrados      Float?      @default(0)
+  anti_reservas      Float?      @default(0)
+  certificado_regalo Float?      @default(0)
+  hugo_app           Float?      @default(0)
+  pedidos_ya         Float?      @default(0)
+  compras            Float?      @default(0)
+  entrega_efectivo   Float?      @default(0)
+  fecha_creacion     DateTime    @default(now()) @db.Timestamptz()
+  fecha_cierre       DateTime?   @default(now())
+  observacion        String?     @db.Text
+  id_usuario         Int?
+  Usuario            Usuarios?   @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cierre_usuario")
+  id_sucursal        Int?
+  Sucursales         Sucursales? @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_cierre_sucursal")
+
+  @@index([id_sucursal], name: "fk_cierre_sucursal_id")
+  @@index([id_usuario], name: "fk_cierre_usuario_id")
 }

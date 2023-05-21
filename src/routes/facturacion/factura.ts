@@ -5,13 +5,14 @@ import {
   anularFactura,
   buscarClientes,
   buscarEnCatalogo,
+  cierreManual,
   crearFactura,
   getNumeroFactura,
   obntenerDepartamentos,
   obntenerFactura,
   obntenerListadoFacturas,
   obntenerMetodosDePago,
-  obntenerMunicipios, 
+  obntenerMunicipios,
 } from "../../controllers/facturacion/factura";
 import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt";
@@ -33,7 +34,8 @@ router.post(
     validarCampos,
   ],
   crearFactura
-); 
+);
+router.post("/cierre_manual", validarJWT, cierreManual);
 
 router.get("/obtener/:id", validarJWT, getNumeroFactura);
 
@@ -62,14 +64,26 @@ router.get(
   "/obtener_listado_facturas",
   [
     validarJWT,
-    check("desde", "El parametro desde es requerido y debe ser formato fecha YYYY-mm-dd").not().isEmpty().isDate(),
-    check("hasta", "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd").not().isEmpty().isDate(),
+    check(
+      "desde",
+      "El parametro desde es requerido y debe ser formato fecha YYYY-mm-dd"
+    )
+      .not()
+      .isEmpty()
+      .isDate(),
+    check(
+      "hasta",
+      "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd"
+    )
+      .not()
+      .isEmpty()
+      .isDate(),
     validarCampos,
   ],
   obntenerListadoFacturas
 );
 router.get("/obtener_departamentos", validarJWT, obntenerDepartamentos);
-router.get("/obtener_municipios/:id", validarJWT, obntenerMunicipios); 
+router.get("/obtener_municipios/:id", validarJWT, obntenerMunicipios);
 router.get("/obtener_factura/:id", validarJWT, obntenerFactura);
 router.delete("/anular_factura/:id", validarJWT, anularFactura);
 

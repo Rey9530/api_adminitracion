@@ -3,7 +3,7 @@ const router = expres.Router();
 import { check } from "express-validator"; 
 import { validarCampos } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt"; 
-import { libroCompras, obtenerListadoCompras } from "../../controllers/facturacion/reportes_compras";
+import { libroCompras, libroComprasAlContado, obtenerListadoCompras } from "../../controllers/facturacion/reportes_compras";
 import { obntenerListadoFacturasAlCredito, obntenerListadoPrecheques } from "../../controllers/inventario/ingreso";
  
 router.get(
@@ -15,6 +15,16 @@ router.get(
     validarCampos,
   ],
   libroCompras
+); 
+
+router.get(
+  "/listado_compras_contado",
+  [
+    validarJWT, 
+    check("fecha", "La fecha es requerida").isDate(),
+    validarCampos,
+  ],
+  libroComprasAlContado
 ); 
 
 router.get(

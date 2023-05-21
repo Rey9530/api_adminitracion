@@ -17,7 +17,7 @@ export const getNumeroFactura = async (req = request, resp = response) => {
   }
   let tipoFactura: any = await prisma.facturasTipos.findFirst({
     where: { id_tipo_factura },
-    include: { Bloques: { where: { estado: "ACTIVO",id_sucursal }, take: 1 } },
+    include: { Bloques: { where: { estado: "ACTIVO", id_sucursal }, take: 1 } },
   });
   if (tipoFactura == null || tipoFactura.Bloques.length == 0) {
     return resp.json({
@@ -76,7 +76,7 @@ export const buscarClientes = async (req = request, resp = response) => {
   let arrayQuery = query.split(" ");
   const data = await prisma.cliente.findMany({
     where: {
-      estado:'ACTIVO',
+      estado: "ACTIVO",
       AND: arrayQuery.map((contains: any) => {
         return {
           nombre: {
@@ -139,7 +139,7 @@ export const obntenerListadoFacturas = async (
         gte: desde,
         lte: hasta,
       },
-      id_sucursal
+      id_sucursal,
     },
     include: { Bloque: { include: { Tipo: true } } },
     orderBy: [
@@ -148,7 +148,7 @@ export const obntenerListadoFacturas = async (
       },
     ],
   });
-  data.forEach((e:any) => {
+  data.forEach((e: any) => {
     total_facturas++;
     total_facturado += e.total ?? 0;
     if (e.estado == "ANULADA") {
@@ -191,8 +191,6 @@ export const obntenerDepartamentos = async (_ = request, resp = response) => {
   });
 };
 
-
-
 export const obntenerMunicipios = async (req = request, resp = response) => {
   let id_departamento: number = Number(req.params.id);
   if (!(id_departamento > 0)) {
@@ -217,7 +215,7 @@ export const obntenerFactura = async (req = request, resp = response) => {
   let { ids = 0 } = req.params;
   let id_sucursal = Number(ids);
   const data = await prisma.facturas.findFirst({
-    where: { id_factura,id_sucursal },
+    where: { id_factura, id_sucursal },
     include: {
       FacturasDetalle: true,
       Bloque: {
@@ -254,7 +252,7 @@ export const anularFactura = async (req = request, resp = response) => {
   let { ids = 0 } = req.params;
   let id_sucursal = Number(ids);
   const data = await prisma.facturas.findMany({
-    where: { estado: "ACTIVO", id_factura,id_sucursal },
+    where: { estado: "ACTIVO", id_factura, id_sucursal },
   });
   if (!data) {
     return resp.json({
@@ -273,6 +271,80 @@ export const anularFactura = async (req = request, resp = response) => {
     status: true,
     msg: "Factura anulada con exito",
     data: null,
+  });
+};
+
+export const cierreManual = async (req = request, resp = response) => {
+  const { uid } = req.params; 
+  let {
+    venta_bruta = 0,
+    para_llevar = 0,
+    tarjeta_credomatic = 0,
+    tarjeta_serfinza = 0,
+    tarjeta_promerica = 0,
+    bitcoin = 0,
+    syke = 0,
+    total_restante = 0,
+    propina = 0,
+    venta_nota_sin_iva = 0,
+    cortecia = 0,
+    anti_cobrados = 0,
+    anti_reservas = 0,
+    certificado_regalo = 0,
+    hugo_app = 0,
+    pedidos_ya = 0,
+    compras = 0,
+    entrega_efectivo = 0,
+    fecha_cierre = 0,
+    id_sucursal = 0,
+    observacion = "",
+  }: any = req.body;
+  id_sucursal = Number(id_sucursal);
+  fecha_cierre = new Date(fecha_cierre);
+
+  const sucursal = await prisma.sucursales.findFirst({
+    where: { id_sucursal },
+  });
+  if (sucursal == null) {
+    return resp.json({
+      status: false,
+      msg: "La sucursal no existe",
+      data: null,
+    });
+  }
+
+  let id_usuario = Number(uid);
+
+  var data = await prisma.cierresDiarios.create({
+    data: {
+      venta_bruta,
+      para_llevar,
+      tarjeta_credomatic,
+      tarjeta_serfinza,
+      tarjeta_promerica,
+      bitcoin,
+      syke,
+      total_restante,
+      propina,
+      venta_nota_sin_iva,
+      cortecia,
+      anti_cobrados,
+      anti_reservas,
+      certificado_regalo,
+      hugo_app,
+      pedidos_ya,
+      compras,
+      entrega_efectivo,
+      fecha_cierre,
+      id_usuario,
+      id_sucursal: sucursal.id_sucursal,
+      observacion,
+    },
+  });
+  return resp.json({
+    status: true,
+    msg: "Cierre creado con exito",
+    data,
   });
 };
 
@@ -317,7 +389,7 @@ export const crearFactura = async (req = request, resp = response) => {
     efectivo = Number(efectivo);
     id_cliente = Number(id_cliente);
     tarjeta = Number(tarjeta);
-    iva_retenido = Number(iva_retenido); 
+    iva_retenido = Number(iva_retenido);
     iva_retenido = Number(iva_retenido);
     cheque = Number(cheque);
     transferencia = Number(transferencia);
