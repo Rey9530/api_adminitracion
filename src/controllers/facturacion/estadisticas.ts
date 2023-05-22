@@ -44,8 +44,7 @@ export const getDataTablero = async (req = request, resp = response) => {
     mes = 0,
   }: any = req.params;
   id_sucursal = Number(id_sucursal);
-  mes = Number(mes);
-  console.log(mes);
+  mes = Number(mes); 
 
   mes = mes > 0 ? mes : 0;
   let diasMes: any = new Date(anio, mes, 0);
