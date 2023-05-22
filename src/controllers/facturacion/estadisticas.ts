@@ -36,6 +36,87 @@ export const getVentasMensuales = async (req = request, resp = response) => {
     data,
   });
 };
+
+export const getDataTablero = async (req = request, resp = response) => {
+  let {
+    id_sucursal = 0,
+    anio = new Date().getFullYear(),
+    mes = 0,
+  }: any = req.params;
+  id_sucursal = Number(id_sucursal);
+  mes = Number(mes);
+  console.log(mes);
+
+  mes = mes > 0 ? mes : 0;
+  let diasMes: any = new Date(anio, mes, 0);
+  mes = mes > 0 ? mes - 1 : 0;
+  diasMes = diasMes.getDate();
+
+  var wSucursal = {};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
+  }
+  var sucursales = await prisma.sucursales.findMany({
+    where: {
+      estado: "ACTIVO",
+      ...wSucursal,
+    },
+  });
+
+  var dias = [];
+  var dataGrafica = [];
+  var colores = [];
+
+  var sucursalesConMonto = [];
+  for (let index = 0; index < sucursales.length; index++) {
+    const element = sucursales[index];
+    dias = [];
+    var montosSucursal = [];
+    var totalporSucursal = 0;
+    for (let index = 1; index <= diasMes; index++) {
+      var desde = new Date(anio, mes, index, 0, 0, 0);
+      var hasta = new Date(anio, mes, index, 23, 59, 59);
+      dias.push(index);
+      var result = await prisma.cierresDiarios.aggregate({
+        _sum: {
+          venta_bruta: true,
+          venta_nota_sin_iva: true,
+        },
+        where: {
+          fecha_cierre: {
+            gte: desde,
+            lte: hasta,
+          },
+          id_sucursal: element.id_sucursal,
+        },
+      });
+      totalporSucursal += result._sum.venta_bruta ?? 0;
+      montosSucursal.push(result._sum.venta_bruta ?? 0);
+    }
+    dataGrafica.push({ name: element.nombre, data: montosSucursal });
+    sucursalesConMonto.push({ name: element.nombre, monto: totalporSucursal });
+    colores.push(obtenerColorAleatorio());
+  }
+
+  // var montos = [];
+
+  resp.json({
+    status: true,
+    msg: "Listado de registros",
+    data: { dias, dataGrafica, colores, sucursalesConMonto },
+  });
+};
+
+const obtenerColorAleatorio = () => {
+  var simbolos, color;
+  simbolos = "0123456789ABCDEF";
+  color = "#";
+
+  for (var i = 0; i < 6; i++) {
+    color = color + simbolos[Math.floor(Math.random() * 16)];
+  }
+  return color;
+};
 export const porMesSucursal = async (req = request, resp = response) => {
   // let { ids = 0 } = req.params;
   // let id_sucursal = Number(ids);
