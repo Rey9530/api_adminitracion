@@ -360,7 +360,7 @@ model Compras {
   id_compras          Int              @id @default(autoincrement())
   numero_factura      String           @default("0")
   numero_quedan       String?          @default("0")
-  tipo_inventario     String?          @default("MP") //MP o CI
+  tipo_inventario     TipoInventario?  @default(MP)
   detalle             String?          @db.Text
   id_proveedor        Int?
   nombre_proveedor    String?          @default("")
@@ -401,6 +401,11 @@ model Compras {
   @@index([id_bodega], name: "fk_compras_bodega_id")
   @@index([id_usuario], name: "fk_compra_usuario_id")
   @@index([id_proveedor], name: "fk_compras_proveedor_id")
+}
+
+enum TipoInventario {
+  MP
+  CI
 }
 
 enum EstadoPago {

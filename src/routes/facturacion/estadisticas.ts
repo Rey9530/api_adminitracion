@@ -3,6 +3,8 @@ const router = expres.Router();
 import { check } from "express-validator";
 import {
   getDataTablero,
+  getPieDataProveedores,
+  getPiePorcentajePropinas,
   getVentasMensuales,
   getVentasXTipoDocumento,
   porMesSucursal,
@@ -33,5 +35,7 @@ router.get(
 );
 router.get("/compras/por_proveedores/:id_sucursal", validarJWT, porProveedores);
 router.get("/tablero/:id_sucursal/:anio/:mes", validarJWT, getDataTablero);
+router.get("/compras/tipo_pastel/:id_sucursal/:anio/:mes", validarJWT, getPieDataProveedores);
+router.get("/compras/tipo_pastel_propinas/:id_sucursal/:anio/:mes", validarJWT, getPiePorcentajePropinas);
 router.get("/compras/por_mes_sucursal", validarJWT, porMesSucursal);
 export default router;

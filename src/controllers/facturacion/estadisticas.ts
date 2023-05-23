@@ -106,6 +106,190 @@ export const getDataTablero = async (req = request, resp = response) => {
   });
 };
 
+export const getPieDataProveedores = async (req = request, resp = response) => {
+  let {
+    id_sucursal = 0,
+    anio = new Date().getFullYear(),
+    mes = 0,
+  }: any = req.params;
+  id_sucursal = Number(id_sucursal);
+  mes = Number(mes);
+
+  mes = mes > 0 ? mes : 0;
+  let diasMes: any = new Date(anio, mes, 0);
+  mes = mes > 0 ? mes - 1 : 0;
+  diasMes = diasMes.getDate();
+
+  var wSucursal = {};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
+  }
+  var sucursales = await prisma.sucursales.findMany({
+    where: {
+      estado: "ACTIVO",
+      ...wSucursal,
+    },
+  });
+
+  var colores = [];
+  var dataGorcentaje = [];
+
+  for (let index = 0; index < sucursales.length; index++) {
+    const element = sucursales[index];
+    var desde = new Date(anio, mes, 1, 0, 0, 0);
+    var hasta = new Date(anio, mes, diasMes, 23, 59, 59);
+    var resultXSUCURSAL = await prisma.compras.aggregate({
+      _sum: {
+        total: true,
+      },
+      where: {
+        fecha_factura: {
+          gte: desde,
+          lte: hasta,
+        },
+        id_sucursal: element.id_sucursal,
+        tipo_inventario: "MP",
+      },
+    });
+    if (Number(resultXSUCURSAL._sum.total) > 0) {
+      dataGorcentaje.push({
+        name: element.nombre,
+        data: resultXSUCURSAL._sum.total ?? 0,
+      });
+      colores.push(obtenerColorAleatorio());
+    }
+  }
+  var desde = new Date(anio, mes, 1, 0, 0, 0);
+  var hasta = new Date(anio, mes, diasMes, 23, 59, 59);
+  var whereF = {
+    fecha_factura: {
+      gte: desde,
+      lte: hasta,
+    },
+  };
+
+  var [RMP, RIC] = await Promise.all([
+    await prisma.compras.aggregate({
+      _sum: {
+        total: true,
+      },
+      where: {
+        ...whereF,
+        tipo_inventario: "MP",
+      },
+    }),
+    await prisma.compras.aggregate({
+      _sum: {
+        total: true,
+      },
+      where: {
+        ...whereF,
+        tipo_inventario: "CI",
+      },
+    }),
+  ]);
+  var dataGrafTipo = [];
+  dataGrafTipo.push({ name: "Materia Prima", data: RMP._sum.total ?? 0 });
+  dataGrafTipo.push({ name: "Costos Indirectos", data: RIC._sum.total ?? 0 });
+
+  // var montos = [];
+
+  resp.json({
+    status: true,
+    msg: "Listado de registros",
+    data: { dataGorcentaje, colores, dataGrafTipo },
+  });
+};
+
+export const getPiePorcentajePropinas = async (
+  req = request,
+  resp = response
+) => {
+  let {
+    id_sucursal = 0,
+    anio = new Date().getFullYear(),
+    mes = 0,
+  }: any = req.params;
+  id_sucursal = Number(id_sucursal);
+  mes = Number(mes);
+
+  mes = mes > 0 ? mes : 0;
+  let diasMes: any = new Date(anio, mes, 0);
+  mes = mes > 0 ? mes - 1 : 0;
+  diasMes = diasMes.getDate();
+
+  var wSucursal = {};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
+  }
+  var sucursales = await prisma.sucursales.findMany({
+    where: {
+      estado: "ACTIVO",
+      ...wSucursal,
+    },
+  });
+
+  var colores = [];
+  var dataGorcentaje = [];
+
+  for (let index = 0; index < sucursales.length; index++) {
+    const element = sucursales[index];
+    var desde = new Date(anio, mes, 1, 0, 0, 0);
+    var hasta = new Date(anio, mes, diasMes, 23, 59, 59);
+    var resultXSUCURSAL = await prisma.cierresDiarios.aggregate({
+      _sum: {
+        venta_bruta: true,
+        propina: true,
+      },
+      where: {
+        fecha_cierre: {
+          gte: desde,
+          lte: hasta,
+        },
+        id_sucursal: element.id_sucursal,
+      },
+    });
+    if (
+      Number(resultXSUCURSAL._sum.venta_bruta) > 0 &&
+      Number(resultXSUCURSAL._sum.propina) > 0
+    ) {
+      dataGorcentaje.push({
+        name: element.nombre,
+        data:
+          (resultXSUCURSAL._sum.venta_bruta ?? 0) -
+          (resultXSUCURSAL._sum.propina ?? 0),
+      });
+      colores.push(obtenerColorAleatorio());
+    }
+  }
+  var desde = new Date(anio, mes, 1, 0, 0, 0);
+  var hasta = new Date(anio, mes, diasMes, 23, 59, 59); 
+
+  var resPro = await prisma.cierresDiarios.aggregate({
+    _sum: {
+      venta_bruta:true,
+      propina:true
+    },
+    where: {
+      fecha_cierre: {
+        gte: desde,
+        lte: hasta,
+      }, 
+    },
+  });
+  var dataGrafTipo = [];
+  dataGrafTipo.push({ name: "Propina", data: resPro._sum.propina ?? 0 });
+  dataGrafTipo.push({ name: "Sub Total", data: resPro._sum.venta_bruta ?? 0 });
+
+  // var montos = [];
+
+  resp.json({
+    status: true,
+    msg: "Listado de registros",
+    data: { dataGorcentaje, colores, dataGrafTipo },
+  });
+};
+
 const obtenerColorAleatorio = () => {
   var simbolos, color;
   simbolos = "0123456789ABCDEF";
