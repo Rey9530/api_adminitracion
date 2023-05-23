@@ -44,7 +44,7 @@ export const getDataTablero = async (req = request, resp = response) => {
     mes = 0,
   }: any = req.params;
   id_sucursal = Number(id_sucursal);
-  mes = Number(mes); 
+  mes = Number(mes);
 
   mes = mes > 0 ? mes : 0;
   let diasMes: any = new Date(anio, mes, 0);
@@ -251,16 +251,19 @@ export const porProveedores = async (req = request, resp = response) => {
   var data = [];
   for (let index = 0; index < proveedoresIds.length; index++) {
     const element = proveedoresIds[index];
-    var proveedor = await prisma.proveedores.findUnique({
-      where: {
-        id_proveedor: element.id_proveedor ?? 0,
-      },
-    });
-    data.push({
-      nombre: proveedor?.nombre,
-      monto: Number((element._sum.total ?? 0).toFixed(2)),
-      id_proveedor: element.id_proveedor,
-    });
+    if (Number(element.id_proveedor) > 0) {
+      console.log(element);
+      var proveedor = await prisma.proveedores.findUnique({
+        where: {
+          id_proveedor: element.id_proveedor ?? 0,
+        },
+      });
+      data.push({
+        nombre: proveedor?.nombre,
+        monto: Number((element._sum.total ?? 0).toFixed(2)),
+        id_proveedor: element.id_proveedor,
+      });
+    }
   }
 
   resp.json({
