@@ -387,6 +387,91 @@ export const obntenerCompra = async (req = request, resp = response) => {
   });
 };
 
+export const getExistencias = async (req: any, resp = response) => {
+  let {
+    pagina = 1,
+    registrosXpagina = 10,
+    query = "",
+    sucursal = 0,
+    bodega = 0,
+  } = req.query;
+  pagina = Number(pagina);
+  sucursal = Number(sucursal);
+  bodega = Number(bodega);
+  registrosXpagina = Number(registrosXpagina);
+  pagina = pagina > 0 ? pagina : 0;
+  registrosXpagina = registrosXpagina > 0 ? registrosXpagina : 10;
+
+  let consultas = [];
+  if (query.length > 3) {
+    let array = query.split(" ");
+    consultas = array.map((contains: any) => {
+      return {
+        AND: [
+          {
+            OR: [
+              {
+                Catalogo: { codigo: { contains } },
+              },
+              {
+                Catalogo: { nombre: { contains } },
+              },
+            ],
+          },
+        ],
+      };
+    });
+  }
+  var wSusucursales: any = {};
+  var wBodega = {};
+  if (bodega > 0) {
+    wBodega = { id_bodega: bodega };
+  } else if (sucursal > 0) {
+    var sucursales = await prisma.bodegas.findMany({
+      where: { id_sucursal: sucursal, estado: "ACTIVO" },
+    });
+
+    var array = sucursales.map((e) => {
+      return {
+        id_bodega: e.id_bodega,
+      };
+    });
+
+    wSusucursales = {
+      OR: array,
+    };
+  }
+  const where = {
+    AND: [
+      {
+        existencia: {
+          gte: 1,
+        },
+      },
+      ...consultas,
+    ],
+    ...wBodega,
+    ...wSusucursales,
+  };
+  const total = await prisma.inventario.count({ where });
+  const registros = await prisma.inventario.findMany({
+    where,
+    include: { Bodegas: { include: { Sucursales: true } }, Catalogo: true },
+    take: registrosXpagina,
+    skip: (pagina - 1) * registrosXpagina,
+  });
+  const totalFiltrado = await registros.length;
+  resp.json({
+    status: true,
+    msg: "Listado de registros",
+    total,
+    totalFiltrado,
+    pagina,
+    registrosXpagina,
+    registros,
+  });
+};
+
 export const crearCompraServicio = async (req = request, resp = response) => {
   const { uid = 0, ids = 0 } = req.params;
   const id_usuario = Number(uid);
@@ -479,26 +564,26 @@ export const crearCompraServicioR = async (req = request, resp = response) => {
     var fecha_de_pago = new Date();
 
     id_sucursal = Number(id_sucursal);
-    id_sucursal = id_sucursal > 0 ? id_sucursal : Number(ids); 
-    fecha_factura = new Date(fecha_factura); 
+    id_sucursal = id_sucursal > 0 ? id_sucursal : Number(ids);
+    fecha_factura = new Date(fecha_factura);
     const compra = await prisma.compras.create({
       data: {
         numero_factura,
         fecha_factura,
         tipo_pago,
-        dui_proveedor, 
+        dui_proveedor,
         tipo_inventario,
-        detalle, 
-        nombre_proveedor, 
-        subtotal: monto, 
-        total:monto,
+        detalle,
+        nombre_proveedor,
+        subtotal: monto,
+        total: monto,
         id_usuario,
-        id_sucursal, 
+        id_sucursal,
         fecha_de_pago,
         id_tipo_factura,
-        estado_pago: "PAGADO"
+        estado_pago: "PAGADO",
       },
-    }); 
+    });
     resp.json({
       status: true,
       msg: "Compra ingresada con exito",

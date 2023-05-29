@@ -11,7 +11,8 @@ import {
   obntenerCompra,
   comprasACheque,
   pagarCheque,
-  crearCompraServicioR, 
+  crearCompraServicioR,
+  getExistencias, 
 } from "../../controllers/inventario/ingreso";
 import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt";
@@ -125,4 +126,5 @@ router.get(
   obntenerListadoFacturas 
 ); 
 router.get("/obtener_factura/:id", validarJWT, obntenerCompra); 
+router.get("/listado_existencias", validarJWT, getExistencias); 
 export default router;
