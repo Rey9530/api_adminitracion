@@ -26,8 +26,6 @@ export const libroCompras = async (req = request, resp = response) => {
   });
 };
 
-
-
 export const libroComprasAlContado = async (req = request, resp = response) => {
   var desde1: any = req.query.fecha!.toString().split("-");
   var hasta1: any = req.query.fecha!.toString().split("-");
@@ -37,8 +35,8 @@ export const libroComprasAlContado = async (req = request, resp = response) => {
 
   id_sucursal = Number(id_sucursal);
   var wSucursal = {};
-  if(id_sucursal>0){
-    wSucursal = {id_sucursal};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
   }
   var data = await prisma.compras.findMany({
     where: {
@@ -47,7 +45,7 @@ export const libroComprasAlContado = async (req = request, resp = response) => {
         lte: hasta,
       },
       ...wSucursal,
-      tipo_pago:"CONTADO", 
+      tipo_pago: "CONTADO",
     },
     include: { Proveedor: true },
   });
@@ -74,6 +72,47 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
       },
     },
     include: { Proveedor: true, Sucursales: true, FacturasTipos: true },
+    orderBy: [
+      {
+        id_compras: "asc",
+      },
+    ],
+  });
+
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data,
+  });
+};
+
+export const obtenerListadoComprasInventario = async (
+  req = request,
+  resp = response
+) => {
+  var desde: any = req.query.desde!.toString();
+  var hasta: any = req.query.hasta!.toString();
+  desde = new Date(desde);
+  hasta = new Date(hasta);
+  hasta.setDate(hasta.getDate() + 1);
+
+  const data = await prisma.compras.findMany({
+    where: {
+      fecha_creacion: {
+        gte: desde,
+        lte: hasta,
+      },
+      id_bodega: {
+        gte: 1,
+      },
+    },
+    include: {
+      Proveedor: true,
+      Sucursales: true,
+      FacturasTipos: true,
+      Bodegas: true,
+      ComprasDetalle: { include: { Catalogo: { select: { nombre: true } } } },
+    },
     orderBy: [
       {
         id_compras: "asc",
