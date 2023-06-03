@@ -1,6 +1,7 @@
 import expres from "express";
 const response = expres.response;
 const request = expres.request;
+import readXlsxFile from "read-excel-file/node";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
@@ -274,8 +275,115 @@ export const anularFactura = async (req = request, resp = response) => {
   });
 };
 
+export const cargarCierre = async (req = request, resp = response) => {
+  try { 
+    let fillle: any = req.files?.files;
+    let data: any = 0;
+    if (req.files && Object.keys(req.files).length > 0) {
+      data = await leerexcel(fillle.data);
+    }
+    return resp.json({
+      status: true,
+      msg: "Leido correctamente",
+      data,
+    });
+  } catch (error) {
+    return resp.json({
+      status: false,
+      msg: "Ha ocurrido un erro favor verificar la estructura del archivo que sea correcto",
+      data: null,
+    });
+  }
+};
+interface ObjectAmounts {
+  venta_bruta: number;
+  para_llevar: number;
+  efectivo: number;
+  credomatic: number;
+  serfinza: number;
+  promerica: number;
+  bitcoib: number;
+  syke: number;
+  propina: number;
+  hugo_app: number;
+  pedidos_ya: number;
+  otro: number;
+}
+const leerexcel = async (path: any) => {
+  return new Promise((resolve, _) => {
+    readXlsxFile(path).then((rows) => {
+      var objectAmounts: ObjectAmounts = {
+        venta_bruta: 0,
+        para_llevar: 0,
+        efectivo: 0,
+        credomatic: 0,
+        serfinza: 0,
+        promerica: 0,
+        bitcoib: 0,
+        syke: 0,
+        propina: 0,
+        hugo_app: 0,
+        pedidos_ya: 0,
+        otro: 0,
+      };
+      for (let index = 3; index <= rows.length; index++) {
+        const element = rows[index];
+        if (element[4] == "TOTAL") {
+          index = rows.length;
+          break;
+        }
+
+        objectAmounts.venta_bruta += Number(element[41]);
+        objectAmounts.propina += Number(element[30]);
+        var arrayDescripcion =
+          element[20] != null ? element[20].toString().split("-") : [];
+        if (arrayDescripcion.length > 0) {
+          switch (arrayDescripcion[0]) {
+            case "SERFINSA":
+              objectAmounts.serfinza += Number(element[41]);
+              break;
+            case "PROMERICA":
+              objectAmounts.promerica += Number(element[41]);
+              break;
+            case "EFECTIVO":
+              objectAmounts.efectivo += Number(element[41]);
+              break;
+            case "BAC":
+              objectAmounts.credomatic += Number(element[41]);
+              break;
+            case "PEDIDOS YA":
+              objectAmounts.pedidos_ya += Number(element[41]);
+              break;
+            default:
+              objectAmounts.otro += Number(element[41]);
+              break;
+          }
+        }
+      }
+
+      objectAmounts = {
+        venta_bruta: Number(objectAmounts.venta_bruta.toFixed(2)),
+        para_llevar: Number(objectAmounts.para_llevar.toFixed(2)),
+        efectivo: Number(objectAmounts.efectivo.toFixed(2)),
+        credomatic: Number(objectAmounts.credomatic.toFixed(2)),
+        serfinza: Number(objectAmounts.serfinza.toFixed(2)),
+        promerica: Number(objectAmounts.promerica.toFixed(2)),
+        bitcoib: Number(objectAmounts.bitcoib.toFixed(2)),
+        syke: Number(objectAmounts.syke.toFixed(2)),
+        propina: Number(objectAmounts.propina.toFixed(2)),
+        hugo_app: Number(objectAmounts.hugo_app.toFixed(2)),
+        pedidos_ya: Number(objectAmounts.pedidos_ya.toFixed(2)),
+        otro: Number(objectAmounts.otro.toFixed(2)),
+      };
+      resolve(objectAmounts);
+    });
+  }).then((resp) => {
+    return resp;
+  });
+};
+
 export const cierreManual = async (req = request, resp = response) => {
-  const { uid } = req.params; 
+  const { uid } = req.params;
   let {
     venta_bruta = 0,
     para_llevar = 0,

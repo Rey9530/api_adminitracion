@@ -5,6 +5,7 @@ import {
   anularFactura,
   buscarClientes,
   buscarEnCatalogo,
+  cargarCierre,
   cierreManual,
   crearFactura,
   getNumeroFactura,
@@ -16,7 +17,9 @@ import {
 } from "../../controllers/facturacion/factura";
 import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt";
+import fileUpload from "express-fileupload";
 
+router.use(fileUpload()); 
 router.post(
   "/",
   [
@@ -36,6 +39,7 @@ router.post(
   crearFactura
 );
 router.post("/cierre_manual", validarJWT, cierreManual);
+router.post("/cargar_cierre", validarJWT, cargarCierre);
 
 router.get("/obtener/:id", validarJWT, getNumeroFactura);
 

@@ -436,7 +436,6 @@ export const porProveedores = async (req = request, resp = response) => {
   for (let index = 0; index < proveedoresIds.length; index++) {
     const element = proveedoresIds[index];
     if (Number(element.id_proveedor) > 0) {
-      console.log(element);
       var proveedor = await prisma.proveedores.findUnique({
         where: {
           id_proveedor: element.id_proveedor ?? 0,
