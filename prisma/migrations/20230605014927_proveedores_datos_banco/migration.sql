@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE "Proveedores" ADD COLUMN     "id_banco" INTEGER NOT NULL DEFAULT 0,
+ALTER TABLE "Proveedores" ADD COLUMN     "id_banco" INTEGER ,
 ADD COLUMN     "no_cuenta" TEXT DEFAULT '',
 ADD COLUMN     "tipo_cuenta" TEXT DEFAULT '';
 
