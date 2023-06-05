@@ -359,7 +359,7 @@ export const obntenerListadoPrecheques = async (
     data.push({
       proveedor: provv?.nombre ?? "",
       id_proveedor: provv?.id_proveedor ?? 0,
-      banco: provv?.Banco.nombre ?? 0,
+      banco: provv?.Banco?.nombre ?? 0,
       no_cuenta: provv?.no_cuenta ?? 0,
       tipo_cuenta: provv?.tipo_cuenta ?? 0,
       monto: registro._sum.total ?? 0,
