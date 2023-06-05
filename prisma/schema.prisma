@@ -355,8 +355,8 @@ model Proveedores {
   correo_contac_3   String?       @default("")
   no_cuenta         String?       @default("")
   tipo_cuenta       String?       @default("")
-  id_banco          Int           @default(0)
-  Banco             Bancos        @relation(fields: [id_banco], references: [id_banco], onDelete: NoAction, onUpdate: NoAction, map: "fk_proveedor_banco")
+  id_banco          Int?           @default(0)
+  Banco             Bancos?        @relation(fields: [id_banco], references: [id_banco], onDelete: NoAction, onUpdate: NoAction, map: "fk_proveedor_banco")
   id_usuario        Int           @default(0)
   Usuario           Usuarios      @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proveedor_usuario")
   id_tipo_proveedor Int?
