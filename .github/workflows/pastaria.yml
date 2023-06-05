@@ -51,7 +51,7 @@ jobs:
       - name: Run production migration
         run: npm run migrate:deploy
         env:
-          DATABASE_URL: postgresql://${{secrets.DB_NAME}}:${{secrets.DB_PASSWORD}}@${{secrets.HOST}}:${{secrets.DB_PORT}}/${{secrets.DB_NAME}}?schema=public
+          DATABASE_URL: postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA_PASTARIA}}@${{secrets.HOST}}:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public
 
   Deploy:
     runs-on: ubuntu-latest
@@ -66,20 +66,21 @@ jobs:
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            cd /var/www/api-admin.relex-dev.com/html
+            cd /var/www/pastaria-api.relex-dev.com/html
+            git checkout pastaria
             git pull
             sudo rm -r .env 
             echo "Configuran Variables en ENV"  
-            sudo echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env
-            sudo echo "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> .env
-            sudo echo "DB_NAME=${{secrets.DB_NAME}}" >> .env
+            sudo echo "JWT_SECRET=${{secrets.JWT_SECRET_PASTARIA}}" >> .env
+            sudo echo "DB_PASSWORD=${{secrets.DB_PASSWORD_PASTARIA}}" >> .env
+            sudo echo "DB_NAME=${{secrets.DB_NAME_PASTARIA}}" >> .env
             sudo echo "DB_HOST=${{secrets.DB_HOST}}" >> .env
-            sudo echo "DB_PORT=${{secrets.DB_PORT}}" >> .env
+            sudo echo "DB_PORT=${{secrets.DB_PORT_PASTARIA}}" >> .env
             sudo echo "CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}" >> .env
             sudo echo "CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}" >> .env
             sudo echo "CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}" >> .env 
-            sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME}}:${{secrets.DB_PASSWORD}}@localhost:${{secrets.DB_PORT}}/${{secrets.DB_NAME}}?schema=public" >> .env 
-            sudo echo "PORT=${{secrets.PORT_API}}" >> .env 
+            sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA}}@localhost:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public" >> .env 
+            sudo echo "PORT=${{secrets.PORT_API_PASTARIA}}" >> .env 
             echo "Fin Variables en ENV"
 
             rm -r node_modules
