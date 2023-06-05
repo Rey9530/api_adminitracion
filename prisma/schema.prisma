@@ -38,6 +38,13 @@ model Roles {
   Usuarios Usuarios[]
 }
 
+model Bancos {
+  id_banco    Int           @id @default(autoincrement())
+  nombre      String
+  Estado      Estado        @default(ACTIVO)
+  Proveedores Proveedores[]
+}
+
 model Sucursales {
   id_sucursal     Int               @id @default(autoincrement())
   nombre          String
@@ -333,6 +340,7 @@ model Proveedores {
   direccion         String?       @default("")
   dui               String?       @default("")
   foto_url_nrc      String?       @default("")
+  dias_credito      String?       @default("0")
   foto_obj_nrc      String?       @db.Text
   estado            Estado        @default(ACTIVO)
   fecha_creacion    DateTime      @default(now())
@@ -345,12 +353,17 @@ model Proveedores {
   nombre_contac_3   String?       @default("")
   telefono_contac_3 String?       @default("")
   correo_contac_3   String?       @default("")
+  no_cuenta         String?       @default("")
+  tipo_cuenta       String?       @default("")
+  id_banco          Int           @default(0)
+  Banco             Bancos        @relation(fields: [id_banco], references: [id_banco], onDelete: NoAction, onUpdate: NoAction, map: "fk_proveedor_banco")
   id_usuario        Int           @default(0)
   Usuario           Usuarios      @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proveedor_usuario")
   id_tipo_proveedor Int?
   TipoProveedor     TiposCliente? @relation(fields: [id_tipo_proveedor], references: [id_tipo_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_proveedor_tipo")
   Compras           Compras[]
 
+  @@index([id_banco], name: "fk_proveedor_banco_id")
   @@index([id_tipo_proveedor], name: "fk_proveedor_tipo_id")
   @@index([id_municipio], name: "fk_proveedor_municipio_id")
   @@index([id_usuario], name: "fk_proveedor_usuario_id")
@@ -365,6 +378,7 @@ model Compras {
   id_proveedor        Int?
   nombre_proveedor    String?          @default("")
   dui_proveedor       String?          @default("")
+  no_cheque           String?          @default("") // esto para cuando sea de credito y se paga
   Proveedor           Proveedores?     @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_proveedor")
   tipo_pago           TipoPago         @default(CONTADO)
   tipo_compra         TipoCompra       @default(INTERNA)
@@ -417,6 +431,7 @@ enum EstadoPago {
 enum TipoPago {
   CONTADO
   CREDITO
+  TARJETCREDITO
 }
 
 enum TipoCompra {

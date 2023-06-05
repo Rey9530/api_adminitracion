@@ -6,27 +6,42 @@ const execute = async () => {
   try {
     await prisma.facturasTipos.createMany({
       data: [
-        { id_tipo_factura:1, nombre: "Consumidor Final", codigo:"01" }, 
-        { id_tipo_factura:2, nombre: "Credito Fiscal" , codigo:"03"},  
-        { id_tipo_factura:3, nombre: "Recibo" , codigo:"00"},  
-        { id_tipo_factura:4, nombre: "Nota de crédito" , codigo:"05"},  
-        { id_tipo_factura:5, nombre: "Nota de débito" , codigo:"06"},  
+        { id_tipo_factura: 1, nombre: "Consumidor Final", codigo: "01" },
+        { id_tipo_factura: 2, nombre: "Credito Fiscal", codigo: "03" },
+        { id_tipo_factura: 3, nombre: "Recibo", codigo: "00" },
+        { id_tipo_factura: 4, nombre: "Nota de crédito", codigo: "05" },
+        { id_tipo_factura: 5, nombre: "Nota de débito", codigo: "06" },
+      ],
+    });
+
+    await prisma.bancos.createMany({
+      data: [
+        { nombre: "Banco Agrícola" },
+        { nombre: "Banco Cuscatlán " },
+        { nombre: "Banco de América Central" },
+        { nombre: "Banco Promerica" },
+        { nombre: "Banco Davivienda" },
+        { nombre: "Banco Hipotecario  " },
+        { nombre: "Citi  " },
+        { nombre: "Banco Procredit" },
+        { nombre: "Banco Azul" },
+        { nombre: "Banco G&T Continental" },
       ],
     });
     await prisma.tiposCliente.createMany({
       data: [
-        { id_tipo_cliente:1, nombre: "Grandes Contribuyentes" }, 
-        { id_tipo_cliente:2, nombre: "Medianos Contribuyentes" }, 
-        { id_tipo_cliente:3, nombre: "Otros Contribuyentes" }, 
+        { id_tipo_cliente: 1, nombre: "Grandes Contribuyentes" },
+        { id_tipo_cliente: 2, nombre: "Medianos Contribuyentes" },
+        { id_tipo_cliente: 3, nombre: "Otros Contribuyentes" },
       ],
     });
     await prisma.facturasMetodosDePago.createMany({
       data: [
-        { nombre: "Efectivo" }, 
-        { nombre: "Tarjeta" }, 
-        { nombre: "Cheque" }, 
-        { nombre: "Transferencia" }, 
-        { nombre: "Mixto" }, 
+        { nombre: "Efectivo" },
+        { nombre: "Tarjeta" },
+        { nombre: "Cheque" },
+        { nombre: "Transferencia" },
+        { nombre: "Mixto" },
         { nombre: "Credito" },
       ],
     });
@@ -559,7 +574,7 @@ const execute = async () => {
         id_rol: rol.id_rol,
         id_sucursal: 1,
       },
-    }); 
+    });
     await prisma.usuarios.create({
       data: {
         nombres: "Usuario",
@@ -570,7 +585,7 @@ const execute = async () => {
         id_rol: rol.id_rol,
         id_sucursal: 2,
       },
-    }); 
+    });
     await prisma.usuarios.create({
       data: {
         nombres: "Usuario",
@@ -611,12 +626,12 @@ const execute = async () => {
     await prisma.generalData.create({
       data: {
         nombre_sistema: "Sistema Administrativo",
-        impuesto:0.13, 
-        direccion:"San Salvador",
-        razon:"Razon",
-        nit:"123456789",
-        nrc:"1234",
-        contactos:"234567890", 
+        impuesto: 0.13,
+        direccion: "San Salvador",
+        razon: "Razon",
+        nit: "123456789",
+        nrc: "1234",
+        contactos: "234567890",
       },
     });
   } catch (err) {

@@ -6,6 +6,18 @@ import { eliminarArchivoCloudinary, subirArchivo } from "../utils";
 const prisma = new PrismaClient();
 
 
+export const getBancos = async (_: any, resp = response) => {
+  var data = await prisma.bancos.findMany({
+    where: {
+      Estado: "ACTIVO"
+    }
+  });
+  return resp.json({
+    status: true,
+    msg: "Listado de registros",
+    data,
+  });
+}
 export const getRegistros = async (req: any, resp = response) => {
   let { pagina = 1, registrosXpagina = 10, query = "" } = req.query;
   pagina = Number(pagina);
@@ -26,7 +38,7 @@ export const getRegistros = async (req: any, resp = response) => {
               { razon_social: { contains } },
               { registro_nrc: { contains } },
               { nit: { contains } },
-              { direccion: { contains } }, 
+              { direccion: { contains } },
               { dui: { contains } },
             ],
           },
@@ -38,7 +50,7 @@ export const getRegistros = async (req: any, resp = response) => {
   const total = await prisma.proveedores.count({ where });
   const data = await prisma.proveedores.findMany({
     where,
-    include: { Municipio: true , TipoProveedor:true},
+    include: { Municipio: true, TipoProveedor: true },
     take: registrosXpagina,
     skip: (pagina - 1) * registrosXpagina,
   });
@@ -86,8 +98,9 @@ export const crearRegistro = async (req = request, resp = response) => {
     registro_nrc = "",
     nit = "",
     id_municipio = 0,
+    dias_credito = 0,
     direccion = "",
-    dui = "", 
+    dui = "",
     nombre_contac_1 = "",
     telefono_contac_1 = "",
     correo_contac_1 = "",
@@ -98,13 +111,18 @@ export const crearRegistro = async (req = request, resp = response) => {
     telefono_contac_3 = "",
     correo_contac_3 = "",
     id_tipo_proveedor = 0,
+    id_banco = 0,
+    no_cuenta = "",
+    tipo_cuenta = "",
   } = req.body;
   try {
-    let { uid=0 } = req.params;
-    let id_usuario = Number(uid); 
+    let { uid = 0 } = req.params;
+    let id_usuario = Number(uid);
     id_municipio = Number(id_municipio);
+    id_banco = Number(id_banco);
     id_tipo_proveedor = Number(id_tipo_proveedor);
     id_municipio = id_municipio > 0 ? id_municipio : null;
+    id_banco = id_banco > 0 ? id_banco : null;
     id_tipo_proveedor = id_tipo_proveedor > 0 ? id_tipo_proveedor : null;
 
     let respImagen: any = {};
@@ -125,7 +143,7 @@ export const crearRegistro = async (req = request, resp = response) => {
         });
       }
     }
-    
+
     if (id_municipio > 0) {
       const municipio = await prisma.municipios.findFirst({
         where: { id_municipio },
@@ -139,8 +157,21 @@ export const crearRegistro = async (req = request, resp = response) => {
     } else {
       id_municipio = null;
     }
+    if (id_banco > 0) {
+      const municipio = await prisma.bancos.findFirst({
+        where: { id_banco },
+      });
+      if (!municipio) {
+        return resp.status(400).json({
+          status: false,
+          msg: "El banco seleccionado no existe ",
+        });
+      }
+    } else {
+      id_banco = null;
+    }
 
-    const data:any = await prisma.proveedores.create({
+    const data: any = await prisma.proveedores.create({
       data: {
         nombre,
         giro,
@@ -149,7 +180,8 @@ export const crearRegistro = async (req = request, resp = response) => {
         nit,
         id_municipio,
         direccion,
-        dui, 
+        dui,
+        dias_credito,
         nombre_contac_1,
         telefono_contac_1,
         correo_contac_1,
@@ -162,6 +194,9 @@ export const crearRegistro = async (req = request, resp = response) => {
         id_tipo_proveedor,
         foto_obj_nrc,
         foto_url_nrc,
+        id_banco,
+        no_cuenta,
+        tipo_cuenta,
         id_usuario
       },
     });
@@ -189,8 +224,9 @@ export const actualizarRegistro = async (req = request, resp = response) => {
     registro_nrc = "",
     nit = "",
     id_municipio = 0,
+    dias_credito = 0,
     direccion = "",
-    dui = "", 
+    dui = "",
     nombre_contac_1 = "",
     telefono_contac_1 = "",
     correo_contac_1 = "",
@@ -201,11 +237,16 @@ export const actualizarRegistro = async (req = request, resp = response) => {
     telefono_contac_3 = "",
     correo_contac_3 = "",
     id_tipo_proveedor = 0,
+
+    id_banco = 0,
+    no_cuenta = "",
+    tipo_cuenta = "",
   } = req.body;
   try {
-    let id_proveedor: number = Number(req.params.id); 
+    let id_proveedor: number = Number(req.params.id);
     id_municipio = Number(id_municipio);
     id_tipo_proveedor = Number(id_tipo_proveedor);
+    id_banco = Number(id_banco);
     id_municipio = id_municipio > 0 ? id_municipio : null;
     id_tipo_proveedor = id_tipo_proveedor > 0 ? id_tipo_proveedor : null;
 
@@ -250,7 +291,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         });
       }
     }
-    
+
     if (id_municipio > 0) {
       const municipio = await prisma.municipios.findFirst({
         where: { id_municipio },
@@ -265,8 +306,8 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       id_municipio = null;
     }
 
-    const data:any = await prisma.proveedores.update({
-      where:{ id_proveedor },
+    const data: any = await prisma.proveedores.update({
+      where: { id_proveedor },
       data: {
         nombre,
         giro,
@@ -275,7 +316,8 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         nit,
         id_municipio,
         direccion,
-        dui, 
+        dui,
+        dias_credito,
         nombre_contac_1,
         telefono_contac_1,
         correo_contac_1,
@@ -287,7 +329,10 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         correo_contac_3,
         id_tipo_proveedor,
         foto_obj_nrc,
-        foto_url_nrc 
+        foto_url_nrc,
+        id_banco,
+        no_cuenta,
+        tipo_cuenta,
       },
     });
     delete data.foto_obj_nrc;
@@ -305,7 +350,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
   }
   return;
 };
- 
+
 export const eliminarRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {

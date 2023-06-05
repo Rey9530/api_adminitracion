@@ -91,25 +91,46 @@ export const pagarCheque = async (req = request, resp = response) => {
   if (id_sucursal > 0) {
     wSucursal = { id_sucursal };
   }
+  let data = 0;
+  for (let index = 0; index < idsProveedores.length; index++) {
+    const element = idsProveedores[index];
 
-  const data = await prisma.compras.updateMany({
-    where: {
-      OR: idsProveedores.map((contains: number) => {
-        return {
-          id_proveedor: Number(contains),
-          estado_pago: "ENCHEQUE",
-          ...wSucursal,
-        };
-      }),
-    },
-    data: {
-      estado_pago: "PAGADO",
-      fecha_actualizacion: new Date(),
-    },
-  });
+    var datos = await prisma.compras.updateMany({
+      where: {
+        id_proveedor: Number(element.id_proveedor),
+        estado_pago: "ENCHEQUE",
+        ...wSucursal,
+      },
+      data: {
+        estado_pago: "PAGADO",
+        fecha_actualizacion: new Date(),
+        no_cheque:element.no_cheque
+      },
+    });
+
+    if(datos.count>0){
+      data ++; 
+    }
+
+  }
+  // const data = await prisma.compras.updateMany({
+  //   where: {
+  //     OR: idsProveedores.map((contains: number) => {
+  //       return {
+  //         id_proveedor: Number(contains),
+  //         estado_pago: "ENCHEQUE",
+  //         ...wSucursal,
+  //       };
+  //     }),
+  //   },
+  //   data: {
+  //     estado_pago: "PAGADO",
+  //     fecha_actualizacion: new Date(),
+  //   },
+  // });
   return resp.json({
-    status: data.count > 0,
-    msg: data.count > 0 ? "Compras procesadas" : "Ha ocurrido un error",
+    status: data > 0,
+    msg: data > 0 ? "Compras procesadas" : "Ha ocurrido un error",
   });
 };
 
@@ -323,7 +344,7 @@ export const obntenerListadoPrecheques = async (
     const element = proveedores[index];
     var provv = await prisma.proveedores.findFirst({
       where: { id_proveedor: element.id_proveedor ?? 0 },
-      select: { nombre: true, id_proveedor: true },
+      select: { nombre: true, id_proveedor: true, Banco: true, no_cuenta: true, tipo_cuenta: true },
     });
     var registro = await prisma.compras.aggregate({
       _sum: {
@@ -338,6 +359,9 @@ export const obntenerListadoPrecheques = async (
     data.push({
       proveedor: provv?.nombre ?? "",
       id_proveedor: provv?.id_proveedor ?? 0,
+      banco: provv?.Banco.nombre ?? 0,
+      no_cuenta: provv?.no_cuenta ?? 0,
+      tipo_cuenta: provv?.tipo_cuenta ?? 0,
       monto: registro._sum.total ?? 0,
     });
   }
