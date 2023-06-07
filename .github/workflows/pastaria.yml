@@ -50,7 +50,7 @@ jobs:
       - name: Run production migration
         run: npm run migrate:deploy
         env:
-          DATABASE_URL: postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA_PASTARIA}}@${{secrets.HOST}}:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public
+          DATABASE_URL: postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA}}@${{secrets.HOST}}:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public
 
   Deploy:
     runs-on: ubuntu-latest
