@@ -5,7 +5,6 @@ on:
     branches:
       - "pastaria"
 
-
 jobs:
   Test:
       runs-on: ubuntu-latest
@@ -51,7 +50,7 @@ jobs:
       - name: Run production migration
         run: npm run migrate:deploy
         env:
-          DATABASE_URL: postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA_PASTARIA}}@${{secrets.HOST}}:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public
+          DATABASE_URL: postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA}}@${{secrets.HOST}}:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public
 
   Deploy:
     runs-on: ubuntu-latest
@@ -81,12 +80,11 @@ jobs:
             sudo echo "CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}" >> .env 
             sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA}}@localhost:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public" >> .env 
             sudo echo "PORT=${{secrets.PORT_API_PASTARIA}}" >> .env 
-            echo "Fin Variables en ENV"
-
+            echo "Fin Variables en ENV" 
             rm -r node_modules
             yarn install
             yarn run tsc
-            pm2 restart mi-api
+            pm2 restart mi-api-pastaria
 
 
 # yarn run migrate:deploy
@@ -95,3 +93,6 @@ jobs:
 
 # sudo rm -r html
 # git clone https://github.com/Rey9530/api_administracion.git html && cd html 
+
+
+# docker-compose up -d
