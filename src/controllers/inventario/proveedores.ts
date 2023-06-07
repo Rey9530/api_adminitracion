@@ -18,6 +18,22 @@ export const getBancos = async (_: any, resp = response) => {
     data,
   });
 }
+
+
+export const getFacturasProveedores = async (req = request, resp = response) => {
+  let id_proveedor: number = Number(req.params.id);
+  var data = await prisma.compras.findMany({
+    where: {
+      id_proveedor
+    },
+    include: { Sucursales: true, FacturasTipos:true }
+  });
+  return resp.json({
+    status: true,
+    msg: "Listado de registros",
+    data,
+  });
+}
 export const getRegistros = async (req: any, resp = response) => {
   let { pagina = 1, registrosXpagina = 10, query = "" } = req.query;
   pagina = Number(pagina);

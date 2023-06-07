@@ -11,12 +11,14 @@ import {
   actualizarRegistro,
   eliminarRegistro,
   getBancos,
+  getFacturasProveedores,
 } from "../../controllers/inventario/proveedores";
 import { obntenerTiposContribuyentes } from "../../controllers/facturacion/cliente";
 
 router.use(fileUpload()); 
 router.get("/", validarJWT, getRegistros);
 router.get("/listado/bancos", validarJWT, getBancos);
+router.get("/listado/facturas/:id", validarJWT, getFacturasProveedores);
 router.get("/:id", validarJWT, getRegistro);
 router.post(
   "/",
