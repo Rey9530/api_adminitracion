@@ -455,7 +455,7 @@ export const getExistencias = async (req: any, resp = response) => {
       where: { id_sucursal: sucursal, estado: "ACTIVO" },
     });
 
-    var array = sucursales.map((e) => {
+    var array = sucursales.map((e:any) => {
       return {
         id_bodega: e.id_bodega,
       };
