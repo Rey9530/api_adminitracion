@@ -1,7 +1,7 @@
 import expres from "express";
 const response = expres.response;
-const request = expres.request; 
-import bcrypt from "bcryptjs"; 
+const request = expres.request;
+import bcrypt from "bcryptjs";
 import { getenerarJWT } from "../helpers/jwt";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
@@ -9,6 +9,15 @@ const prisma = new PrismaClient();
 export const getUsuarios = async (__: any, resp = response) => {
   const usuarios = await prisma.usuarios.findMany({
     where: { estado: "ACTIVO" },
+    select:{
+      nombres:true,
+      apellidos:true,
+      dui:true,
+      usuario:true,
+      Roles:true,
+      Sucursales:true,
+      id:true,
+    }
   });
   const total = await usuarios.length;
   resp.json({
@@ -16,6 +25,17 @@ export const getUsuarios = async (__: any, resp = response) => {
     msg: "Usuario",
     usuarios,
     total,
+  });
+};
+
+export const getRoles = async (__: any, resp = response) => {
+  const data = await prisma.roles.findMany({
+    where: { Estado: "ACTIVO" },
+  });
+  resp.json({
+    status: true,
+    msg: "Registros",
+    data,
   });
 };
 export const getUsuario = async (req = request, resp = response) => {
@@ -39,9 +59,11 @@ export const getUsuario = async (req = request, resp = response) => {
 };
 
 export const crearUsuario = async (req = request, resp = response) => {
-  let { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal } =
+  let { usuario, nombres, apellidos, dui, id_rol, id_sucursal } =
     req.body;
   try {
+    id_rol = Number(id_rol)
+    id_sucursal = Number(id_sucursal)
     const existeRol = await prisma.roles.findUnique({ where: { id_rol } });
     if (!existeRol) {
       return resp.status(400).json({
@@ -65,14 +87,14 @@ export const crearUsuario = async (req = request, resp = response) => {
       },
     });
     if (existeEmail) {
-      return resp.status(400).json({
-        status: true,
+      return resp.json({
+        status: false,
         msg: usuario + " ya existe",
       });
     }
-    //encriptar clave
+    //encriptar clave 
     const salt = bcrypt.genSaltSync();
-    password = bcrypt.hashSync(password, salt);
+    let password = bcrypt.hashSync("1234", salt);
 
     const userSaved = await prisma.usuarios.create({
       data: {
@@ -84,6 +106,15 @@ export const crearUsuario = async (req = request, resp = response) => {
         id_rol,
         id_sucursal,
       },
+      select:{
+        nombres:true,
+        apellidos:true,
+        dui:true,
+        usuario:true,
+        Roles:true,
+        Sucursales:true,
+        id:true,
+      }
     });
 
     const token = await getenerarJWT(userSaved.id);
@@ -94,6 +125,7 @@ export const crearUsuario = async (req = request, resp = response) => {
       data: { ...userSaved, token },
     });
   } catch (error) {
+    console.log(error)
     resp.status(500).json({
       status: false,
       msg: "Error inesperado reviosar log",
@@ -105,7 +137,7 @@ export const actualizarUsuario = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {
     const existeEmail = await prisma.usuarios.findFirst({
-      where: { id: uid ,estado: "ACTIVO"},
+      where: { id: uid, estado: "ACTIVO" },
     });
     if (!existeEmail) {
       return resp.status(400).json({
@@ -114,15 +146,17 @@ export const actualizarUsuario = async (req = request, resp = response) => {
       });
     }
 
-    const { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal } =
+    let { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal } =
       req.body;
+    id_rol = Number(id_rol)
+    id_sucursal = Number(id_sucursal)
     if (existeEmail.usuario != usuario) {
       const existeEmail = await prisma.usuarios.findFirst({
         where: { usuario },
       });
       if (existeEmail) {
-        return resp.status(400).json({
-          status: true,
+        return resp.json({
+          status: false,
           msg: "Ya existe un registro con ese usuario",
         });
       }

@@ -13,6 +13,7 @@ export const login = async (req = request, resp = response) => {
     const usaurioDB = await prisma.usuarios.findFirst({
       where: {
         usuario,
+        estado: "ACTIVO",
       },
     });
 
@@ -56,7 +57,7 @@ export const loginRenew = async (req = request, resp = response) => {
       id: uid,
       estado: "ACTIVO",
     },
-  });
+  }); 
   if (!usaurioDB) {
     resp.json({
       status: false,
