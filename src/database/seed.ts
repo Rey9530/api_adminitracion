@@ -1,4 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
+
+import { PrismaClient } from "@prisma/client";
 const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
@@ -567,7 +568,7 @@ const execute = async () => {
 
 
     //ROLS DEMO
-    let rol = await prisma.roles.createMany({
+    await prisma.roles.createMany({
       data: [
         { nombre: "Admin", },
         { nombre: "Reservas", },
@@ -585,7 +586,7 @@ const execute = async () => {
         usuario: "usuario@demo.com",
         dui: "1234567890",
         password: password,
-        id_rol: 1,//rol.id_rol,//testertkiero@gmail.com Tkiero2022.
+        id_rol: 1,//1,//testertkiero@gmail.com Tkiero2022.
         id_sucursal: 1,
         id_sucursal_reser: 1
       },
@@ -597,7 +598,7 @@ const execute = async () => {
         usuario: "miguelmunoz_19@hotmail.es",
         dui: "1234567890",
         password: password,
-        id_rol: rol.id_rol,
+        id_rol: 1,
         id_sucursal: 2,
       },
     });
@@ -608,7 +609,7 @@ const execute = async () => {
         usuario: "palomo_naza@yahoo.com",
         dui: "1234567890",
         password: password,
-        id_rol: rol.id_rol,
+        id_rol: 1,
         id_sucursal: 3,
       },
     });
@@ -620,7 +621,7 @@ const execute = async () => {
         usuario: "balcaceressteven@gmail.com",
         dui: "1234567890",
         password: password,
-        id_rol: rol.id_rol,
+        id_rol: 1,
         id_sucursal: 4,
       },
     });
@@ -631,7 +632,7 @@ const execute = async () => {
         usuario: "giovanniartiga@yahoo.com",
         dui: "1234567890",
         password: password,
-        id_rol: rol.id_rol,
+        id_rol: 1,
         id_sucursal: 5,
       },
     });
