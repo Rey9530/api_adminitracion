@@ -29,6 +29,7 @@ router.post(
     check("telefono", "El telefono es obligatorio").not().isEmpty(),
     check("date", "La fecha es obligatoria").not().isEmpty(),
     check("start", "El hora es obligatoria").not().isEmpty(),
+    check("turno", "El hora es obligatoria").not().isEmpty(),
     validarCampos,
   ],
   crearRegistro
@@ -46,6 +47,7 @@ router.put(
     check("telefono", "El telefono es obligatorio").not().isEmpty(),
     check("date", "La fecha es obligatoria").not().isEmpty(),
     check("start", "El hora es obligatoria").not().isEmpty(),
+    check("turno", "El hora es obligatoria").not().isEmpty(),
     validarCampos,
   ],
   actualizarRegistro

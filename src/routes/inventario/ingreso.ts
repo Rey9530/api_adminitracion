@@ -12,7 +12,9 @@ import {
   comprasACheque,
   pagarCheque,
   crearCompraServicioR,
-  getExistencias, 
+  getExistencias,
+  obtenercxpPorProveedor,
+  verificarCompraServicio, 
 } from "../../controllers/inventario/ingreso";
 import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt";
@@ -58,6 +60,21 @@ router.post(
     validarCampos,
   ],
   crearCompraServicio
+); 
+
+
+
+router.post(
+  "/servicio/verficar",
+  [
+    validarJWT, 
+    check("id_proveedor", "El seleccione un proveedor valido").custom((e) =>
+      validar_dato(e, "positivo")
+    ), 
+    check("numero_factura", "El numero de factura es requerido").not().isEmpty(), 
+    validarCampos,
+  ],
+  verificarCompraServicio
 ); 
 
 router.post(
@@ -115,6 +132,7 @@ router.post(
 );
  
 router.get("/obtener/bodegas/:id", validarJWT, obtenerBodegas);
+router.get("/proveedor/obtener_listado_compras_al_credito/:id_sucursal", validarJWT, obtenercxpPorProveedor);
 router.get(
   "/obtener_listado_facturas",
   [

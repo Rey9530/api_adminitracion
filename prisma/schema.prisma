@@ -74,25 +74,26 @@ model Bodegas {
 }
 
 model Usuarios {
-  id             Int              @id @default(autoincrement())
-  usuario        String
-  password       String
-  nombres        String
-  apellidos      String
-  dui            String?
-  foto           String?          @unique
-  estado         Estado           @default(ACTIVO)
-  fecha_creacion DateTime         @default(now()) @db.Timestamptz()
-  id_rol         Int
-  Roles          Roles            @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
-  id_sucursal    Int
-  Sucursales     Sucursales       @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
-  Facturas       Facturas[]
-  Proveedores    Proveedores[]
-  Compras        Compras[]
-  CierresDiarios CierresDiarios[]
-  Agenda         Agenda[]
-  OrdenDeSalida  OrdenDeSalida[]
+  id                Int              @id @default(autoincrement())
+  usuario           String
+  password          String
+  nombres           String
+  apellidos         String
+  dui               String?
+  foto              String?          @unique
+  estado            Estado           @default(ACTIVO)
+  fecha_creacion    DateTime         @default(now()) @db.Timestamptz()
+  id_rol            Int
+  Roles             Roles            @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
+  id_sucursal       Int
+  Sucursales        Sucursales       @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
+  id_sucursal_reser Int?
+  Facturas          Facturas[]
+  Proveedores       Proveedores[]
+  Compras           Compras[]
+  CierresDiarios    CierresDiarios[]
+  Agenda            Agenda[]
+  OrdenDeSalida     OrdenDeSalida[]
 
   @@index([id_rol], name: "fk_usuario_rol_id")
   @@index([id_sucursal], name: "fk_usuario_sucursal_id")
@@ -522,6 +523,7 @@ model Agenda {
   no_personas    String?
   nombre         String?
   telefono       String?
+  turno          Turnos?
   inicio         DateTime
   fin            DateTime
   nota           String?      @db.Text
@@ -532,6 +534,12 @@ model Agenda {
 
   @@index([id_sucursal], name: "fk_agenda_sucursal_id")
   @@index([id_usuario], name: "fk_agenda_usuario_id")
+}
+
+enum Turnos {
+  DESAYUNO
+  ALMUERZO
+  CENA
 }
 
 model MotivoSalida {

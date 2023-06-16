@@ -12,7 +12,7 @@ export const getRegistros = async (req = request, resp = response) => {
     wSucursal = { id_sucursal };
   }
   const registros = await prisma.agenda.findMany({
-    include: { Sucursales: true },
+    include: { Sucursales: true, Usuario: true },
     where: { ...wSucursal },
   });
   const total = await registros.length;
@@ -89,16 +89,16 @@ export const getRegistrosFiltrados = async (req = request, resp = response) => {
   ]);
 
   const registros = await prisma.agenda.findMany({
-    include: { Sucursales: true },
+    include: { Sucursales: true, Usuario: true },
     where: { ...wSucursal, ...wMes },
-    orderBy:{
-      inicio:"asc"
+    orderBy: {
+      inicio: "asc"
     }
-  });  
+  });
   resp.json({
     status: true,
     msg: "Listado de registros",
-    registros,  
+    registros,
     contadores: {
       pendiente,
       confirmada,
@@ -173,6 +173,7 @@ export const crearRegistro = async (req = request, resp = response) => {
     id_sucursal = 0,
     zona = "",
     no_personas = "",
+    turno = "DESAYUNO",
     telefono = "",
     date = "",
     start = "",
@@ -200,6 +201,7 @@ export const crearRegistro = async (req = request, resp = response) => {
         inicio,
         fin,
         nota,
+        turno,
         id_usuario: uid,
       },
     });
@@ -226,6 +228,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       id_sucursal = 0,
       zona = "",
       no_personas = "",
+      turno = "DESAYUNO",
       telefono = "",
       date = "",
       start = "",
@@ -269,6 +272,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         inicio,
         fin,
         nota,
+        turno,
       },
     });
     resp.json({

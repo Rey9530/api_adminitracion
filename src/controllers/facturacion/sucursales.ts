@@ -4,9 +4,19 @@ const request = expres.request;
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getRegistros = async (__: any, resp = response) => {
+export const getRegistros = async (req: any, resp = response) => {
+  var id_usuario: any = Number(req.params.uid);
+  var wSucursal = {};
+  if (id_usuario > 0) {
+    var usuario = await prisma.usuarios.findFirst({ where: { id: id_usuario } });
+    if (Number(usuario?.id_sucursal_reser) > 0) {
+      wSucursal = { id_sucursal: Number(usuario?.id_sucursal_reser) };
+    }
+  }
+
+
   const registros = await prisma.sucursales.findMany({
-    where: { estado: "ACTIVO" },
+    where: { estado: "ACTIVO", ...wSucursal },
   });
   const total = await registros.length;
   resp.json({
@@ -72,10 +82,10 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         msg: "El registro no existe",
       });
     }
-    let { nombre = "", color =""} = req.body;
+    let { nombre = "", color = "" } = req.body;
     const registroActualizado = await prisma.sucursales.update({
       where: { id_sucursal: uid },
-      data: { nombre,color },
+      data: { nombre, color },
     });
     resp.json({
       status: true,
