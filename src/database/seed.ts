@@ -587,6 +587,7 @@ const execute = async () => {
         password: password,
         id_rol: rol.id_rol,
         id_sucursal: 1,
+        id_sucursal_reser: 1
       },
     });
     await prisma.usuarios.create({
