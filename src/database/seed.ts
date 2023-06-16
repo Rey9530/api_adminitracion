@@ -585,7 +585,7 @@ const execute = async () => {
         usuario: "usuario@demo.com",
         dui: "1234567890",
         password: password,
-        id_rol: rol.id_rol,
+        id_rol: 1,//rol.id_rol,//testertkiero@gmail.com Tkiero2022.
         id_sucursal: 1,
         id_sucursal_reser: 1
       },
