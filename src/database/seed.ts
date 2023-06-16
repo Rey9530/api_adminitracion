@@ -542,6 +542,18 @@ const execute = async () => {
       data: [{ nombre: "Servicio" }, { nombre: "Producto" }],
     });
 
+
+    //MOTIVOS DEMO
+    await prisma.motivoSalida.createMany({
+      data: [
+        { nombre: "Roto" },
+        { nombre: "Dañado" },
+        { nombre: "Vendido" },
+        { nombre: "Regalado" },
+        { nombre: "Obsequiado" },
+      ]
+    });
+
     //SUCURSAL DEMO
     await prisma.sucursales.createMany({
       data: [
@@ -553,11 +565,13 @@ const execute = async () => {
       ]
     });
 
+
     //ROLS DEMO
-    let rol = await prisma.roles.create({
-      data: {
-        nombre: "Rol 1",
-      },
+    let rol = await prisma.roles.createMany({
+      data: [
+        { nombre: "Admin", },
+        { nombre: "Reservas", },
+      ]
     });
 
     //USUARIO DEMO

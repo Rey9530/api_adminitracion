@@ -298,6 +298,29 @@ export const obntenerListadoFacturasAlCredito = async (
     data,
   });
 };
+
+
+export const revertirEstadoCompra= async (
+  req = request,
+  resp = response
+) => {
+  
+  let id_compra: number = Number(req.params.id_compra);
+
+  await prisma.compras.update({
+    where: { id_compras: id_compra },
+    data: {
+      estado_pago: "PENDIENTE"
+    }
+  });
+
+  return resp.json({
+    status: true,
+    msg: "Datos Actualizados",
+  });
+};
+
+
 export const obntenerListadoPrecheques = async (
   req = request,
   resp = response
@@ -346,6 +369,18 @@ export const obntenerListadoPrecheques = async (
       where: { id_proveedor: element.id_proveedor ?? 0 },
       select: { nombre: true, id_proveedor: true, Banco: true, no_cuenta: true, tipo_cuenta: true },
     });
+
+    var compras = await prisma.compras.findMany({ 
+      where: {
+        id_proveedor: element.id_proveedor,
+        estado_pago: "ENCHEQUE",
+        ...wSucursal,
+      },
+      include:{
+        FacturasTipos:true,
+        Sucursales:true,
+      }
+    });
     var registro = await prisma.compras.aggregate({
       _sum: {
         total: true,
@@ -363,6 +398,7 @@ export const obntenerListadoPrecheques = async (
       no_cuenta: provv?.no_cuenta ?? 0,
       tipo_cuenta: provv?.tipo_cuenta ?? 0,
       monto: registro._sum.total ?? 0,
+      compras
     });
   }
 
