@@ -108,17 +108,16 @@ export const getDataTablero = async (req = request, resp = response) => {
 
 export const getPieDataProveedores = async (req = request, resp = response) => {
   let {
-    id_sucursal = 0,
-    anio = new Date().getFullYear(),
-    mes = 0,
+    id_sucursal = 0, 
   }: any = req.params;
   id_sucursal = Number(id_sucursal);
-  mes = Number(mes);
-
-  mes = mes > 0 ? mes : 0;
-  let diasMes: any = new Date(anio, mes, 0);
-  mes = mes > 0 ? mes - 1 : 0;
-  diasMes = diasMes.getDate();
+  
+  var desde_v: any = req.query.desde!.toString();
+  var hasta_v: any = req.query.hasta!.toString();
+  var desde = new Date(desde_v);
+  var hasta = new Date(hasta_v);
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59);;
 
   var wSucursal = {};
   if (id_sucursal > 0) {
@@ -135,9 +134,7 @@ export const getPieDataProveedores = async (req = request, resp = response) => {
   var dataGorcentaje = [];
 
   for (let index = 0; index < sucursales.length; index++) {
-    const element = sucursales[index];
-    var desde = new Date(anio, mes, 1, 0, 0, 0);
-    var hasta = new Date(anio, mes, diasMes, 23, 59, 59);
+    const element = sucursales[index]; 
     var resultXSUCURSAL = await prisma.compras.aggregate({
       _sum: {
         total: true,
@@ -158,9 +155,7 @@ export const getPieDataProveedores = async (req = request, resp = response) => {
       });
       colores.push(obtenerColorAleatorio());
     }
-  }
-  var desde = new Date(anio, mes, 1, 0, 0, 0);
-  var hasta = new Date(anio, mes, diasMes, 23, 59, 59);
+  } 
   var whereF = {
     fecha_factura: {
       gte: desde,
@@ -207,17 +202,17 @@ export const getPiePorcentajePropinas = async (
 ) => {
   let {
     id_sucursal = 0,
-    anio = new Date().getFullYear(),
-    mes = 0,
   }: any = req.params;
   id_sucursal = Number(id_sucursal);
-  mes = Number(mes);
 
-  mes = mes > 0 ? mes : 0;
-  let diasMes: any = new Date(anio, mes, 0);
-  mes = mes > 0 ? mes - 1 : 0;
-  diasMes = diasMes.getDate();
 
+
+  var desde_v: any = req.query.desde!.toString();
+  var hasta_v: any = req.query.hasta!.toString();
+  var desde = new Date(desde_v);
+  var hasta = new Date(hasta_v);
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59);
   var wSucursal = {};
   if (id_sucursal > 0) {
     wSucursal = { id_sucursal };
@@ -234,8 +229,6 @@ export const getPiePorcentajePropinas = async (
 
   for (let index = 0; index < sucursales.length; index++) {
     const element = sucursales[index];
-    var desde = new Date(anio, mes, 1, 0, 0, 0);
-    var hasta = new Date(anio, mes, diasMes, 23, 59, 59);
     var resultXSUCURSAL = await prisma.cierresDiarios.aggregate({
       _sum: {
         venta_bruta: true,
@@ -261,20 +254,18 @@ export const getPiePorcentajePropinas = async (
       });
       colores.push(obtenerColorAleatorio());
     }
-  }
-  var desde = new Date(anio, mes, 1, 0, 0, 0);
-  var hasta = new Date(anio, mes, diasMes, 23, 59, 59); 
+  } 
 
   var resPro = await prisma.cierresDiarios.aggregate({
     _sum: {
-      venta_bruta:true,
-      propina:true
+      venta_bruta: true,
+      propina: true
     },
     where: {
       fecha_cierre: {
         gte: desde,
         lte: hasta,
-      }, 
+      },
     },
   });
   var dataGrafTipo = [];

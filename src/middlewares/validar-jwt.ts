@@ -1,3 +1,7 @@
+
+// import expres from "express";
+// const response = expres.response;
+// const request = expres.request;
 const { request, response } = require("express");
 import jwt from "jsonwebtoken";
 
@@ -8,8 +12,9 @@ export const validarJWT = (req = request, resp = response, next: Function) => {
       status: false,
       msg: "No se detecta el accessToken",
     });
-  }
-
+  } 
+  // TODO: Aqui agregar la sentencia que guarda en bitacora
+  // console.log(req.baseUrl+req.url); 
   try {
     const { uid, ids }: any = jwt.verify(
       token,

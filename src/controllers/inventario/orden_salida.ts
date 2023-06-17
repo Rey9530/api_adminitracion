@@ -4,19 +4,24 @@ const request = expres.request;
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export const getRegistros = async (req: any, resp = response) => {
-  var id_usuario: any = Number(req.params.uid);
-  var wSucursal = {};
-  if (id_usuario > 0) {
-    var usuario = await prisma.usuarios.findFirst({ where: { id: id_usuario } });
-    if (Number(usuario?.id_sucursal_reser) > 0) {
-      wSucursal = { id_sucursal: Number(usuario?.id_sucursal_reser) };
-    }
-  }
+
+export const getMotivos = async (__: any, resp = response) => {
+  
+  const data = await prisma.motivoSalida.findMany({
+    where: { estado: "ACTIVO" }, 
+  }); 
+  resp.json({
+    status: true,
+    msg: "Listado de registros",
+    data, 
+  });
+};
 
 
-  const registros = await prisma.sucursales.findMany({
-    where: { estado: "ACTIVO", ...wSucursal },
+export const getRegistros = async (__: any, resp = response) => {
+  const registros = await prisma.bodegas.findMany({
+    where: { estado: "ACTIVO" },
+    include:{ Sucursales:true }
   });
   const total = await registros.length;
   resp.json({
@@ -29,8 +34,8 @@ export const getRegistros = async (req: any, resp = response) => {
 
 export const getRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
-  const registros = await prisma.sucursales.findFirst({
-    where: { id_sucursal: uid, estado: "ACTIVO" },
+  const registros = await prisma.bodegas.findFirst({
+    where: { id_bodega: uid, estado: "ACTIVO" },
   });
 
   if (!registros) {
@@ -48,12 +53,13 @@ export const getRegistro = async (req = request, resp = response) => {
 };
 
 export const crearRegistro = async (req = request, resp = response) => {
-  let { nombre = "", color = "" } = req.body;
+  let { nombre = "", id_sucursal = 0 } = req.body;
   try {
-    const data = await prisma.sucursales.create({
+    id_sucursal = Number(id_sucursal);
+    const data = await prisma.bodegas.create({
       data: {
         nombre,
-        color,
+        id_sucursal,
       },
     });
     resp.json({
@@ -73,19 +79,26 @@ export const crearRegistro = async (req = request, resp = response) => {
 export const actualizarRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {
-    const registro = await prisma.sucursales.findFirst({
-      where: { id_sucursal: uid, estado: "ACTIVO" },
-    });
-    if (!registro) {
+    let { nombre = "",id_sucursal=0 } = req.body;
+    id_sucursal = Number(id_sucursal);
+
+    const [registro, sucursal] = await Promise.all([
+      await prisma.bodegas.findFirst({
+        where: { id_bodega: uid, estado: "ACTIVO" },
+      }),
+      await prisma.sucursales.findFirst({
+        where: { id_sucursal },
+      }),
+    ]); 
+    if (!registro || !sucursal) {
       return resp.status(400).json({
         status: false,
-        msg: "El registro no existe",
+        msg: "El registro no existe o la sucursal esta incorrecta",
       });
     }
-    let { nombre = "", color = "" } = req.body;
-    const registroActualizado = await prisma.sucursales.update({
-      where: { id_sucursal: uid },
-      data: { nombre, color },
+    const registroActualizado = await prisma.bodegas.update({
+      where: { id_bodega: uid },
+      data: { nombre,id_sucursal },
     });
     resp.json({
       status: true,
@@ -105,8 +118,8 @@ export const actualizarRegistro = async (req = request, resp = response) => {
 export const eliminarRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {
-    const registro = await prisma.sucursales.findFirst({
-      where: { id_sucursal: uid, estado: "ACTIVO" },
+    const registro = await prisma.bodegas.findFirst({
+      where: { id_bodega: uid, estado: "ACTIVO" },
     });
     if (!registro) {
       return resp.status(400).json({
@@ -114,9 +127,9 @@ export const eliminarRegistro = async (req = request, resp = response) => {
         msg: "El registro no existe",
       });
     }
-    await prisma.sucursales.update({
+    await prisma.bodegas.update({
       data: { estado: "INACTIVO" },
-      where: { id_sucursal: uid },
+      where: { id_bodega: uid },
     });
     resp.json({
       status: true,

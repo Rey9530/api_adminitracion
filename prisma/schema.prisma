@@ -61,36 +61,39 @@ model Sucursales {
 }
 
 model Bodegas {
-  id_bodega   Int          @id @default(autoincrement())
-  nombre      String
-  estado      Estado       @default(ACTIVO)
-  id_sucursal Int
-  Sucursales  Sucursales   @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_bodega_sucursal")
-  Compras     Compras[]
-  Inventario  Inventario[]
+  id_bodega     Int             @id @default(autoincrement())
+  nombre        String
+  estado        Estado          @default(ACTIVO)
+  id_sucursal   Int
+  Sucursales    Sucursales      @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_bodega_sucursal")
+  Compras       Compras[]
+  Inventario    Inventario[]
+  OrdenDeSalida OrdenDeSalida[]
 
   @@index([id_sucursal], name: "fk_bodega_sucursal_id")
 }
 
 model Usuarios {
-  id             Int              @id @default(autoincrement())
-  usuario        String
-  password       String
-  nombres        String
-  apellidos      String
-  dui            String?
-  foto           String?          @unique
-  estado         Estado           @default(ACTIVO)
-  fecha_creacion DateTime         @default(now()) @db.Timestamptz()
-  id_rol         Int
-  Roles          Roles            @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
-  id_sucursal    Int
-  Sucursales     Sucursales       @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
-  Facturas       Facturas[]
-  Proveedores    Proveedores[]
-  Compras        Compras[]
-  CierresDiarios CierresDiarios[]
-  Agenda         Agenda[]
+  id                Int              @id @default(autoincrement())
+  usuario           String
+  password          String
+  nombres           String
+  apellidos         String
+  dui               String?
+  foto              String?          @unique
+  estado            Estado           @default(ACTIVO)
+  fecha_creacion    DateTime         @default(now()) @db.Timestamptz()
+  id_rol            Int
+  Roles             Roles            @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
+  id_sucursal       Int
+  Sucursales        Sucursales       @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
+  id_sucursal_reser Int?
+  Facturas          Facturas[]
+  Proveedores       Proveedores[]
+  Compras           Compras[]
+  CierresDiarios    CierresDiarios[]
+  Agenda            Agenda[]
+  OrdenDeSalida     OrdenDeSalida[]
 
   @@index([id_rol], name: "fk_usuario_rol_id")
   @@index([id_sucursal], name: "fk_usuario_sucursal_id")
@@ -127,10 +130,11 @@ model Catalogo {
   estado              Estado             @default(ACTIVO)
   fecha_creacion      DateTime           @default(now()) @db.Timestamptz()
 
-  FacturasDetalle FacturasDetalle[]
-  ComprasDetalle  ComprasDetalle[]
-  Kardex          Kardex[]
-  Inventario      Inventario[]
+  FacturasDetalle      FacturasDetalle[]
+  ComprasDetalle       ComprasDetalle[]
+  Kardex               Kardex[]
+  Inventario           Inventario[]
+  OrdenDeSalidaDetalle OrdenDeSalidaDetalle[]
 
   @@index([id_tipo], name: "fk_tipo_catalogo_id")
   @@index([id_categoria], name: "fk_categoria_sefvicio_id")
@@ -355,8 +359,8 @@ model Proveedores {
   correo_contac_3   String?       @default("")
   no_cuenta         String?       @default("")
   tipo_cuenta       String?       @default("")
-  id_banco          Int?           @default(0)
-  Banco             Bancos?        @relation(fields: [id_banco], references: [id_banco], onDelete: NoAction, onUpdate: NoAction, map: "fk_proveedor_banco")
+  id_banco          Int?          @default(0)
+  Banco             Bancos?       @relation(fields: [id_banco], references: [id_banco], onDelete: NoAction, onUpdate: NoAction, map: "fk_proveedor_banco")
   id_usuario        Int           @default(0)
   Usuario           Usuarios      @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_proveedor_usuario")
   id_tipo_proveedor Int?
@@ -475,16 +479,17 @@ model ComprasDetalle {
 }
 
 model Inventario {
-  id_inventario      Int             @id @default(autoincrement())
-  id_catalogo        Int
-  Catalogo           Catalogo        @relation(fields: [id_catalogo], references: [id_catalogo], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventario_catalogo")
-  id_compras_detalle Int?
-  ComprasDetalle     ComprasDetalle? @relation(fields: [id_compras_detalle], references: [id_compras_detalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventario_detalle")
-  id_bodega          Int?
-  Bodegas            Bodegas?        @relation(fields: [id_bodega], references: [id_bodega], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventario_bodega")
-  costo_unitario     Float?          @default(0)
-  existencia         Int?            @default(0)
-  costo_total        Float?          @default(0)
+  id_inventario        Int                    @id @default(autoincrement())
+  id_catalogo          Int
+  Catalogo             Catalogo               @relation(fields: [id_catalogo], references: [id_catalogo], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventario_catalogo")
+  id_compras_detalle   Int?
+  ComprasDetalle       ComprasDetalle?        @relation(fields: [id_compras_detalle], references: [id_compras_detalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventario_detalle")
+  id_bodega            Int?
+  Bodegas              Bodegas?               @relation(fields: [id_bodega], references: [id_bodega], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventario_bodega")
+  costo_unitario       Float?                 @default(0)
+  existencia           Int?                   @default(0)
+  costo_total          Float?                 @default(0)
+  OrdenDeSalidaDetalle OrdenDeSalidaDetalle[]
 
   @@index([id_bodega], name: "fk_inventario_bodega_id")
   @@index([id_catalogo], name: "fk_inventario_catalogo_id")
@@ -518,6 +523,7 @@ model Agenda {
   no_personas    String?
   nombre         String?
   telefono       String?
+  turno          Turnos?
   inicio         DateTime
   fin            DateTime
   nota           String?      @db.Text
@@ -528,6 +534,53 @@ model Agenda {
 
   @@index([id_sucursal], name: "fk_agenda_sucursal_id")
   @@index([id_usuario], name: "fk_agenda_usuario_id")
+}
+
+enum Turnos {
+  DESAYUNO
+  ALMUERZO
+  CENA
+}
+
+model MotivoSalida {
+  id_motivo Int    @id @default(autoincrement())
+  nombre    String
+  estado    Estado @default(ACTIVO)
+
+  OrdenDeSalida OrdenDeSalida[]
+}
+
+model OrdenDeSalida {
+  id_orden_salida     Int          @id @default(autoincrement())
+  id_bodega           Int
+  Bodegas             Bodegas      @relation(fields: [id_bodega], references: [id_bodega], onDelete: NoAction, onUpdate: NoAction, map: "fk_salida_bodega")
+  id_motivo           Int
+  MotivoSalida        MotivoSalida @relation(fields: [id_motivo], references: [id_motivo], onDelete: NoAction, onUpdate: NoAction, map: "fk_salida_motivo")
+  id_usuario          Int
+  Usuario             Usuarios     @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_salida_usuario")
+  observacion         String?      @db.Text
+  fecha_creacion      DateTime     @default(now())
+  fecha_actualizacion DateTime     @default(now())
+
+  @@index([id_bodega], name: "fk_salida_bodega_id")
+  @@index([id_motivo], name: "fk_salida_motivo_id")
+  @@index([id_usuario], name: "fk_salida_usuario_id")
+}
+
+model OrdenDeSalidaDetalle {
+  id_orden_detalle Int        @id @default(autoincrement())
+  id_catalogo      Int        @default(0)
+  Catalogo         Catalogo   @relation(fields: [id_catalogo], references: [id_catalogo], onDelete: NoAction, onUpdate: NoAction, map: "fk_salida_detalle_catalogo")
+  id_inventario    Int        @default(0)
+  Inventario       Inventario @relation(fields: [id_inventario], references: [id_inventario], onDelete: NoAction, onUpdate: NoAction, map: "fk_salida_inventario")
+  costo_unitario   Float      @default(0)
+  cantidad         Float      @default(0)
+  total            Float?     @default(0)
+  fecha_creacion   DateTime   @default(now())
+  estado           Estado     @default(ACTIVO)
+
+  @@index([id_catalogo], name: "fk_salida_detalle_catalogo_id")
+  @@index([id_inventario], name: "fk_salida_inventario_id")
 }
 
 enum EstadoAgenda {

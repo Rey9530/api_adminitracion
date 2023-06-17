@@ -5,18 +5,18 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getRegistros = async (req = request, resp = response) => {
-  let { id_sucursal = 0 } = req.query;
+  let { id_sucursal = 0, turno = "DESAYUNO" } = req.query;
   id_sucursal = Number(id_sucursal);
   var wSucursal = {};
   if (id_sucursal > 0) {
     wSucursal = { id_sucursal };
   }
   const registros = await prisma.agenda.findMany({
-    include: { Sucursales: true },
+    include: { Sucursales: true, Usuario: true },
     where: { ...wSucursal },
   });
   const total = await registros.length;
-  var ahora = await getRegistrosDelDia(id_sucursal);
+  var ahora = await getRegistrosDelDia(id_sucursal, turno);
   resp.json({
     status: true,
     msg: "Listado de registros",
@@ -28,23 +28,28 @@ export const getRegistros = async (req = request, resp = response) => {
 export const getRegistrosFiltrados = async (req = request, resp = response) => {
   let {
     id_sucursal = 0,
-    anio = new Date().getFullYear(),
-    mes = new Date().getUTCMonth(),
   } = req.params;
-  anio = Number(anio);
-  mes = Number(mes);
+  // anio = Number(anio);
+  // mes = Number(mes);
 
-  if (mes > 0) {
-    mes = mes > 0 ? mes : 0;
-    var diasMes: any = new Date(anio, mes, 0);
-    mes = mes > 0 ? mes - 1 : 0;
-    diasMes = diasMes.getDate();
-    var desde = new Date(anio, mes, 1, 0, 0, 0);
-    var hasta = new Date(anio, mes, diasMes, 23, 59, 59);
-  } else {
-    var desde = new Date(anio, 0, 1, 0, 0, 0);
-    var hasta = new Date(anio, 11, 31, 23, 59, 59);
-  }
+  var desde_v: any = req.query.desde!.toString();
+  var hasta_v: any = req.query.hasta!.toString();
+  var turno: any = req.query.turno; 
+  var desde = new Date(desde_v);
+  var hasta = new Date(hasta_v);
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59); 
+  // if (mes > 0) {
+  //   mes = mes > 0 ? mes : 0;
+  //   var diasMes: any = new Date(anio, mes, 0);
+  //   mes = mes > 0 ? mes - 1 : 0;
+  //   diasMes = diasMes.getDate();
+  //   var desde = new Date(anio, mes, 1, 0, 0, 0);
+  //   var hasta = new Date(anio, mes, diasMes, 23, 59, 59);
+  // } else {
+  //   var desde = new Date(anio, 0, 1, 0, 0, 0);
+  //   var hasta = new Date(anio, 11, 31, 23, 59, 59);
+  // }
   var wMes = {
     fecha_creacion: {
       gte: desde,
@@ -57,12 +62,17 @@ export const getRegistrosFiltrados = async (req = request, resp = response) => {
     wSucursal = { id_sucursal };
   }
 
+  var wTurno = {};
+  if (turno.length > 0) {
+    wTurno = { turno };
+  }
   const [pendiente, confirmada, completada, cancelada] = await Promise.all([
     await prisma.agenda.count({
       where: {
         estado: "PENDIENTE",
         ...wSucursal,
         ...wMes,
+        ...wTurno,
       },
     }),
     await prisma.agenda.count({
@@ -70,6 +80,7 @@ export const getRegistrosFiltrados = async (req = request, resp = response) => {
         estado: "CONFIRMADA",
         ...wSucursal,
         ...wMes,
+        ...wTurno
       },
     }),
     await prisma.agenda.count({
@@ -77,6 +88,7 @@ export const getRegistrosFiltrados = async (req = request, resp = response) => {
         estado: "COMPLETADA",
         ...wSucursal,
         ...wMes,
+        ...wTurno
       },
     }),
     await prisma.agenda.count({
@@ -84,21 +96,26 @@ export const getRegistrosFiltrados = async (req = request, resp = response) => {
         estado: "CANCELADA",
         ...wSucursal,
         ...wMes,
+        ...wTurno
       },
     }),
   ]);
 
   const registros = await prisma.agenda.findMany({
-    include: { Sucursales: true },
-    where: { ...wSucursal, ...wMes },
-    orderBy:{
-      inicio:"asc"
+    include: { Sucursales: true, Usuario: true },
+    where: {
+      ...wSucursal,
+      ...wMes,
+      ...wTurno,
+    },
+    orderBy: {
+      inicio: "asc"
     }
-  });  
+  });
   resp.json({
     status: true,
     msg: "Listado de registros",
-    registros,  
+    registros,
     contadores: {
       pendiente,
       confirmada,
@@ -108,11 +125,16 @@ export const getRegistrosFiltrados = async (req = request, resp = response) => {
   });
 };
 
-export const getRegistrosDelDia = async (id_sucursal = 0) => {
+export const getRegistrosDelDia = async (id_sucursal = 0, turno: any = "DESAYUNO") => {
   id_sucursal = Number(id_sucursal);
   var wSucursal = {};
   if (id_sucursal > 0) {
     wSucursal = { id_sucursal };
+  }
+
+  var wTurno = {};
+  if (turno.length > 0) {
+    wTurno = { turno };
   }
   var ahora = new Date();
   var y = ahora.getFullYear();
@@ -125,6 +147,7 @@ export const getRegistrosDelDia = async (id_sucursal = 0) => {
     include: { Sucursales: true },
     where: {
       ...wSucursal,
+      ...wTurno,
       inicio: {
         gte: desde,
         lte: hasta,
@@ -173,6 +196,7 @@ export const crearRegistro = async (req = request, resp = response) => {
     id_sucursal = 0,
     zona = "",
     no_personas = "",
+    turno = "DESAYUNO",
     telefono = "",
     date = "",
     start = "",
@@ -200,6 +224,7 @@ export const crearRegistro = async (req = request, resp = response) => {
         inicio,
         fin,
         nota,
+        turno,
         id_usuario: uid,
       },
     });
@@ -226,6 +251,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       id_sucursal = 0,
       zona = "",
       no_personas = "",
+      turno = "DESAYUNO",
       telefono = "",
       date = "",
       start = "",
@@ -269,6 +295,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         inicio,
         fin,
         nota,
+        turno,
       },
     });
     resp.json({

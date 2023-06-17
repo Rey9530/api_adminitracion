@@ -9,14 +9,15 @@ const prisma = new PrismaClient();
 export const getUsuarios = async (__: any, resp = response) => {
   const usuarios = await prisma.usuarios.findMany({
     where: { estado: "ACTIVO" },
-    select:{
-      nombres:true,
-      apellidos:true,
-      dui:true,
-      usuario:true,
-      Roles:true,
-      Sucursales:true,
-      id:true,
+    select: {
+      nombres: true,
+      apellidos: true,
+      dui: true,
+      usuario: true,
+      Roles: true,
+      Sucursales: true,
+      id: true,
+      id_sucursal_reser: true,
     }
   });
   const total = await usuarios.length;
@@ -59,11 +60,13 @@ export const getUsuario = async (req = request, resp = response) => {
 };
 
 export const crearUsuario = async (req = request, resp = response) => {
-  let { usuario, nombres, apellidos, dui, id_rol, id_sucursal } =
+  let { usuario, nombres, apellidos, dui, id_rol, id_sucursal, id_sucursal_reser = 0 } =
     req.body;
   try {
     id_rol = Number(id_rol)
     id_sucursal = Number(id_sucursal)
+    id_sucursal_reser = Number(id_sucursal_reser)
+    id_sucursal_reser = id_sucursal_reser > 0 ? id_sucursal_reser : null;
     const existeRol = await prisma.roles.findUnique({ where: { id_rol } });
     if (!existeRol) {
       return resp.status(400).json({
@@ -71,14 +74,16 @@ export const crearUsuario = async (req = request, resp = response) => {
         msg: "El registro del rol no existe",
       });
     }
-    const existeSucursal = await prisma.sucursales.findUnique({
-      where: { id_sucursal },
-    });
-    if (!existeSucursal) {
-      return resp.status(400).json({
-        status: false,
-        msg: "El registro de la sucursal no existe",
+    if (id_sucursal > 0) {
+      const existeSucursal = await prisma.sucursales.findUnique({
+        where: { id_sucursal },
       });
+      if (!existeSucursal) {
+        return resp.status(400).json({
+          status: false,
+          msg: "El registro de la sucursal no existe",
+        });
+      }
     }
 
     const existeEmail = await prisma.usuarios.findFirst({
@@ -105,15 +110,17 @@ export const crearUsuario = async (req = request, resp = response) => {
         dui,
         id_rol,
         id_sucursal,
+        id_sucursal_reser
       },
-      select:{
-        nombres:true,
-        apellidos:true,
-        dui:true,
-        usuario:true,
-        Roles:true,
-        Sucursales:true,
-        id:true,
+      select: {
+        nombres: true,
+        apellidos: true,
+        dui: true,
+        usuario: true,
+        Roles: true,
+        Sucursales: true,
+        id: true,
+        id_sucursal_reser: true,
       }
     });
 
@@ -146,10 +153,12 @@ export const actualizarUsuario = async (req = request, resp = response) => {
       });
     }
 
-    let { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal } =
+    let { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal,id_sucursal_reser=0 } =
       req.body;
     id_rol = Number(id_rol)
     id_sucursal = Number(id_sucursal)
+    id_sucursal_reser = Number(id_sucursal_reser)
+    id_sucursal_reser = id_sucursal_reser > 0 ? id_sucursal_reser : null;
     if (existeEmail.usuario != usuario) {
       const existeEmail = await prisma.usuarios.findFirst({
         where: { usuario },
@@ -169,19 +178,22 @@ export const actualizarUsuario = async (req = request, resp = response) => {
         msg: "El registro del rol no existe",
       });
     }
-    const existeSucursal = await prisma.sucursales.findUnique({
-      where: { id_sucursal },
-    });
-    if (!existeSucursal) {
-      return resp.status(400).json({
-        status: false,
-        msg: "El registro de la sucursal no existe",
+    if (id_sucursal > 0) {
+      const existeSucursal = await prisma.sucursales.findUnique({
+        where: { id_sucursal },
       });
+      if (!existeSucursal) {
+        return resp.status(400).json({
+          status: false,
+          msg: "El registro de la sucursal no existe",
+        });
+      }
+
     }
 
     const usuarioUpdate = await prisma.usuarios.update({
       where: { id: uid },
-      data: { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal },
+      data: { usuario, password, nombres, apellidos, dui, id_rol, id_sucursal,id_sucursal_reser },
     });
     resp.json({
       status: true,
