@@ -35,7 +35,47 @@ router.get(
 );
 router.get("/compras/por_proveedores/:id_sucursal", validarJWT, porProveedores);
 router.get("/tablero/:id_sucursal/:anio/:mes", validarJWT, getDataTablero);
-router.get("/compras/tipo_pastel/:id_sucursal/:anio/:mes", validarJWT, getPieDataProveedores);
-router.get("/compras/tipo_pastel_propinas/:id_sucursal/:anio/:mes", validarJWT, getPiePorcentajePropinas);
+router.get("/compras/tipo_pastel/:id_sucursal",
+  [
+    validarJWT,
+    check(
+      "desde",
+      "El parametro desde es requerido y debe ser formato fecha YYYY-mm-dd"
+    )
+      .not()
+      .isEmpty()
+      .isDate(),
+    check(
+      "hasta",
+      "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd"
+    )
+      .not()
+      .isEmpty()
+      .isDate(),
+    validarCampos,
+  ],
+  getPieDataProveedores
+);
+router.get("/compras/tipo_pastel_propinas/:id_sucursal",
+  [
+    validarJWT,
+    check(
+      "desde",
+      "El parametro desde es requerido y debe ser formato fecha YYYY-mm-dd"
+    )
+      .not()
+      .isEmpty()
+      .isDate(),
+    check(
+      "hasta",
+      "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd"
+    )
+      .not()
+      .isEmpty()
+      .isDate(),
+    validarCampos,
+  ],
+  getPiePorcentajePropinas
+);
 router.get("/compras/por_mes_sucursal", validarJWT, porMesSucursal);
 export default router;

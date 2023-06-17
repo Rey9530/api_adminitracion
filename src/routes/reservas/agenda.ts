@@ -10,11 +10,29 @@ import {
   actualizarRegistro,
   eliminarRegistro,
   actualizarEstadoRegistro,
-  getRegistrosFiltrados, 
+  getRegistrosFiltrados,
 } from "../../controllers/reservas/agenda";
 
-router.get("/", validarJWT, getRegistros); 
-router.get("/:id_sucursal/:anio/:mes", validarJWT, getRegistrosFiltrados); 
+router.get("/", validarJWT, getRegistros);
+router.get("/:id_sucursal",
+  [
+    validarJWT,
+    check(
+      "desde",
+      "El parametro desde es requerido y debe ser formato fecha YYYY-mm-dd"
+    )
+      .not()
+      .isEmpty()
+      .isDate(),
+    check(
+      "hasta",
+      "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd"
+    )
+      .not()
+      .isEmpty()
+      .isDate(),
+    validarCampos,
+  ], getRegistrosFiltrados);
 router.get("/:id", validarJWT, getRegistro);
 router.post(
   "/",
@@ -56,7 +74,7 @@ router.put(
   "/cambiar_estado/:id",
   [
     validarJWT,
-    check("estado", "El estado es obligatorio").not().isEmpty(), 
+    check("estado", "El estado es obligatorio").not().isEmpty(),
     validarCampos,
   ],
   actualizarEstadoRegistro
