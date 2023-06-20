@@ -45,7 +45,7 @@ jobs:
   #     - name: Run production migration
   #       run: npm run migrate:deploy
   #       env:
-  #         DATABASE_URL: postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA}}@${{secrets.HOST}}:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public
+  #         DATABASE_URL: postgresql://${{secrets.DB_NAME_RESERVAS}}:${{secrets.DB_PASSWORD_RESERVAS}}@${{secrets.HOST}}:${{secrets.DB_PORT_RESERVAS}}/${{secrets.DB_NAME_RESERVAS}}?schema=public
 
   Deploy:
     runs-on: ubuntu-latest
@@ -65,16 +65,16 @@ jobs:
             git pull
             sudo rm -r .env 
             echo "Configuran Variables en ENV"  
-            sudo echo "JWT_SECRET=${{secrets.JWT_SECRET_PASTARIA}}" >> .env
-            sudo echo "DB_PASSWORD=${{secrets.DB_PASSWORD_PASTARIA}}" >> .env
-            sudo echo "DB_NAME=${{secrets.DB_NAME_PASTARIA}}" >> .env
+            sudo echo "JWT_SECRET=${{secrets.JWT_SECRET_RESERVAS}}" >> .env
+            sudo echo "DB_PASSWORD=${{secrets.DB_PASSWORD_RESERVAS}}" >> .env
+            sudo echo "DB_NAME=${{secrets.DB_NAME_RESERVAS}}" >> .env
             sudo echo "DB_HOST=${{secrets.DB_HOST}}" >> .env
-            sudo echo "DB_PORT=${{secrets.DB_PORT_PASTARIA}}" >> .env
+            sudo echo "DB_PORT=${{secrets.DB_PORT_RESERVAS}}" >> .env
             sudo echo "CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}" >> .env
             sudo echo "CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}" >> .env
             sudo echo "CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}" >> .env 
-            sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA}}@localhost:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public" >> .env 
-            sudo echo "PORT=${{secrets.PORT_API_PASTARIA}}" >> .env 
+            sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME_RESERVAS}}:${{secrets.DB_PASSWORD_RESERVAS}}@localhost:${{secrets.DB_PORT_RESERVAS}}/${{secrets.DB_NAME_RESERVAS}}?schema=public" >> .env 
+            sudo echo "PORT=${{secrets.PORT_API_RESERVAS}}" >> .env 
             echo "Fin Variables en ENV" 
     # rm -r node_modules
     # yarn install
