@@ -95,7 +95,7 @@ jobs:
         yarn install
         yarn run tsc 
     - name: instalar npm y compilar
-      run: yarn install && yarn run build 
+      run: yarn install && yarn run tsc 
 
     - name: Mostrando archivos
       run: ls
