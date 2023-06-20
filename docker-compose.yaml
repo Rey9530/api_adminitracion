@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
 
-  db-pastaria:
+  db-reservas:
     image: postgres:15.2-alpine
     container_name: ${DB_NAME}
     restart: always
