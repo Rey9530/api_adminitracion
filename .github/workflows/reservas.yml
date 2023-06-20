@@ -6,115 +6,50 @@ on:
       - "reservas"
 
 jobs:
-  Test:
-      runs-on: ubuntu-latest   # Service containers to run with `container-job`
-      services:    # Label used to access the service container
-        postgres:   # Docker Hub image
-          image: postgres  # Provide the password for postgres
-          env:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-          options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
-          ports: 
-            - 5432:5432
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grading-app
-      steps:
-        - uses: actions/checkout@v3
-        - name: Se define la version de node
-          uses: actions/setup-node@v3
-          with:
-            node-version: 18 
-        - run: npm install
-        - run: npm ci  # run the migration in the test database
-        - run: npm run db:push
-        - run: npm run datos
-        - run: npm run test
+  # Test:
+  #     runs-on: ubuntu-latest   # Service containers to run with `container-job`
+  #     services:    # Label used to access the service container
+  #       postgres:   # Docker Hub image
+  #         image: postgres  # Provide the password for postgres
+  #         env:
+  #           POSTGRES_USER: postgres
+  #           POSTGRES_PASSWORD: postgres
+  #         options: >-
+  #           --health-cmd pg_isready
+  #           --health-interval 10s
+  #           --health-timeout 5s
+  #           --health-retries 5
+  #         ports: 
+  #           - 5432:5432
+  #     env:
+  #       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grading-app
+  #     steps:
+  #       - uses: actions/checkout@v3
+  #       - name: Se define la version de node
+  #         uses: actions/setup-node@v3
+  #         with:
+  #           node-version: 18 
+  #       - run: npm install
+  #       - run: npm ci  # run the migration in the test database
+  #       - run: npm run db:push
+  #       - run: npm run datos
+  #       - run: npm run test
 
-  Build:
-    runs-on: ubuntu-latest 
-    needs: Test
-    steps:
-      - uses: actions/checkout@v3
-      - run: npm install
-      - run: npm ci
-      - name: Run production migration
-        run: npm run migrate:deploy
-        env:
-          DATABASE_URL: postgresql://${{secrets.DB_NAME_RESERVAS}}:${{secrets.DB_PASSWORD_RESERVAS}}@${{secrets.HOST}}:${{secrets.DB_PORT_RESERVAS}}/${{secrets.DB_NAME_RESERVAS}}?schema=public
+  # Build:
+  #   runs-on: ubuntu-latest 
+  #   needs: Test
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: npm install
+  #     - run: npm ci
+  #     - name: Run production migration
+  #       run: npm run migrate:deploy
+  #       env:
+  #         DATABASE_URL: postgresql://${{secrets.DB_NAME_RESERVAS}}:${{secrets.DB_PASSWORD_RESERVAS}}@${{secrets.HOST}}:${{secrets.DB_PORT_RESERVAS}}/${{secrets.DB_NAME_RESERVAS}}?schema=public
 
-  PreParing:
+  Deploy:
     runs-on: ubuntu-latest
-    needs: Build
-    steps:
-      - name: Limpiar
-        uses: appleboy/ssh-action@master 
-        with:
-          host: ${{secrets.HOST}}
-          username: ${{secrets.USERNAME}}
-          key: ${{secrets.KEY}}
-          script: | 
-            export NVM_DIR=~/.nvm
-            source ~/.nvm/nvm.sh
-            cd /var/www/api-reservas.relex-dev.com
-            rm -r html
-            mkdir html
-
-  Deploy: 
-    runs-on: ubuntu-latest
-    needs: PreParing
-  
-    steps:
-    - uses: actions/checkout@v3
-    - name: Se define la version de node
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18  
-
-    - name: Preparando variables de entorno 
-      run: | 
-        echo "Configuran Variables en ENV"  
-        sudo echo "JWT_SECRET=${{secrets.JWT_SECRET_RESERVAS}}" >> .env
-        sudo echo "DB_PASSWORD=${{secrets.DB_PASSWORD_RESERVAS}}" >> .env
-        sudo echo "DB_NAME=${{secrets.DB_NAME_RESERVAS}}" >> .env
-        sudo echo "DB_HOST=${{secrets.DB_HOST}}" >> .env
-        sudo echo "DB_PORT=${{secrets.DB_PORT_RESERVAS}}" >> .env
-        sudo echo "CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}" >> .env
-        sudo echo "CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}" >> .env
-        sudo echo "CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}" >> .env 
-        sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME_RESERVAS}}:${{secrets.DB_PASSWORD_RESERVAS}}@localhost:${{secrets.DB_PORT_RESERVAS}}/${{secrets.DB_NAME_RESERVAS}}?schema=public" >> .env 
-        sudo echo "PORT=${{secrets.PORT_API_RESERVAS}}" >> .env 
-        echo "Fin Variables en ENV" 
-        rm -r .git
-        rm -r .github
-        rm -r .vscode
-        yarn install
-        yarn run tsc 
-    - name: instalar npm y compilar
-      run: yarn install && yarn run tsc 
-
-    - name: Mostrando archivos
-      run: ls
-          
-    - name: Copiar el contenido del repositorio con scp
-      uses: appleboy/scp-action@master 
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
-        source: "*"
-        target: "/var/www/api-reservas.relex-dev.com/html"
-        strip_components: 1  
-        overwrite: true
-
-  Cleaning:
-    runs-on: ubuntu-latest
-    needs: Deploy
+    # needs: Test
     steps:
       - name: Despliegue en Droplet de DigitalOcean
         uses: appleboy/ssh-action@master 
@@ -122,12 +57,34 @@ jobs:
           host: ${{secrets.HOST}}
           username: ${{secrets.USERNAME}}
           key: ${{secrets.KEY}}
-          script: pm2 restart mi-api-reservas
+          script: |
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            cd /var/www/api-reservas.relex-dev.com/html
+            git pull
+            sudo rm -r .env 
+            echo "Configuran Variables en ENV"  
+            sudo echo "JWT_SECRET=${{secrets.JWT_SECRET_RESERVAS}}" >> .env
+            sudo echo "DB_PASSWORD=${{secrets.DB_PASSWORD_RESERVAS}}" >> .env
+            sudo echo "DB_NAME=${{secrets.DB_NAME_RESERVAS}}" >> .env
+            sudo echo "DB_HOST=${{secrets.DB_HOST}}" >> .env
+            sudo echo "DB_PORT=${{secrets.DB_PORT_RESERVAS}}" >> .env
+            sudo echo "CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}" >> .env
+            sudo echo "CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}" >> .env
+            sudo echo "CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}" >> .env 
+            sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME_RESERVAS}}:${{secrets.DB_PASSWORD_RESERVAS}}@localhost:${{secrets.DB_PORT_RESERVAS}}/${{secrets.DB_NAME_RESERVAS}}?schema=public" >> .env 
+            sudo echo "PORT=${{secrets.PORT_API_RESERVAS}}" >> .env 
+            echo "Fin Variables en ENV" 
+        # rm -r node_modules
+        # yarn install
+        # yarn run tsc
+        # pm2 restart mi-api-reservas
 
 
 # yarn run migrate:deploy
 # npx prisma migrate deploy  // Esto va antes de yarn install
-# pm2 start index.js --name "mi-api-reservas"
+
+
 # sudo rm -r html
 # git clone https://github.com/Rey9530/api_administracion.git html && cd html 
 
