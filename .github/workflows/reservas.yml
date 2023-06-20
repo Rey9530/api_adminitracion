@@ -100,7 +100,7 @@ jobs:
     - name: Mostrando archivos
       run: ls
           
-    - name: Copiar el contenido del repositorio con scp.
+    - name: Copiar el contenido del repositorio con scp
       uses: appleboy/scp-action@master 
       with:
         host: ${{ secrets.HOST }}
