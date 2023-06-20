@@ -61,7 +61,6 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             cd /var/www/api-reservas.relex-dev.com/html
-            git checkout reservas
             git pull
             sudo rm -r .env 
             echo "Configuran Variables en ENV"  
