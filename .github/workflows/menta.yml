@@ -83,7 +83,7 @@ jobs:
             rm -r node_modules
             yarn install
             yarn run tsc
-            pm2 restart mi-api
+            pm2 restart api-menta
 
 
 # yarn run migrate:deploy
