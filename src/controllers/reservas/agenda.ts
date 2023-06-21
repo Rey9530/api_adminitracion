@@ -232,18 +232,18 @@ export const crearRegistro = async (req = request, resp = response) => {
         id_sucursal,
       }
     });
-    var total_personas = 0;
+    var total_personas: number = no_personas;
     for (let index = 0; index < validar.length; index++) {
       const element = validar[index];
-      total_personas += Number(element.no_personas); 
+      total_personas += Number(element.no_personas);
     }
-    if(total_personas>40){ 
+    if (total_personas > 40) {
       return resp.json({
         status: false,
         msg: "Las reservas para este turno sobre pasan de las 40 personas",
-        data:null,
+        data: null,
       });
-    } 
+    }
 
     const data = await prisma.agenda.create({
       data: {
