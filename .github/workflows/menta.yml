@@ -60,6 +60,7 @@ jobs:
           host: ${{secrets.HOST_MENTA}}
           username: ${{secrets.USERNAME_MENTA}}
           key: ${{secrets.SSH_KEY_MENTA}}
+          passphrase: "1234"
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
