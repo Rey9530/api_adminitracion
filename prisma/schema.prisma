@@ -520,7 +520,7 @@ model Agenda {
   zona           String?
   id_sucursal    Int?
   Sucursales     Sucursales?  @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_sucursal")
-  no_personas    String?
+  no_personas    Int?         @default(0)
   nombre         String?
   telefono       String?
   turno          Turnos?

@@ -34,11 +34,11 @@ export const getRegistrosFiltrados = async (req = request, resp = response) => {
 
   var desde_v: any = req.query.desde!.toString();
   var hasta_v: any = req.query.hasta!.toString();
-  var turno: any = req.query.turno; 
+  var turno: any = req.query.turno;
   var desde = new Date(desde_v);
   var hasta = new Date(hasta_v);
   hasta.setHours(hasta.getHours() + 23);
-  hasta.setMinutes(hasta.getMinutes() + 59); 
+  hasta.setMinutes(hasta.getMinutes() + 59);
   // if (mes > 0) {
   //   mes = mes > 0 ? mes : 0;
   //   var diasMes: any = new Date(anio, mes, 0);
@@ -195,13 +195,15 @@ export const crearRegistro = async (req = request, resp = response) => {
     nombre = "",
     id_sucursal = 0,
     zona = "",
-    no_personas = "",
+    no_personas = 0,
     turno = "DESAYUNO",
     telefono = "",
     date = "",
     start = "",
     nota = "",
   } = req.body;
+  id_sucursal = Number(id_sucursal);
+  no_personas = Number(no_personas);
   date = date.split("T")[0];
   start = start.split(":");
   var inicio = new Date(date);
@@ -213,7 +215,36 @@ export const crearRegistro = async (req = request, resp = response) => {
   fin.setMinutes(fin.getMinutes() + Number(start[1]));
   fin.setHours(fin.getHours() + 2);
   try {
-    id_sucursal = Number(id_sucursal);
+
+
+
+    var start_date = new Date(date);
+    var end_date = new Date(date);
+    end_date.setHours(end_date.getHours() + 23);
+    end_date.setMinutes(end_date.getMinutes() + 59);
+    var validar = await prisma.agenda.findMany({
+      where: {
+        inicio: {
+          lte: end_date,
+          gte: start_date,
+        },
+        turno,
+        id_sucursal,
+      }
+    });
+    var total_personas = 0;
+    for (let index = 0; index < validar.length; index++) {
+      const element = validar[index];
+      total_personas += Number(element.no_personas); 
+    }
+    if(total_personas>40){ 
+      return resp.json({
+        status: false,
+        msg: "Las reservas para este turno sobre pasan de las 40 personas",
+        data:null,
+      });
+    } 
+
     const data = await prisma.agenda.create({
       data: {
         zona,
