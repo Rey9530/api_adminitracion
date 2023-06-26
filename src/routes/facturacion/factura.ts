@@ -8,7 +8,9 @@ import {
   cargarCierre,
   cierreManual,
   crearFactura,
+  getLiquidaciones,
   getNumeroFactura,
+  liquidacion,
   obntenerDepartamentos,
   obntenerFactura,
   obntenerListadoFacturas,
@@ -19,7 +21,7 @@ import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt";
 import fileUpload from "express-fileupload";
 
-router.use(fileUpload()); 
+router.use(fileUpload());
 router.post(
   "/",
   [
@@ -38,7 +40,26 @@ router.post(
   ],
   crearFactura
 );
+router.get("/liquidaciones/:id_sucursal", validarJWT, getLiquidaciones);
 router.post("/cierre_manual", validarJWT, cierreManual);
+router.post("/liquidacion",
+  [
+    validarJWT,
+    check("no_corr", "El no_corr es requerido").not().isEmpty(),
+    check("fecha", "El fecha es requerido").not().isEmpty(),
+    check("no_compra", "El no_compra es requerido").not().isEmpty(),
+    check("no_registro", "El no_registro es requerido").not().isEmpty(),
+    check("hora_inicio", "El hora_inicio es requerido").not().isEmpty(),
+    check("hora_fin", "El hora_fin es requerido").not().isEmpty(),
+    check("proveedor", "El proveedor es requerido").not().isEmpty(),
+    check("concepto", "El concepto es requerido").not().isEmpty(),
+    check("valor", "El valor es requerido").not().isEmpty(),
+    check("responsable", "El responsable es requerido").not().isEmpty(),
+    check("id_sucursal", "El id_sucursal es requerido").not().isEmpty(),
+    validarCampos,
+  ],
+  liquidacion
+);
 router.post("/cargar_cierre", validarJWT, cargarCierre);
 
 router.get("/obtener/:id", validarJWT, getNumeroFactura);

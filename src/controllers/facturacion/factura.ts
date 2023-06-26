@@ -3,6 +3,9 @@ const response = expres.response;
 const request = expres.request;
 import readXlsxFile from "read-excel-file/node";
 import { PrismaClient } from "@prisma/client";
+const pdf = require("html-pdf");
+import fs from "fs";
+const nodemailer = require('nodemailer');
 const prisma = new PrismaClient();
 
 export const getNumeroFactura = async (req = request, resp = response) => {
@@ -276,7 +279,7 @@ export const anularFactura = async (req = request, resp = response) => {
 };
 
 export const cargarCierre = async (req = request, resp = response) => {
-  try { 
+  try {
     let fillle: any = req.files?.files;
     let data: any = 0;
     if (req.files && Object.keys(req.files).length > 0) {
@@ -382,6 +385,26 @@ const leerexcel = async (path: any) => {
   });
 };
 
+export const getLiquidaciones = async (req = request, resp = response) => {
+  let id_sucursal: number = Number(req.params.id_sucursal);
+  try {
+    var data = await prisma.liquidacionCajaChica.findMany({
+      where: { id_sucursal, id_cierre: null, Estado: "ACTIVO" }
+    });
+    resp.json({
+      status: true,
+      msg: "Listado Liquidaciones",
+      data,
+    });
+  } catch (error) {
+    console.log(error)
+    resp.json({
+      status: false,
+      msg: "Ha ocurrido un error, favor revisar logs",
+      data: null,
+    });
+  }
+}
 export const cierreManual = async (req = request, resp = response) => {
   const { uid } = req.params;
   let {
@@ -448,6 +471,82 @@ export const cierreManual = async (req = request, resp = response) => {
       id_sucursal: sucursal.id_sucursal,
       observacion,
     },
+    include: { Sucursales: true, Usuario: true }
+  });
+
+  await prisma.liquidacionCajaChica.updateMany({
+    where: {
+      id_cierre: null,
+      id_sucursal: sucursal.id_sucursal,
+      Estado: "ACTIVO",
+    },
+    data: { id_cierre: data.id_cierre },
+  });
+
+  await getPdfCierre(data);
+  return resp.json({
+    status: true,
+    msg: "Cierre creado con exito",
+    data,
+  });
+};
+
+
+
+export const liquidacion = async (req = request, resp = response) => {
+  const { uid } = req.params;
+  let {
+    no_corr = "",
+    fecha = "",
+    no_compra = "",
+    no_registro = "",
+    hora_inicio = "",
+    hora_fin = "",
+    proveedor = "",
+    concepto = "",
+    valor = 0,
+    responsable = "",
+    id_sucursal = "",
+  }: any = req.body;
+  id_sucursal = Number(id_sucursal);
+
+  const sucursal = await prisma.sucursales.findFirst({
+    where: { id_sucursal },
+  });
+  if (sucursal == null) {
+    return resp.json({
+      status: false,
+      msg: "La sucursal no existe",
+      data: null,
+    });
+  }
+  hora_inicio = hora_inicio.split(":");
+  hora_fin = hora_fin.split(":");
+  var hora_inicio_ = new Date(fecha);
+  var hora_fin_ = new Date(fecha);
+
+  hora_inicio_.setHours(hora_inicio_.getHours() + Number(hora_inicio[0]));
+  hora_inicio_.setMinutes(hora_inicio_.getMinutes() + Number(hora_inicio[1]));
+
+  hora_fin_.setHours(hora_fin_.getHours() + Number(hora_fin[0]));
+  hora_fin_.setMinutes(hora_fin_.getMinutes() + Number(hora_fin[1]));
+
+  let id_usuario = Number(uid);
+  var valores = {
+    no_correlativo: no_corr,
+    no_comp_de_pago: no_compra,
+    no_comp_registro: no_registro,
+    fecha_inicio: hora_inicio_,
+    fecha_fin: hora_fin_,
+    proveedor,
+    concepto,
+    valor,
+    responsable,
+    id_usuario,
+    id_sucursal,
+  };
+  var data = await prisma.liquidacionCajaChica.create({
+    data: valores
   });
   return resp.json({
     status: true,
@@ -455,6 +554,91 @@ export const cierreManual = async (req = request, resp = response) => {
     data,
   });
 };
+
+
+export const getPdfCierre = async (data: any) => {
+  const ubicacionPlantilla = require.resolve("./../../html/emails/cierres_plantilla.html");
+  let contenidoHtml = fs.readFileSync(ubicacionPlantilla, 'utf8');
+  // Podemos acceder a la petición HTTP 
+  var total_tarjetas = data.tarjeta_credomatic! +
+    data.tarjeta_serfinza! +
+    data.tarjeta_promerica!;
+  var dia = data.fecha_cierre!.getDate() > 9 ? data.fecha_cierre!.getDate() + 1 : "0" + (data.fecha_cierre!.getDate() + 1);
+  var mes = data.fecha_cierre!.getMonth() > 8 ? data.fecha_cierre!.getMonth() + 1 : "0" + (data.fecha_cierre!.getMonth() + 1);
+  var fecha = dia + "-" + mes + "-" + data.fecha_cierre!.getFullYear();
+  contenidoHtml = contenidoHtml.replace("{{sucursal}}", data.Sucursales!.nombre);
+  contenidoHtml = contenidoHtml.replace("{{usuario_generador}}", data.Usuario!.nombres + " " + data.Usuario!.apellidos + " (" + data.Usuario.apellidos + ")");
+  contenidoHtml = contenidoHtml.replace("{{fecha}}", fecha);
+  contenidoHtml = contenidoHtml.replace("{{venta_bruta}}", data.venta_bruta!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{para_llevar}}", data.para_llevar!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{efectivo}}", data.entrega_efectivo!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{t_credomatic}}", data.tarjeta_credomatic!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{t_sefinza}}", data.tarjeta_serfinza!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{t_promerica}}", data.tarjeta_promerica!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{t_total}}", total_tarjetas.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{bitcoin}}", data.para_llevar!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{syke}}", data.syke!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{total_restante}}", data.total_restante!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{propina}}", data.propina!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{venta_iva}}", data.venta_nota_sin_iva!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{cortecia}}", data.cortecia!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{anticipos_cobrados}}", data.anti_cobrados!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{anticipos_reservas}}", data.anti_reservas!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{certificados_regalo}}", data.certificado_regalo!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{hugo_app}}", data.hugo_app!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{pedidos_ya}}", data.pedidos_ya!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{compras}}", data.compras!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{entrega_efectivo}}", data.entrega_efectivo!.toFixed(2));
+  contenidoHtml = contenidoHtml.replace("{{nota}}", data.observacion);
+  pdf.create(contenidoHtml).toFile(__dirname + '/../../../uploads/uploads_pdf.pdf', (error: any, stream: any) => { 
+    if (error) {
+      console.log("Error creando PDF: " + error);
+    } else {
+      enviarCorreoCierre(data.Sucursales!.nombre, stream.filename);
+    }
+  });
+};
+
+export const enviarCorreoCierre = async (sucursal: String, filename: any) => {
+  var sistem = await prisma.generalData.findFirst();
+  if (sistem?.notificar_correo != true) {
+    return;
+  }
+  var message = {
+    from: "devrelex@gmail.com",
+    to: sistem?.correos,//  "d9@tkiero.app",
+    subject: "Cierre de " + sucursal,
+    text: "",
+    html: "<p>Este es un correo automatico por favor no responder</p>",
+    attachments: [
+      {
+        filename: 'Reporte',
+        path: filename,
+      }
+    ]
+  };
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.USER_EMAIL,
+      pass: process.env.PASSWORD_EMAIL
+    }
+  })
+  transporter.sendMail(message, (error: any, info: any) => {
+    if (error) {
+      console.log(info);
+      console.log("Error enviando email")
+      console.log(error.message)
+    } else {
+      try {
+        fs.unlinkSync(filename);
+      } catch (error) {
+        console.log(filename)
+        console.log(error);
+      }
+    }
+  })
+}
 
 export const crearFactura = async (req = request, resp = response) => {
   try {

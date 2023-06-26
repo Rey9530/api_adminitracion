@@ -9,8 +9,8 @@ export const validarCampos = (
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return resp.status(400).json({
-      status: true,
+    return resp.json({
+      status: false,
       msg: "Error de parametros",
       errors: errors.mapped(),
     });

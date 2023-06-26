@@ -21,6 +21,8 @@ model GeneralData {
   contactos             String?
   impuesto              Float?        @default(0.13)
   id_tipo_contribuyente Int?
+  notificar_correo      Boolean?      @default(false)
+  correos               String?       @db.Text
   TipoCliente           TiposCliente? @relation(fields: [id_tipo_contribuyente], references: [id_tipo_cliente], onDelete: NoAction, onUpdate: NoAction, map: "fk_sistema_tipo")
 
   @@index([id_tipo_contribuyente], name: "fk_sistema_tipo_id")
@@ -46,18 +48,19 @@ model Bancos {
 }
 
 model Sucursales {
-  id_sucursal     Int               @id @default(autoincrement())
-  nombre          String
-  color           String?
-  estado          Estado            @default(ACTIVO)
-  Bodegas         Bodegas[]
-  Usuarios        Usuarios[]
-  FacturasBloques FacturasBloques[]
-  Cliente         Cliente[]
-  Facturas        Facturas[]
-  Compras         Compras[]
-  Agenda          Agenda[]
-  CierresDiarios  CierresDiarios[]
+  id_sucursal          Int                    @id @default(autoincrement())
+  nombre               String
+  color                String?
+  estado               Estado                 @default(ACTIVO)
+  Bodegas              Bodegas[]
+  Usuarios             Usuarios[]
+  FacturasBloques      FacturasBloques[]
+  Cliente              Cliente[]
+  Facturas             Facturas[]
+  Compras              Compras[]
+  Agenda               Agenda[]
+  CierresDiarios       CierresDiarios[]
+  LiquidacionCajaChica LiquidacionCajaChica[]
 }
 
 model Bodegas {
@@ -74,26 +77,27 @@ model Bodegas {
 }
 
 model Usuarios {
-  id                Int              @id @default(autoincrement())
-  usuario           String
-  password          String
-  nombres           String
-  apellidos         String
-  dui               String?
-  foto              String?          @unique
-  estado            Estado           @default(ACTIVO)
-  fecha_creacion    DateTime         @default(now()) @db.Timestamptz()
-  id_rol            Int
-  Roles             Roles            @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
-  id_sucursal       Int
-  Sucursales        Sucursales       @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
-  id_sucursal_reser Int?
-  Facturas          Facturas[]
-  Proveedores       Proveedores[]
-  Compras           Compras[]
-  CierresDiarios    CierresDiarios[]
-  Agenda            Agenda[]
-  OrdenDeSalida     OrdenDeSalida[]
+  id                   Int                    @id @default(autoincrement())
+  usuario              String
+  password             String
+  nombres              String
+  apellidos            String
+  dui                  String?
+  foto                 String?                @unique
+  estado               Estado                 @default(ACTIVO)
+  fecha_creacion       DateTime               @default(now()) @db.Timestamptz()
+  id_rol               Int
+  Roles                Roles                  @relation(fields: [id_rol], references: [id_rol], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_rol")
+  id_sucursal          Int
+  Sucursales           Sucursales             @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_sucursal")
+  id_sucursal_reser    Int?
+  Facturas             Facturas[]
+  Proveedores          Proveedores[]
+  Compras              Compras[]
+  CierresDiarios       CierresDiarios[]
+  Agenda               Agenda[]
+  OrdenDeSalida        OrdenDeSalida[]
+  LiquidacionCajaChica LiquidacionCajaChica[]
 
   @@index([id_rol], name: "fk_usuario_rol_id")
   @@index([id_sucursal], name: "fk_usuario_sucursal_id")
@@ -591,33 +595,59 @@ enum EstadoAgenda {
 }
 
 model CierresDiarios {
-  id_cierre          Int         @id @default(autoincrement())
-  venta_bruta        Float?      @default(0)
-  para_llevar        Float?      @default(0)
-  tarjeta_credomatic Float?      @default(0)
-  tarjeta_serfinza   Float?      @default(0)
-  tarjeta_promerica  Float?      @default(0)
-  bitcoin            Float?      @default(0)
-  syke               Float?      @default(0)
-  total_restante     Float?      @default(0)
-  propina            Float?      @default(0)
-  venta_nota_sin_iva Float?      @default(0)
-  cortecia           Float?      @default(0)
-  anti_cobrados      Float?      @default(0)
-  anti_reservas      Float?      @default(0)
-  certificado_regalo Float?      @default(0)
-  hugo_app           Float?      @default(0)
-  pedidos_ya         Float?      @default(0)
-  compras            Float?      @default(0)
-  entrega_efectivo   Float?      @default(0)
-  fecha_creacion     DateTime    @default(now()) @db.Timestamptz()
-  fecha_cierre       DateTime?   @default(now())
-  observacion        String?     @db.Text
-  id_usuario         Int?
-  Usuario            Usuarios?   @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cierre_usuario")
-  id_sucursal        Int?
-  Sucursales         Sucursales? @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_cierre_sucursal")
+  id_cierre            Int                    @id @default(autoincrement())
+  venta_bruta          Float?                 @default(0)
+  para_llevar          Float?                 @default(0)
+  tarjeta_credomatic   Float?                 @default(0)
+  tarjeta_serfinza     Float?                 @default(0)
+  tarjeta_promerica    Float?                 @default(0)
+  bitcoin              Float?                 @default(0)
+  syke                 Float?                 @default(0)
+  total_restante       Float?                 @default(0)
+  propina              Float?                 @default(0)
+  venta_nota_sin_iva   Float?                 @default(0)
+  cortecia             Float?                 @default(0)
+  anti_cobrados        Float?                 @default(0)
+  anti_reservas        Float?                 @default(0)
+  certificado_regalo   Float?                 @default(0)
+  hugo_app             Float?                 @default(0)
+  pedidos_ya           Float?                 @default(0)
+  compras              Float?                 @default(0)
+  entrega_efectivo     Float?                 @default(0)
+  fecha_creacion       DateTime               @default(now()) @db.Timestamptz()
+  fecha_cierre         DateTime?              @default(now())
+  observacion          String?                @db.Text
+  id_usuario           Int?
+  Usuario              Usuarios?              @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cierre_usuario")
+  id_sucursal          Int?
+  Sucursales           Sucursales?            @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_cierre_sucursal")
+  LiquidacionCajaChica LiquidacionCajaChica[]
 
   @@index([id_sucursal], name: "fk_cierre_sucursal_id")
   @@index([id_usuario], name: "fk_cierre_usuario_id")
+}
+
+model LiquidacionCajaChica {
+  id_liquidacion   Int             @id @default(autoincrement())
+  no_correlativo   String?
+  no_comp_de_pago  String?
+  no_comp_registro String?
+  fecha_inicio     DateTime        @default(now())
+  fecha_fin        DateTime        @default(now())
+  proveedor        String?
+  concepto         String?
+  valor            Float?          @default(0)
+  responsable      String?
+  Estado           Estado          @default(ACTIVO)
+  fecha_cierre     DateTime?       @default(now())
+  id_usuario       Int
+  Usuario          Usuarios        @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_liquidacion_usuario")
+  id_cierre        Int?
+  CierresDiarios   CierresDiarios? @relation(fields: [id_cierre], references: [id_cierre], onDelete: NoAction, onUpdate: NoAction, map: "fk_liquidacion_cierre")
+  id_sucursal      Int
+  Sucursales       Sucursales      @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_liquidacion_sucursal")
+
+  @@index([id_usuario], name: "fk_liquidacion_usuario_id")
+  @@index([id_cierre], name: "fk_liquidacion_cierre_id")
+  @@index([id_sucursal], name: "fk_liquidacion_sucursal_id")
 }

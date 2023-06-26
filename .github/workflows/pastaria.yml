@@ -79,12 +79,17 @@ jobs:
             sudo echo "CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}" >> .env
             sudo echo "CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}" >> .env 
             sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA}}@localhost:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public" >> .env 
+            sudo echo "USER_EMAIL=${{secrets.USER_EMAIL}}" >> .env 
+            sudo echo "PASSWORD_EMAIL=${{secrets.PASSWORD_EMAIL}}" >> .env 
             sudo echo "PORT=${{secrets.PORT_API_PASTARIA}}" >> .env 
             echo "Fin Variables en ENV" 
+            pm2 stop mi-api-pastaria
+            pm2 stop mi-api-reservas
             rm -r node_modules
             yarn install
             yarn run tsc
             pm2 restart mi-api-pastaria
+            pm2 restart mi-api-reservas
 
 
 # yarn run migrate:deploy

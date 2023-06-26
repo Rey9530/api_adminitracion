@@ -33,6 +33,8 @@ export const updateDatosSistema = async (req = request, resp = response) => {
       nit = "",
       nrc = "",
       contactos = "",
+      notificar_correo = false,
+      correos = ""
     } = req.body;
     id_tipo_contribuyente = Number(id_tipo_contribuyente);
     id_tipo_contribuyente =
@@ -48,6 +50,8 @@ export const updateDatosSistema = async (req = request, resp = response) => {
         nrc,
         contactos,
         id_tipo_contribuyente,
+        notificar_correo,
+        correos
       },
     });
     resp.json({
