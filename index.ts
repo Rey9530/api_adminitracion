@@ -31,6 +31,10 @@ import proveedores from "./src/routes/inventario/proveedores";
 import ingreso from "./src/routes/inventario/ingreso"; 
 import orden_salida from "./src/routes/inventario/orden_salida"; 
 
+
+import utils from "./src/routes/utils"; 
+app.use('/utils', utils );
+
 //intanciando rutas
 app.use('/usuarios', usuarios );
 app.use('/perfil', perfil );
