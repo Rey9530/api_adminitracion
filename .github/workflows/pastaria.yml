@@ -65,8 +65,7 @@ jobs:
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            cd /var/www/pastaria-api.relex-dev.com/html
-            git checkout pastaria
+            cd /var/www/pastaria-api.relex-dev.com/html 
             git pull
             sudo rm -r .env 
             echo "Configuran Variables en ENV"  
@@ -85,10 +84,11 @@ jobs:
             echo "Fin Variables en ENV" 
             pm2 stop mi-api-pastaria
             pm2 stop mi-api-reservas
-            rm -r node_modules
+            rm -r node_modules && rm -r build
             yarn install
             yarn run tsc
             cp -r src/html build/src
+            mkdir build/src/helpers/pdfs_x_borra
             pm2 restart mi-api-pastaria
             pm2 restart mi-api-reservas
 
@@ -97,8 +97,7 @@ jobs:
 # npx prisma migrate deploy  // Esto va antes de yarn install
 
 
-# sudo rm -r html
-# git clone https://github.com/Rey9530/api_administracion.git html && cd html 
+# sudo rm -r html 
 
 
 # docker-compose up -d

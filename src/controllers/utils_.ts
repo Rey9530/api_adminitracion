@@ -4,8 +4,8 @@ const request = expres.request;
 import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 import readXlsxFile from "read-excel-file/node";
-const prisma = new PrismaClient();
-const pdf = require("html-pdf");
+import { generarPdf } from "../helpers/generar_pdfs";
+const prisma = new PrismaClient(); 
 
 //TODO: Bueno haber en que se utiliza
 export const getData = async (req = request, resp = response) => {
@@ -50,15 +50,14 @@ export const getPdf = async (_ = request, resp = response) => {
   contenidoHtml = contenidoHtml.replace("{{pedidos_ya}}", "$1.00");
   contenidoHtml = contenidoHtml.replace("{{compras}}", "$1.00");
   contenidoHtml = contenidoHtml.replace("{{entrega_efectivo}}", "$1.00");
-  pdf.create(contenidoHtml).toStream((error: any, stream: any) => {
-    if (error) {
-      resp.end("Error creando PDF: " + error)
-    } else {
-      resp.setHeader("Content-Type", "application/pdf");
-      stream.pipe(resp);
-    }
-  });
-};
+
+  const pdf = await generarPdf(contenidoHtml, "reporte_demo4",true);
+
+
+  resp.setHeader("Content-Type", "application/pdf");
+  resp.send(pdf);
+ 
+}; 
 
 export const getHtml = async (_ = request, resp = response) => {
   const ubicacionPlantilla = require.resolve("./../html/emails/cierres_plantilla.html");
@@ -66,15 +65,7 @@ export const getHtml = async (_ = request, resp = response) => {
   // Podemos acceder a la petición HTTP
   const valorPasadoPorNode = "Soy un valor pasado desde JavaScript";
   contenidoHtml = contenidoHtml.replace("{{valor}}", valorPasadoPorNode);
-  resp.send(contenidoHtml);
-  // pdf.create(contenidoHtml).toStream((error: any, stream: any) => {
-  //   if (error) {
-  //     resp.end("Error creando PDF: " + error)
-  //   } else {
-  //     resp.setHeader("Content-Type", "application/pdf");
-  //     stream.pipe(resp);
-  //   }
-  // });
+  resp.send(contenidoHtml); 
 };
 
 

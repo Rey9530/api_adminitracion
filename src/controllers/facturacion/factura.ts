@@ -3,8 +3,8 @@ const response = expres.response;
 const request = expres.request;
 import readXlsxFile from "read-excel-file/node";
 import { PrismaClient } from "@prisma/client";
-const pdf = require("html-pdf");
 import fs from "fs";
+import { generarPdf } from "../../helpers/generar_pdfs";
 const nodemailer = require('nodemailer');
 const prisma = new PrismaClient();
 
@@ -523,7 +523,7 @@ export const liquidacion = async (req = request, resp = response) => {
   var hora_inicio_ = new Date(fecha);
   var hora_fin_ = new Date(fecha);
 
-  hora_inicio = hora_inicio.split(":"); 
+  hora_inicio = hora_inicio.split(":");
   var hora_i = (hora_inicio.length > 1) ? Number(hora_inicio[0]) : 1;
   var minuto_i = (hora_inicio.length > 1) ? Number(hora_inicio[1]) : 1;
   hora_inicio_.setHours(hora_inicio_.getHours() + hora_i);
@@ -534,14 +534,14 @@ export const liquidacion = async (req = request, resp = response) => {
   var hora_f = (hora_fin.length > 1) ? Number(hora_fin[0]) : 1;
   var minuto_f = (hora_fin.length > 1) ? Number(hora_fin[1]) : 1;
   hora_fin_.setHours(hora_fin_.getHours() + hora_f);
-  hora_fin_.setMinutes(hora_fin_.getMinutes() + minuto_f); 
+  hora_fin_.setMinutes(hora_fin_.getMinutes() + minuto_f);
 
   let id_usuario = Number(uid);
   var valores = {
     no_correlativo: `${no_corr}`,
     no_comp_de_pago: no_compra,
     no_comp_registro: no_registro,
-    fecha_inicio: hora_inicio_, 
+    fecha_inicio: hora_inicio_,
     fecha_fin: hora_fin_,
     proveedor,
     concepto,
@@ -549,7 +549,7 @@ export const liquidacion = async (req = request, resp = response) => {
     responsable,
     id_usuario,
     id_sucursal,
-  }; 
+  };
   var data = await prisma.liquidacionCajaChica.create({
     data: valores
   });
@@ -595,13 +595,11 @@ export const getPdfCierre = async (data: any) => {
   contenidoHtml = contenidoHtml.replace("{{compras}}", data.compras!.toFixed(2));
   contenidoHtml = contenidoHtml.replace("{{entrega_efectivo}}", data.entrega_efectivo!.toFixed(2));
   contenidoHtml = contenidoHtml.replace("{{nota}}", data.observacion);
-  pdf.create(contenidoHtml).toFile(__dirname + '/../../../uploads/uploads_pdf.pdf', (error: any, stream: any) => {
-    if (error) {
-      console.log("Error creando PDF: " + error);
-    } else {
-      enviarCorreoCierre(data.Sucursales!.nombre, stream.filename);
-    }
-  });
+
+  const pdf = await generarPdf(contenidoHtml, "reporte_demo");
+  if (pdf.length > 2) {
+    enviarCorreoCierre(data.Sucursales!.nombre, pdf);
+  } 
 };
 
 export const enviarCorreoCierre = async (sucursal: String, filename: any) => {
