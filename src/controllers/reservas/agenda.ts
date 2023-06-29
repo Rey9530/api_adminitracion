@@ -197,6 +197,7 @@ export const crearRegistro = async (req = request, resp = response) => {
     zona = "",
     no_personas = 0,
     turno = "DESAYUNO",
+    encargado = "",
     telefono = "",
     date = "",
     start = "",
@@ -256,6 +257,7 @@ export const crearRegistro = async (req = request, resp = response) => {
         fin,
         nota,
         turno,
+        encargado,
         id_usuario: uid,
       },
     });
@@ -283,6 +285,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       zona = "",
       no_personas = "",
       turno = "DESAYUNO",
+      encargado = "",
       telefono = "",
       date = "",
       start = "",
@@ -326,6 +329,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         inicio,
         fin,
         nota,
+        encargado,
         turno,
       },
     });

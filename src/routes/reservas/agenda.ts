@@ -40,6 +40,7 @@ router.post(
     validarJWT,
     check("id_sucursal", "La sucursal es obligatoria").not().isEmpty(),
     check("zona", "La zona es obligatoria").not().isEmpty(),
+    check("encargado", "El encargado es obligatorio").not().isEmpty(),
     check("no_personas", "El numero de personas es obligatorio")
       .not()
       .isEmpty(),
