@@ -88,6 +88,8 @@ jobs:
             rm -r node_modules
             yarn install
             yarn run tsc
+            cp -r src/html build/src
+            
             pm2 restart mi-api-pastaria
             pm2 restart mi-api-reservas
 
