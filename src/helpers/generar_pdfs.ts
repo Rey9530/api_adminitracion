@@ -3,10 +3,15 @@ import puppeteer from "puppeteer";
 import fs from "fs";
 const FILE_PATH = __dirname + "/pdfs_x_borra/";
 export const generarPdf = async (html: any, nombre: string = "reporte", isFile: boolean = false) => {
-
-    const browserOptions: any = {
-        headless: 'old'
-    };
+    let browserOptions: any = {
+        headless: 'old',
+    }
+    if (process.env.PORT != null && process.env.PORT != "4000") {
+        browserOptions = {
+            headless: 'old',
+            executablePath: '/usr/bin/chromium-browser'
+        };
+    }
 
     await eliminarArchivBasura();
     const browser = await puppeteer.launch(browserOptions);
@@ -37,7 +42,7 @@ export const generarPdf = async (html: any, nombre: string = "reporte", isFile: 
 
 const eliminarArchivBasura = async () => {
     var files = fs.readdirSync(FILE_PATH);
-    files.map((file: any) => { 
+    files.map((file: any) => {
         if (file != ".gitkeep") {
             const filePath = FILE_PATH + file;
             return fs.unlinkSync(filePath)
