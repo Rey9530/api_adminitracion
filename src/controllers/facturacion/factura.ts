@@ -496,7 +496,7 @@ export const cierreManual = async (req = request, resp = response) => {
 export const liquidacion = async (req = request, resp = response) => {
   const { uid } = req.params;
   let {
-    no_corr = "",
+    no_corr = 1,
     fecha = "",
     no_compra = "",
     no_registro = "",
@@ -520,23 +520,28 @@ export const liquidacion = async (req = request, resp = response) => {
       data: null,
     });
   }
-  hora_inicio = hora_inicio.split(":");
-  hora_fin = hora_fin.split(":");
   var hora_inicio_ = new Date(fecha);
   var hora_fin_ = new Date(fecha);
 
-  hora_inicio_.setHours(hora_inicio_.getHours() + Number(hora_inicio[0]));
-  hora_inicio_.setMinutes(hora_inicio_.getMinutes() + Number(hora_inicio[1]));
+  hora_inicio = hora_inicio.split(":"); 
+  var hora_i = (hora_inicio.length > 1) ? Number(hora_inicio[0]) : 1;
+  var minuto_i = (hora_inicio.length > 1) ? Number(hora_inicio[1]) : 1;
+  hora_inicio_.setHours(hora_inicio_.getHours() + hora_i);
+  hora_inicio_.setMinutes(hora_inicio_.getMinutes() + minuto_i);
 
-  hora_fin_.setHours(hora_fin_.getHours() + Number(hora_fin[0]));
-  hora_fin_.setMinutes(hora_fin_.getMinutes() + Number(hora_fin[1]));
+  hora_fin = hora_fin.split(":");
+
+  var hora_f = (hora_fin.length > 1) ? Number(hora_fin[0]) : 1;
+  var minuto_f = (hora_fin.length > 1) ? Number(hora_fin[1]) : 1;
+  hora_fin_.setHours(hora_fin_.getHours() + hora_f);
+  hora_fin_.setMinutes(hora_fin_.getMinutes() + minuto_f); 
 
   let id_usuario = Number(uid);
   var valores = {
-    no_correlativo: no_corr,
+    no_correlativo: `${no_corr}`,
     no_comp_de_pago: no_compra,
     no_comp_registro: no_registro,
-    fecha_inicio: hora_inicio_,
+    fecha_inicio: hora_inicio_, 
     fecha_fin: hora_fin_,
     proveedor,
     concepto,
@@ -544,7 +549,7 @@ export const liquidacion = async (req = request, resp = response) => {
     responsable,
     id_usuario,
     id_sucursal,
-  };
+  }; 
   var data = await prisma.liquidacionCajaChica.create({
     data: valores
   });
@@ -556,8 +561,8 @@ export const liquidacion = async (req = request, resp = response) => {
 };
 
 
-export const getPdfCierre = async (data: any) => { 
-  const ubicacionPlantilla = require.resolve(__dirname+"/../../html/emails/cierres_plantilla.html");
+export const getPdfCierre = async (data: any) => {
+  const ubicacionPlantilla = require.resolve(__dirname + "/../../html/emails/cierres_plantilla.html");
   let contenidoHtml = fs.readFileSync(ubicacionPlantilla, 'utf8');
   // Podemos acceder a la petición HTTP 
   var total_tarjetas = data.tarjeta_credomatic! +
@@ -590,7 +595,7 @@ export const getPdfCierre = async (data: any) => {
   contenidoHtml = contenidoHtml.replace("{{compras}}", data.compras!.toFixed(2));
   contenidoHtml = contenidoHtml.replace("{{entrega_efectivo}}", data.entrega_efectivo!.toFixed(2));
   contenidoHtml = contenidoHtml.replace("{{nota}}", data.observacion);
-  pdf.create(contenidoHtml).toFile(__dirname + '/../../../uploads/uploads_pdf.pdf', (error: any, stream: any) => { 
+  pdf.create(contenidoHtml).toFile(__dirname + '/../../../uploads/uploads_pdf.pdf', (error: any, stream: any) => {
     if (error) {
       console.log("Error creando PDF: " + error);
     } else {
