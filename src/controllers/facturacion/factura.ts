@@ -556,8 +556,8 @@ export const liquidacion = async (req = request, resp = response) => {
 };
 
 
-export const getPdfCierre = async (data: any) => {
-  const ubicacionPlantilla = require.resolve("./../../html/emails/cierres_plantilla.html");
+export const getPdfCierre = async (data: any) => { 
+  const ubicacionPlantilla = require.resolve(__dirname+"/../../html/emails/cierres_plantilla.html");
   let contenidoHtml = fs.readFileSync(ubicacionPlantilla, 'utf8');
   // Podemos acceder a la petición HTTP 
   var total_tarjetas = data.tarjeta_credomatic! +
