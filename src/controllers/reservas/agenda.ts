@@ -198,6 +198,7 @@ export const crearRegistro = async (req = request, resp = response) => {
     no_personas = 0,
     turno = "DESAYUNO",
     encargado = "",
+    extras = "",
     telefono = "",
     date = "",
     start = "",
@@ -215,10 +216,7 @@ export const crearRegistro = async (req = request, resp = response) => {
   fin.setHours(fin.getHours() + Number(start[0]));
   fin.setMinutes(fin.getMinutes() + Number(start[1]));
   fin.setHours(fin.getHours() + 2);
-  try {
-
-
-
+  try { 
     var start_date = new Date(date);
     var end_date = new Date(date);
     end_date.setHours(end_date.getHours() + 23);
@@ -257,6 +255,7 @@ export const crearRegistro = async (req = request, resp = response) => {
         fin,
         nota,
         turno,
+        extras,
         encargado,
         id_usuario: uid,
       },
@@ -287,6 +286,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       turno = "DESAYUNO",
       encargado = "",
       telefono = "",
+      extras = "",
       date = "",
       start = "",
       nota = "",
@@ -329,6 +329,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         inicio,
         fin,
         nota,
+        extras,
         encargado,
         turno,
       },

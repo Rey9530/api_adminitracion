@@ -532,6 +532,7 @@ model Agenda {
   inicio         DateTime
   fin            DateTime
   nota           String?      @db.Text
+  extras         String?      @db.Text
   id_usuario     Int?
   Usuario        Usuarios?    @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_agenda_usuario")
   estado         EstadoAgenda @default(PENDIENTE)
