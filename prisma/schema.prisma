@@ -541,6 +541,12 @@ model Agenda {
   @@index([id_usuario], name: "fk_agenda_usuario_id")
 }
 
+model ExtrasReservas {
+  id_extra Int    @id @default(autoincrement())
+  nombre   String
+  estado   Estado @default(ACTIVO)
+}
+
 enum Turnos {
   DESAYUNO
   ALMUERZO

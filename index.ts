@@ -21,6 +21,7 @@ import reportes from "./src/routes/facturacion/reportes";
 import reportes_compras from "./src/routes/facturacion/reportes_compras"; 
 import estadisticas from "./src/routes/facturacion/estadisticas"; 
 import agenda from "./src/routes/reservas/agenda"; 
+import extras_reservas from "./src/routes/admin/extras_reservas"; 
 import cliente from "./src/routes/facturacion/cliente"; 
 import bloques from "./src/routes/facturacion/bloques"; 
 import decuentos from "./src/routes/facturacion/decuentos"; 
@@ -47,6 +48,7 @@ app.use('/estadisticas', estadisticas);
 
 //Reservas
 app.use('/reservas/agenda', agenda);  
+app.use('/admin/extras_reservas', extras_reservas);  
 
 //Facturacion
 app.use('/facturacion/cliente', cliente);
