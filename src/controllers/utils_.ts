@@ -4,8 +4,8 @@ const request = expres.request;
 import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 import readXlsxFile from "read-excel-file/node";
-import { generarPdf } from "../helpers/generar_pdfs";
-const prisma = new PrismaClient(); 
+import { generarPdfNode } from "../helpers/generar_pdfs";
+const prisma = new PrismaClient();
 
 //TODO: Bueno haber en que se utiliza
 export const getData = async (req = request, resp = response) => {
@@ -50,14 +50,16 @@ export const getPdf = async (_ = request, resp = response) => {
   contenidoHtml = contenidoHtml.replace("{{pedidos_ya}}", "$1.00");
   contenidoHtml = contenidoHtml.replace("{{compras}}", "$1.00");
   contenidoHtml = contenidoHtml.replace("{{entrega_efectivo}}", "$1.00");
+  contenidoHtml = contenidoHtml.replace("{{usuario_generador}}", "$1.00"); 
+  contenidoHtml = contenidoHtml.replace("{{nota}}", "$1.00"); 
 
-  const pdf = await generarPdf(contenidoHtml, "reporte_demo4",true);
-
+  const pdf = await generarPdfNode(contenidoHtml, "reporte_demo4", true);
+  console.log(pdf);
 
   resp.setHeader("Content-Type", "application/pdf");
   resp.send(pdf);
- 
-}; 
+
+};
 
 export const getHtml = async (_ = request, resp = response) => {
   const ubicacionPlantilla = require.resolve("./../html/emails/cierres_plantilla.html");
@@ -65,7 +67,7 @@ export const getHtml = async (_ = request, resp = response) => {
   // Podemos acceder a la petición HTTP
   const valorPasadoPorNode = "Soy un valor pasado desde JavaScript";
   contenidoHtml = contenidoHtml.replace("{{valor}}", valorPasadoPorNode);
-  resp.send(contenidoHtml); 
+  resp.send(contenidoHtml);
 };
 
 

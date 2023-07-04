@@ -596,10 +596,10 @@ export const getPdfCierre = async (data: any) => {
   contenidoHtml = contenidoHtml.replace("{{entrega_efectivo}}", data.entrega_efectivo!.toFixed(2));
   contenidoHtml = contenidoHtml.replace("{{nota}}", data.observacion);
 
-  const pdf = await generarPdf(contenidoHtml, "reporte_demo");
+  const pdf: any = await generarPdf(contenidoHtml, "reporte_demo");
   if (pdf.length > 2) {
     enviarCorreoCierre(data.Sucursales!.nombre, pdf);
-  } 
+  }
 };
 
 export const enviarCorreoCierre = async (sucursal: String, filename: any) => {
