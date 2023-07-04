@@ -10,7 +10,8 @@ export const generarPdf = async (html: any, nombre: string = "reporte", isFile: 
     if (process.env.PORT != null && process.env.PORT != "4000") {
         browserOptions = {
             headless: 'old',
-            executablePath: '/usr/bin/chromium-browser'
+            executablePath: '/usr/bin/chromium-browser', 
+            args: ['--no-sandbox']
         };
     }
 
