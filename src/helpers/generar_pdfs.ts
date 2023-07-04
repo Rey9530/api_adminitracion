@@ -3,7 +3,7 @@ import puppeteer from "puppeteer";
 import htmlpdf from "html-pdf-node";
 import fs from "fs";
 const FILE_PATH = __dirname + "/pdfs_x_borra/";
-export const generarPdfNode = async (html: any, nombre: string = "reporte", isFile: boolean = false) => {
+export const generarPdf = async (html: any, nombre: string = "reporte", isFile: boolean = false) => {
     let browserOptions: any = {
         headless: 'old',
     }
@@ -41,7 +41,7 @@ export const generarPdfNode = async (html: any, nombre: string = "reporte", isFi
     }
 }
 
-export const generarPdf = async (html: any, nombre: string = "reporte", isFile: boolean = false) => {
+export const generarPdfNode = async (html: any, nombre: string = "reporte", isFile: boolean = false) => {
     const path = FILE_PATH + nombre + ".pdf";
     let options = { format: 'A4', path };
     // console.log(nombre);
