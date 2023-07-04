@@ -87,6 +87,7 @@ export const getDataTablero = async (req = request, resp = response) => {
             lte: hasta,
           },
           id_sucursal: element.id_sucursal,
+          Estado:"ACTIVO"
         },
       });
       totalporSucursal += result._sum.venta_bruta ?? 0;
@@ -240,6 +241,7 @@ export const getPiePorcentajePropinas = async (
           lte: hasta,
         },
         id_sucursal: element.id_sucursal,
+        Estado:"ACTIVO"
       },
     });
     if (
@@ -266,6 +268,7 @@ export const getPiePorcentajePropinas = async (
         gte: desde,
         lte: hasta,
       },
+      Estado:"ACTIVO"
     },
   });
   var dataGrafTipo = [];

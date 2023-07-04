@@ -1,6 +1,5 @@
 
-import puppeteer from "puppeteer";
-import htmlpdf from "html-pdf-node";
+import puppeteer from "puppeteer"; 
 import fs from "fs";
 const FILE_PATH = __dirname + "/pdfs_x_borra/";
 export const generarPdf = async (html: any, nombre: string = "reporte", isFile: boolean = false) => {
@@ -41,31 +40,7 @@ export const generarPdf = async (html: any, nombre: string = "reporte", isFile: 
         return "";
     }
 }
-
-export const generarPdfNode = async (html: any, nombre: string = "reporte", isFile: boolean = false) => {
-    const path = FILE_PATH + nombre + ".pdf";
-    let options = { format: 'A4', path };
-    // console.log(nombre);
-    // console.log(isFile);
-    // Example of options with args // 
-
-    // or //
-    // let file = { url: "https://example.com" };
-
-
-    return new Promise((resolve, _) => {
-        let file = { content: html };
-        htmlpdf.generatePdf(file, options, (_: Error, buffer: Buffer) => {
-            // console.log(err);
-            // console.log(buffer);
-            resolve(isFile ? buffer : path);
-        });
-    });
-    //   .then((resp) => {
-    //     return resp;
-    //   });
-}
-
+ 
 const eliminarArchivBasura = async () => {
     var files = fs.readdirSync(FILE_PATH);
     files.map((file: any) => {

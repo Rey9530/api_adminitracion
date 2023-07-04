@@ -625,6 +625,7 @@ model CierresDiarios {
   fecha_creacion       DateTime               @default(now()) @db.Timestamptz()
   fecha_cierre         DateTime?              @default(now())
   observacion          String?                @db.Text
+  Estado               Estado                 @default(ACTIVO)
   id_usuario           Int?
   Usuario              Usuarios?              @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cierre_usuario")
   id_sucursal          Int?

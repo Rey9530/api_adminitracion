@@ -405,6 +405,145 @@ export const getLiquidaciones = async (req = request, resp = response) => {
     });
   }
 }
+export const getCierresManuales = async (req = request, resp = response) => {
+  let id_sucursal: number = Number(req.params.id_sucursal);
+
+  id_sucursal = Number(id_sucursal);
+  var wSucursal = {};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
+  }
+
+  var desde_v: any = req.query.desde!.toString();
+  var hasta_v: any = req.query.hasta!.toString();
+  var desde = new Date(desde_v);
+  var hasta = new Date(hasta_v);
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59);
+
+  var wMes = {
+    fecha_cierre: {
+      gte: desde,
+      lte: hasta,
+    },
+  };
+
+
+  try {
+    var data = await prisma.cierresDiarios.findMany({
+      where: {
+        Estado: "ACTIVO",
+        ...wSucursal,
+        ...wMes,
+      },
+      include: {
+        Sucursales: true
+      }
+    });
+    resp.json({
+      status: true,
+      msg: "Listado Cierres",
+      data,
+    });
+  } catch (error) {
+    console.log(error)
+    resp.json({
+      status: false,
+      msg: "Ha ocurrido un error, favor revisar logs",
+      data: null,
+    });
+  }
+}
+export const eliminarcierreManual = async (req = request, resp = response) => {
+  let id_cierre: number = Number(req.params.id_cierre);
+  try {
+    var data = await prisma.cierresDiarios.updateMany({
+      data: {
+        Estado: "INACTIVO"
+      },
+      where: {
+        Estado: "ACTIVO",
+        id_cierre
+      }
+    });
+    resp.json({
+      status: data.count > 0,
+      msg: data.count > 0 ? "Cierrel Eliminado" : "Error al elinminar el cierre",
+      data,
+    });
+  } catch (error) {
+    console.log(error)
+    resp.json({
+      status: false,
+      msg: "Ha ocurrido un error, favor revisar logs",
+      data: null,
+    });
+  }
+}
+export const enviarPorCorreocierreManual = async (req = request, resp = response) => {
+  let id_cierre: number = Number(req.params.id_cierre);
+  try {
+    var data = await prisma.cierresDiarios.findMany({
+      where: {
+        Estado: "ACTIVO",
+        id_cierre
+      },
+      include: { Sucursales: true, Usuario: true, }
+    });
+
+    if (data.length > 0) {
+      getPdfCierre(data[0]);
+      resp.json({
+        status: true,
+        msg: "Correo enviado con exito",
+        data: data[0],
+      });
+    }else{
+
+    resp.json({
+      status: false,
+      msg: "Correo no enviado",
+      data: data[0],
+    });
+    }
+  } catch (error) {
+    console.log(error)
+    resp.json({
+      status: false,
+      msg: "Ha ocurrido un error, favor revisar logs",
+      data: null,
+    });
+  }
+}
+export const imprimirCierreManual = async (req = request, resp = response) => {
+  let id_cierre: number = Number(req.params.id_cierre);
+  try {
+    var data = await prisma.cierresDiarios.findMany({
+      where: {
+        Estado: "ACTIVO",
+        id_cierre
+      },
+      include: { Sucursales: true, Usuario: true, }
+    });
+    if (data.length > 0) { 
+      var pdf = await getPdfCierre(data[0], true);
+      resp.setHeader("Content-Type", "application/pdf");
+      resp.send(pdf);
+    }
+    // resp.json({
+    //   status: true,
+    //   msg: "Correo enviado con exito",
+    //   data: data[0],
+    // });
+  } catch (error) {
+    console.log(error)
+    resp.json({
+      status: false,
+      msg: "Ha ocurrido un error, favor revisar logs",
+      data: null,
+    });
+  }
+}
 export const cierreManual = async (req = request, resp = response) => {
   const { uid } = req.params;
   let {
@@ -483,7 +622,7 @@ export const cierreManual = async (req = request, resp = response) => {
     data: { id_cierre: data.id_cierre },
   });
 
-  await getPdfCierre(data);
+  getPdfCierre(data);
   return resp.json({
     status: true,
     msg: "Cierre creado con exito",
@@ -561,7 +700,7 @@ export const liquidacion = async (req = request, resp = response) => {
 };
 
 
-export const getPdfCierre = async (data: any) => {
+export const getPdfCierre = async (data: any, isForPrin = false) => {
   const ubicacionPlantilla = require.resolve(__dirname + "/../../html/emails/cierres_plantilla.html");
   let contenidoHtml = fs.readFileSync(ubicacionPlantilla, 'utf8');
   // Podemos acceder a la petición HTTP 
@@ -596,9 +735,15 @@ export const getPdfCierre = async (data: any) => {
   contenidoHtml = contenidoHtml.replace("{{entrega_efectivo}}", data.entrega_efectivo!.toFixed(2));
   contenidoHtml = contenidoHtml.replace("{{nota}}", data.observacion);
 
-  const pdf: any = await generarPdf(contenidoHtml, "reporte_demo");
-  if (pdf.length > 2) {
-    enviarCorreoCierre(data.Sucursales!.nombre, pdf);
+  if (isForPrin) {
+    const pdf: any = await generarPdf(contenidoHtml, "reporte_imprimir", true);
+    return pdf;
+  } else {
+    const pdf: any = await generarPdf(contenidoHtml, "reporte_correo");
+    if (pdf.length > 2) {
+      enviarCorreoCierre(data.Sucursales!.nombre, pdf);
+    }
+
   }
 };
 

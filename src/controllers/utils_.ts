@@ -4,7 +4,7 @@ const request = expres.request;
 import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 import readXlsxFile from "read-excel-file/node";
-import { generarPdfNode } from "../helpers/generar_pdfs";
+import { generarPdf } from "../helpers/generar_pdfs";
 const prisma = new PrismaClient();
 
 //TODO: Bueno haber en que se utiliza
@@ -53,7 +53,7 @@ export const getPdf = async (_ = request, resp = response) => {
   contenidoHtml = contenidoHtml.replace("{{usuario_generador}}", "$1.00"); 
   contenidoHtml = contenidoHtml.replace("{{nota}}", "$1.00"); 
 
-  const pdf = await generarPdfNode(contenidoHtml, "reporte_demo4", true);
+  const pdf = await generarPdf(contenidoHtml, "reporte_demo4", true);
   console.log(pdf);
 
   resp.setHeader("Content-Type", "application/pdf");

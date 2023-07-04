@@ -8,8 +8,12 @@ import {
   cargarCierre,
   cierreManual,
   crearFactura,
+  eliminarcierreManual,
+  enviarPorCorreocierreManual,
+  getCierresManuales,
   getLiquidaciones,
   getNumeroFactura,
+  imprimirCierreManual,
   liquidacion,
   obntenerDepartamentos,
   obntenerFactura,
@@ -42,6 +46,27 @@ router.post(
 );
 router.get("/liquidaciones/:id_sucursal", validarJWT, getLiquidaciones);
 router.post("/cierre_manual", validarJWT, cierreManual);
+router.delete("/cierres_manuales/:id_cierre", validarJWT, eliminarcierreManual);
+router.get("/cierres_manuales/enviar/:id_cierre", validarJWT, enviarPorCorreocierreManual);
+router.get("/cierres_manuales/imprimir/:id_cierre", imprimirCierreManual);
+router.get("/cierres_manuales/:id_sucursal", [
+  validarJWT,
+  check(
+    "desde",
+    "El parametro desde es requerido y debe ser formato fecha YYYY-mm-dd"
+  )
+    .not()
+    .isEmpty()
+    .isDate(),
+  check(
+    "hasta",
+    "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd"
+  )
+    .not()
+    .isEmpty()
+    .isDate(),
+  validarCampos,
+], getCierresManuales);
 router.post("/liquidacion",
   [
     validarJWT,
