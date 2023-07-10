@@ -520,7 +520,8 @@ export const crearFactura = async (req = request, resp = response) => {
     if (!(id_usuario > 0)) {
       error = "Error de token, no se detecta al usuario";
     } else if (clientedB == null) {
-      error = "Por favor seleccione un cliente";
+      // error = "Por favor seleccione un cliente";
+      id_cliente = 1;
     } else if (tipoFactura == null) {
       error = "El tipo de factura no existe";
     } else if (tipoFactura.Bloques.length == 0) {
