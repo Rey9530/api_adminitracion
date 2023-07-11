@@ -82,6 +82,7 @@ jobs:
             sudo echo "PASSWORD_EMAIL=${{secrets.PASSWORD_EMAIL}}" >> .env 
             sudo echo "PORT=${{secrets.PORT_API_PASTARIA}}" >> .env 
             echo "Fin Variables en ENV" 
+            pm2 stop mi-api
             pm2 stop mi-api-pastaria
             pm2 stop mi-api-reservas
             rm -r node_modules && rm -r build
@@ -90,6 +91,7 @@ jobs:
             yarn run tsc
             cp -r src/html build/src
             mkdir build/src/helpers/pdfs_x_borra
+            pm2 restart mi-api
             pm2 restart mi-api-pastaria
             pm2 restart mi-api-reservas
 
