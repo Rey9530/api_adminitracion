@@ -82,6 +82,7 @@ jobs:
             pm2 stop api-menta
             rm -r node_modules
             yarn install
+            npx prisma generate
             yarn run tsc
             pm2 restart api-menta
 
