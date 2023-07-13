@@ -566,6 +566,24 @@ const execute = async () => {
     });
 
 
+    await prisma.cliente.create({
+      data: {
+        nombre: "Varios",
+        giro: "N/A",
+        razon_social: "N/A",
+        registro_nrc: "N/A",
+        foto_url_nrc: null,
+        foto_obj_nrc: null,
+        nit: "N/A",
+        id_municipio: null,
+        direccion: "N/A",
+        telefono: "N/A",
+        correo: "N/A",
+        dui: "N/A",
+        id_sucursal: null,
+        id_tipo_cliente: 2
+      },
+    });
     //ROLS DEMO
     await prisma.roles.createMany({
       data: [

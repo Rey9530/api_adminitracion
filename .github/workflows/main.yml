@@ -80,12 +80,19 @@ jobs:
             sudo echo "CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}" >> .env 
             sudo echo "DATABASE_URL=postgresql://${{secrets.DB_NAME}}:${{secrets.DB_PASSWORD}}@localhost:${{secrets.DB_PORT}}/${{secrets.DB_NAME}}?schema=public" >> .env 
             sudo echo "PORT=${{secrets.PORT_API}}" >> .env 
-            echo "Fin Variables en ENV"
-
-            rm -r node_modules
+            echo "Fin Variables en ENV" 
+            pm2 stop mi-api
+            pm2 stop mi-api-pastaria
+            pm2 stop mi-api-reservas
+            rm -r node_modules && rm -r build
             yarn install
+            npx prisma generate
             yarn run tsc
+            cp -r src/html build/src
+            mkdir build/src/helpers/pdfs_x_borra
             pm2 restart mi-api
+            pm2 restart mi-api-pastaria
+            pm2 restart mi-api-reservas
 
 
 # yarn run migrate:deploy

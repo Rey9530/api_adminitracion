@@ -57,6 +57,15 @@ export const buscarEnCatalogo = async (req = request, resp = response) => {
         };
       }),
     },
+    include: {
+      Inventario: {
+        where: {
+          existencia: {
+            gte: 1
+          }
+        }
+      }
+    }
   });
   return resp.json({
     status: true,
@@ -276,7 +285,7 @@ export const anularFactura = async (req = request, resp = response) => {
 };
 
 export const cargarCierre = async (req = request, resp = response) => {
-  try { 
+  try {
     let fillle: any = req.files?.files;
     let data: any = 0;
     if (req.files && Object.keys(req.files).length > 0) {
@@ -520,14 +529,14 @@ export const crearFactura = async (req = request, resp = response) => {
     if (!(id_usuario > 0)) {
       error = "Error de token, no se detecta al usuario";
     } else if (clientedB == null) {
-      error = "Por favor seleccione un cliente";
+      // error = "Por favor seleccione un cliente";
+      id_cliente = 1;
     } else if (tipoFactura == null) {
       error = "El tipo de factura no existe";
     } else if (tipoFactura.Bloques.length == 0) {
       error = "El tipo de factura no tiene un bloque activo asignado";
     } else if (tipoFactura.Bloques[0].actual > tipoFactura.Bloques[0].hasta) {
-      error =
-        "El bloque de facturas ha finalizado, configure uno nuevo para continuar.";
+      error = "El bloque de facturas ha finalizado, configure uno nuevo para continuar.";
       await prisma.facturasBloques.update({
         data: { estado: "INACTIVO" },
         where: { id_bloque: tipoFactura.Bloques[0].id_bloque },
@@ -564,6 +573,8 @@ export const crearFactura = async (req = request, resp = response) => {
         detalle.total != null &&
         detalle.total > 0
       ) {
+        const no_fact = tipoFactura?.Bloques[0]?.actual.toString().padStart(6, "0");
+        await descargarItemDeInventario(detalle, no_fact);
         db_detalle.push({
           id_factura: 0,
           id_catalogo: detalle.id_catalogo,
@@ -667,3 +678,47 @@ export const crearFactura = async (req = request, resp = response) => {
   }
   return;
 };
+
+const descargarItemDeInventario = async (item: any, nomero_factura: any = 0) => { 
+  if (item.item != null && item.item.Inventario.length > 0) {
+    var id_inventario = item.item.Inventario[0].id_inventario;
+    var inventario = await prisma.inventario.findFirst({
+      where: {
+        id_inventario
+      }
+    });
+
+    await prisma.inventario.update({
+      where: {
+        id_inventario
+      },
+      data: {
+        existencia: (inventario?.existencia ?? 0) - item.cantidad
+      }
+    });
+
+    var kardex = await prisma.kardex.findFirst({
+      where: {
+        id_catalogo: item.id_catalogo
+      },
+      orderBy: {
+        id_kardex: "desc"
+      }
+    }); 
+    var nInventario =  ((kardex?.inventario ?? 0) - item.cantidad) ?? 0;
+    await prisma.kardex.create({
+      data: {
+        id_catalogo: item.id_catalogo,
+        id_compras_detalle: (kardex?.id_compras_detalle ?? 0),
+        tipo_movimiento: 2,
+        descripcion: `Salida por Factura # ${nomero_factura}`,
+        costo: kardex?.costo,
+        cantidad: item.cantidad,
+        subtotal: item.cantidad * (kardex?.costo_promedio ?? 0),
+        costo_promedio: (kardex?.costo_promedio ?? 0),
+        inventario:nInventario,
+        total: nInventario * (kardex?.costo_promedio ?? 0),
+      }
+    }); 
+  } 
+}

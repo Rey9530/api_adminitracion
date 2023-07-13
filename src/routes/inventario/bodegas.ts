@@ -9,10 +9,12 @@ import {
   crearRegistro,
   actualizarRegistro,
   eliminarRegistro,
+  updateAsPrinicpal,
 } from "../../controllers/inventario/bodegas";
 
 router.get("/", validarJWT, getRegistros);
 router.get("/:id", validarJWT, getRegistro);
+router.get("/asignar_principal/:id", validarJWT, updateAsPrinicpal);
 router.post(
   "/",
   [
