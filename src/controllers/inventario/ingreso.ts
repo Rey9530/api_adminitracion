@@ -632,8 +632,29 @@ export const verificarCompraServicio = async (req = request, resp = response) =>
     status: compra == null,
     msg: "La factura ya fue registrada ",
     data: compra,
+  }); 
+}
+
+
+
+export const obtenerCompraServicio = async (req = request, resp = response) => {
+
+  let id_compras : number = Number(req.params.id); 
+
+  var compra = await prisma.compras.findUnique({
+    where: {
+      id_compras:id_compras 
+    },
+    include:{
+      Proveedor:true
+    }
   });
 
+  resp.json({
+    status: compra != null,
+    msg: "Success ",
+    data: compra,
+  }); 
 }
 export const crearCompraServicio = async (req = request, resp = response) => {
   const { uid = 0, ids = 0 } = req.params;
@@ -653,7 +674,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
       iva = 0,
       cesc = 0,
       iva_percivido = 0,
-      monto = 2,
+      monto = 0,
       fovial = 0,
       cotrans = 0,
       total = 0,
@@ -697,6 +718,82 @@ export const crearCompraServicio = async (req = request, resp = response) => {
     resp.json({
       status: true,
       msg: "Factura creada con exito",
+      data: compra,
+    });
+  } catch (error) {
+    console.log(error);
+    resp.status(500).json({
+      status: false,
+      msg: "Error inesperado reviosar log",
+    });
+  }
+};
+export const updateCompraServicio = async (req = request, resp = response) => {
+  let id_compras : number = Number(req.params.id_compra); 
+  const { uid = 0, ids = 0 } = req.params;
+  const id_usuario = Number(uid);
+  try {
+    let {
+      numero_factura = "",
+      numero_quedan = "",
+      fecha_factura = new Date(),
+      tipo_pago = "CONTADO",
+      tipo_compra = "INTERNA",
+      tipo_factura = "GRABADO",
+      tipo_inventario = "MP",
+      dias_credito = 0,
+      id_sucursal = 0,
+      detalle = "",
+      iva = 0,
+      cesc = 0,
+      iva_percivido = 0,
+      monto = 0,
+      fovial = 0,
+      cotrans = 0,
+      total = 0,
+      id_proveedor = 0,
+    } = req.body;
+
+    id_sucursal = Number(id_sucursal);
+    id_sucursal = id_sucursal > 0 ? id_sucursal : Number(ids);
+    dias_credito = Number(dias_credito);
+    fecha_factura = new Date(fecha_factura);
+    var fecha_de_pago = new Date();
+    if (tipo_pago == "CREDITO" && dias_credito > 0) {
+      fecha_de_pago.setDate(fecha_de_pago.getDate() + dias_credito);
+    }
+    const compra = await prisma.compras.update({
+      where:{
+        id_compras
+      },
+      data: {
+        numero_factura,
+        fecha_factura,
+        tipo_pago,
+        tipo_compra,
+        tipo_factura,
+        dias_credito,
+        tipo_inventario,
+        detalle,
+        iva,
+        cesc,
+        iva_percivido,
+        subtotal: monto,
+        fovial,
+        cotrans,
+        total,
+        id_proveedor,
+        id_usuario,
+        id_sucursal,
+        numero_quedan,
+        fecha_de_pago,
+        estado_pago: tipo_pago == "CREDITO" ? "PENDIENTE" : "PAGADO",
+      },
+    });
+
+    resp.json({
+      status: true,
+      msg: "Factura actualizada con exito",
       data: compra,
     });
   } catch (error) {

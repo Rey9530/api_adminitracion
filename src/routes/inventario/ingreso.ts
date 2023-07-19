@@ -1,20 +1,22 @@
 import expres from "express";
 const router = expres.Router();
 import { check } from "express-validator";
-import { 
+import {
   buscarProveedor,
   buscarEnCatalogo,
-  crearFactura,    
-  obntenerListadoFacturas,  
+  crearFactura,
+  obntenerListadoFacturas,
   obtenerBodegas,
-  crearCompraServicio, 
+  crearCompraServicio,
   obntenerCompra,
   comprasACheque,
   pagarCheque,
   crearCompraServicioR,
   getExistencias,
   obtenercxpPorProveedor,
-  verificarCompraServicio, 
+  verificarCompraServicio,
+  obtenerCompraServicio,
+  updateCompraServicio,
 } from "../../controllers/inventario/ingreso";
 import { validarCampos, validar_dato } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt";
@@ -22,7 +24,7 @@ import { validarJWT } from "../../middlewares/validar-jwt";
 router.post(
   "/",
   [
-    validarJWT, 
+    validarJWT,
     check("id_proveedor", "El seleccione un proveedor valido").custom((e) =>
       validar_dato(e, "positivo")
     ),
@@ -38,59 +40,80 @@ router.post(
     validarCampos,
   ],
   crearFactura
-); 
+);
 
 router.post(
   "/servicio",
   [
-    validarJWT, 
+    validarJWT,
     check("id_proveedor", "El seleccione un proveedor valido").custom((e) =>
       validar_dato(e, "positivo")
-    ), 
-    check("numero_factura", "El numero de factura es requerido").not().isEmpty(), 
+    ),
+    check("numero_factura", "El numero de factura es requerido").not().isEmpty(),
     check("tipo_compra", "El tipo de compra es requerido").not().isEmpty(),
     check("tipo_factura", "El tipo de factura es requerido").not().isEmpty(),
     check("fecha_factura", "La fecha es requerida").isDate(),
     check("monto", "El tipo de factura es obligatorio").custom((e) =>
       validar_dato(e, "positivo")
-    ), 
+    ),
     check("total", "El tipo de factura es obligatorio").custom((e) =>
       validar_dato(e, "positivo_0")
-    ), 
+    ),
     validarCampos,
   ],
   crearCompraServicio
-); 
+);
+router.put(
+  "/servicio/:id_compra",
+  [
+    validarJWT,
+    check("id_proveedor", "El seleccione un proveedor valido").custom((e) =>
+      validar_dato(e, "positivo")
+    ),
+    check("numero_factura", "El numero de factura es requerido").not().isEmpty(),
+    check("tipo_compra", "El tipo de compra es requerido").not().isEmpty(),
+    check("tipo_factura", "El tipo de factura es requerido").not().isEmpty(),
+    check("fecha_factura", "La fecha es requerida").isDate(),
+    check("monto", "El tipo de factura es obligatorio").custom((e) =>
+      validar_dato(e, "positivo")
+    ),
+    check("total", "El tipo de factura es obligatorio").custom((e) =>
+      validar_dato(e, "positivo_0")
+    ),
+    validarCampos,
+  ],
+  updateCompraServicio
+);
 
-
+router.get("/obtener_compra/:id", validarCampos, obtenerCompraServicio);
 
 router.post(
   "/servicio/verficar",
   [
-    validarJWT, 
+    validarJWT,
     check("id_proveedor", "El seleccione un proveedor valido").custom((e) =>
       validar_dato(e, "positivo")
-    ), 
-    check("numero_factura", "El numero de factura es requerido").not().isEmpty(), 
+    ),
+    check("numero_factura", "El numero de factura es requerido").not().isEmpty(),
     validarCampos,
   ],
   verificarCompraServicio
-); 
+);
 
 router.post(
   "/servicio_r",
   [
-    validarJWT,  
-    check("numero_factura", "El numero de factura es requerido").not().isEmpty(), 
+    validarJWT,
+    check("numero_factura", "El numero de factura es requerido").not().isEmpty(),
     check("fecha_factura", "La fecha es requerida").isDate(),
     check("monto", "El tipo de factura es obligatorio").custom((e) =>
       validar_dato(e, "positivo")
-    ), 
+    ),
     validarCampos,
   ],
   crearCompraServicioR
-); 
- 
+);
+
 
 router.post(
   "/buscar/catalogo",
@@ -130,7 +153,7 @@ router.post(
   ],
   pagarCheque
 );
- 
+
 router.get("/obtener/bodegas/:id", validarJWT, obtenerBodegas);
 router.get("/proveedor/obtener_listado_compras_al_credito/:id_sucursal", validarJWT, obtenercxpPorProveedor);
 router.get(
@@ -141,8 +164,8 @@ router.get(
     check("hasta", "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd").not().isEmpty().isDate(),
     validarCampos,
   ],
-  obntenerListadoFacturas 
-); 
-router.get("/obtener_factura/:id", validarJWT, obntenerCompra); 
-router.get("/listado_existencias", validarJWT, getExistencias); 
+  obntenerListadoFacturas
+);
+router.get("/obtener_factura/:id", validarJWT, obntenerCompra);
+router.get("/listado_existencias", validarJWT, getExistencias);
 export default router;
