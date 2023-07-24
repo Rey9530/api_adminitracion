@@ -760,7 +760,7 @@ export const enviarCorreoCierre = async (sucursal: String, filename: any) => {
     html: "<p>Este es un correo automatico por favor no responder</p>",
     attachments: [
       {
-        filename: 'Reporte',
+        filename: sucursal+'.pdf',
         path: filename,
       }
     ]
