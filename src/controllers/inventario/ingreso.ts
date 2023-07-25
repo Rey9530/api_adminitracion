@@ -498,6 +498,110 @@ export const obntenerListadoPrecheques = async (
   });
 };
 
+
+
+export const obtenerListadocheques = async (
+  req = request,
+  resp = response
+) => {
+
+  var query: any = req.query.query ? req.query.query!.toString() : "";
+  var desde_v: any = req.query.desde ? req.query.desde!.toString() : new Date().toString();
+  var hasta_v: any = req.query.hasta ? req.query.hasta!.toString() : new Date().toString();
+  var desde = new Date(desde_v);
+  var hasta = new Date(hasta_v);
+  hasta.setHours(hasta.getHours() + 8);
+
+
+  var proveedores = await prisma.compras.groupBy({
+    by: ["no_cheque", "id_proveedor"],
+    where: {
+      tipo_pago: "CREDITO",
+      estado_pago: "PAGADO",
+      fecha_actualizacion: {
+        gte: desde,
+        lte: hasta,
+      },
+      OR: [
+        {
+          Proveedor: {
+            nombre: {
+              mode: "insensitive",
+              contains: query,
+            },
+          },
+        },
+        {
+          no_cheque: {
+            mode: "insensitive",
+            contains: query,
+          },
+        },
+        {
+          numero_factura: {
+            mode: "insensitive",
+            contains: query,
+          }
+        },
+        {
+          numero_quedan: {
+            mode: "insensitive",
+            contains: query,
+          }
+        }
+      ]
+    },
+  });
+  var data = [];
+  for (let index = 0; index < proveedores.length; index++) {
+    const element = proveedores[index];
+    var provv = await prisma.proveedores.findFirst({
+      where: { id_proveedor: element.id_proveedor ?? 0 },
+      select: { nombre: true, id_proveedor: true, Banco: true, no_cuenta: true, tipo_cuenta: true },
+    });
+
+    var where: any = {
+      id_proveedor: element.id_proveedor,
+      tipo_pago: "CREDITO",
+      estado_pago: "PAGADO",
+      no_cheque: element?.no_cheque ?? "0",
+      fecha_actualizacion: {
+        gte: desde,
+        lte: hasta,
+      },
+    };
+
+    var compras = await prisma.compras.findMany({
+      where,
+      include: {
+        FacturasTipos: true,
+        Sucursales: true,
+      }
+    });
+    var registro = await prisma.compras.aggregate({
+      _sum: {
+        total: true,
+      },
+      where
+    });
+    data.push({
+      proveedor: provv?.nombre ?? "",
+      id_proveedor: provv?.id_proveedor ?? 0,
+      no_cheque: element?.no_cheque ?? "0",
+      monto: registro._sum.total ?? 0,
+      fecha: compras.length > 0 ? compras[0].fecha_actualizacion : new Date(),
+      compras
+    });
+  }
+
+
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data,
+  });
+};
+
 export const imprimirListadoPrecheques = async (
   req = request,
   resp = response
@@ -506,7 +610,7 @@ export const imprimirListadoPrecheques = async (
   let wSucursal = {};
   if (id_sucursal > 0) {
     wSucursal = { id_sucursal };
-  } 
+  }
 
   var proveedores = await prisma.compras.groupBy({
     by: ["id_proveedor"],
@@ -556,11 +660,11 @@ export const imprimirListadoPrecheques = async (
       compras
     });
   }
-  
-  var contenidoHtml:any = await htmlReporteCheques(data);
+
+  var contenidoHtml: any = await htmlReporteCheques(data);
   const pdf = await generarPdf(contenidoHtml, "reporte_demo4", true, true);
-  resp.set({ "Content-Type": "application/pdf","Content-Length": pdf.length });
-  return  resp.send(pdf);
+  resp.set({ "Content-Type": "application/pdf", "Content-Length": pdf.length });
+  return resp.send(pdf);
 };
 
 export const obntenerCompra = async (req = request, resp = response) => {
@@ -699,21 +803,21 @@ export const verificarCompraServicio = async (req = request, resp = response) =>
     status: compra == null,
     msg: "La factura ya fue registrada ",
     data: compra,
-  }); 
+  });
 }
 
 
 
 export const obtenerCompraServicio = async (req = request, resp = response) => {
 
-  let id_compras : number = Number(req.params.id); 
+  let id_compras: number = Number(req.params.id);
 
   var compra = await prisma.compras.findUnique({
     where: {
-      id_compras:id_compras 
+      id_compras: id_compras
     },
-    include:{
-      Proveedor:true
+    include: {
+      Proveedor: true
     }
   });
 
@@ -721,7 +825,7 @@ export const obtenerCompraServicio = async (req = request, resp = response) => {
     status: compra != null,
     msg: "Success ",
     data: compra,
-  }); 
+  });
 }
 export const crearCompraServicio = async (req = request, resp = response) => {
   const { uid = 0, ids = 0 } = req.params;
@@ -796,7 +900,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
   }
 };
 export const updateCompraServicio = async (req = request, resp = response) => {
-  let id_compras : number = Number(req.params.id_compra); 
+  let id_compras: number = Number(req.params.id_compra);
   const { uid = 0, ids = 0 } = req.params;
   const id_usuario = Number(uid);
   try {
@@ -830,7 +934,7 @@ export const updateCompraServicio = async (req = request, resp = response) => {
       fecha_de_pago.setDate(fecha_de_pago.getDate() + dias_credito);
     }
     const compra = await prisma.compras.update({
-      where:{
+      where: {
         id_compras
       },
       data: {
