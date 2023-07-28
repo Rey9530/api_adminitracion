@@ -51,7 +51,7 @@ export const getRegistrosFiltrados = async (req = request, resp = response) => {
   //   var hasta = new Date(anio, 11, 31, 23, 59, 59);
   // }
   var wMes = {
-    fecha_creacion: {
+    inicio: {
       gte: desde,
       lte: hasta,
     },
