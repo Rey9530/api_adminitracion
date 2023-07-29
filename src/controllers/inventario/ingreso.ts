@@ -581,6 +581,7 @@ export const obtenerListadocheques = async (
       proveedor: provv?.nombre ?? "",
       id_proveedor: provv?.id_proveedor ?? 0,
       no_cheque: element?.no_cheque ?? "0",
+      id_cheque: element?.id_cheque ?? "0",
       monto: registro._sum.total ?? 0,
       fecha: compras.length > 0 ? fecha : new Date(),
       compras
