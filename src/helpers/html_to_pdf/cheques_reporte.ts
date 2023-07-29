@@ -167,7 +167,7 @@ export const htmlImprimirCheque = async (datos: any) => {
   var html_facturas = "";
   for (let index = 0; index < datos.length; index++) {
     const element = datos[index];
-    html_facturas += `C.C.F&nbsp;&nbsp;${element.numero_factura}&nbsp;&nbsp;&nbsp;&nbsp;$${formatNumber(monto)}<br/>`;
+    html_facturas += `C.C.F&nbsp;&nbsp;${element.numero_factura}&nbsp;&nbsp;&nbsp;&nbsp;$${formatNumber(element.total)}<br/>`;
   }
   html_facturas += `<hr/>${formatNumber(monto)}`;
  
