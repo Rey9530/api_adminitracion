@@ -2,7 +2,7 @@ import expres from "express";
 const response = expres.response;
 const request = expres.request;
 import { PrismaClient } from "@prisma/client";
-import { htmlReporteCheques } from "../../helpers/html_to_pdf/cheques_reporte";
+import { htmlReporteCheques, htmlImprimirCheque } from "../../helpers/html_to_pdf/cheques_reporte";
 import { generarPdf } from "../../helpers/generar_pdfs";
 const prisma = new PrismaClient();
 
@@ -80,6 +80,8 @@ export const comprasACheque = async (req = request, resp = response) => {
 
 export const pagarCheque = async (req = request, resp = response) => {
   let { idsProveedores = [], id_sucursal = 0 } = req.body;
+  const { uid = 0, } = req.params;
+  const id_usuario = Number(uid);
 
   if (!(idsProveedores.length > 0)) {
     return resp.json({
@@ -96,7 +98,13 @@ export const pagarCheque = async (req = request, resp = response) => {
   let data = 0;
   for (let index = 0; index < idsProveedores.length; index++) {
     const element = idsProveedores[index];
-
+    const cheque = await prisma.cheques.create({
+      data: {
+        no_cheque: element.no_cheque,
+        id_usuario
+      }
+    });
+    var fecha = new Date();
     var datos = await prisma.compras.updateMany({
       where: {
         id_proveedor: Number(element.id_proveedor),
@@ -105,31 +113,15 @@ export const pagarCheque = async (req = request, resp = response) => {
       },
       data: {
         estado_pago: "PAGADO",
-        fecha_actualizacion: new Date(),
-        no_cheque: element.no_cheque
+        fecha_actualizacion: fecha,
+        no_cheque: element.no_cheque,
+        id_cheque: cheque.id_cheque,
       },
     });
-
     if (datos.count > 0) {
       data++;
     }
-
   }
-  // const data = await prisma.compras.updateMany({
-  //   where: {
-  //     OR: idsProveedores.map((contains: number) => {
-  //       return {
-  //         id_proveedor: Number(contains),
-  //         estado_pago: "ENCHEQUE",
-  //         ...wSucursal,
-  //       };
-  //     }),
-  //   },
-  //   data: {
-  //     estado_pago: "PAGADO",
-  //     fecha_actualizacion: new Date(),
-  //   },
-  // });
   return resp.json({
     status: data > 0,
     msg: data > 0 ? "Compras procesadas" : "Ha ocurrido un error",
@@ -509,12 +501,15 @@ export const obtenerListadocheques = async (
   var desde_v: any = req.query.desde ? req.query.desde!.toString() : new Date().toString();
   var hasta_v: any = req.query.hasta ? req.query.hasta!.toString() : new Date().toString();
   var desde = new Date(desde_v);
+  desde.setHours(0);
+  desde.setMinutes(0);
   var hasta = new Date(hasta_v);
-  hasta.setHours(hasta.getHours() + 8);
+  hasta.setHours(23);
+  hasta.setMinutes(59);
 
 
   var proveedores = await prisma.compras.groupBy({
-    by: ["no_cheque", "id_proveedor"],
+    by: ["id_cheque","no_cheque" ,"id_proveedor"],
     where: {
       tipo_pago: "CREDITO",
       estado_pago: "PAGADO",
@@ -564,11 +559,7 @@ export const obtenerListadocheques = async (
       id_proveedor: element.id_proveedor,
       tipo_pago: "CREDITO",
       estado_pago: "PAGADO",
-      no_cheque: element?.no_cheque ?? "0",
-      fecha_actualizacion: {
-        gte: desde,
-        lte: hasta,
-      },
+      id_cheque: element?.id_cheque ?? 0,
     };
 
     var compras = await prisma.compras.findMany({
@@ -583,13 +574,15 @@ export const obtenerListadocheques = async (
         total: true,
       },
       where
-    });
+    }); 
+    var fecha = new Date(compras[0].fecha_actualizacion);
+    fecha.setHours(fecha.getHours() + 6)
     data.push({
       proveedor: provv?.nombre ?? "",
       id_proveedor: provv?.id_proveedor ?? 0,
       no_cheque: element?.no_cheque ?? "0",
       monto: registro._sum.total ?? 0,
-      fecha: compras.length > 0 ? compras[0].fecha_actualizacion : new Date(),
+      fecha: compras.length > 0 ? fecha : new Date(),
       compras
     });
   }
@@ -663,6 +656,28 @@ export const imprimirListadoPrecheques = async (
 
   var contenidoHtml: any = await htmlReporteCheques(data);
   const pdf = await generarPdf(contenidoHtml, "reporte_demo4", true, true);
+  resp.set({ "Content-Type": "application/pdf", "Content-Length": pdf.length });
+  return resp.send(pdf);
+};
+
+
+export const imprimirChequecheques = async (
+  req = request,
+  resp = response
+) => {
+  let id_cheque: number = Number(req.params.id_cheque);
+
+  var compras = await prisma.compras.findMany({
+    where: {
+      id_cheque
+    },
+    include: {
+      Proveedor: true
+    }
+  });
+
+  var contenidoHtml: any = await htmlImprimirCheque(compras);
+  const pdf = await generarPdf(contenidoHtml, "reporte_cheque", true);
   resp.set({ "Content-Type": "application/pdf", "Content-Length": pdf.length });
   return resp.send(pdf);
 };

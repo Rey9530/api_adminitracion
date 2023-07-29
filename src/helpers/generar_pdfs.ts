@@ -28,7 +28,7 @@ export const generarPdf = async (html: any, nombre: string = "reporte", isFile: 
     // Downlaod the PDF
     const pdf = await page.pdf({
         path,
-        margin: { top: '50px', right: '40px', bottom: '30px', left: '40px' },
+        margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' },
         printBackground: true,
         format: 'A4',
         landscape: isLandScape

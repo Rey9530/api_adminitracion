@@ -97,6 +97,7 @@ model Usuarios {
   CierresDiarios       CierresDiarios[]
   Agenda               Agenda[]
   OrdenDeSalida        OrdenDeSalida[]
+  Cheques              Cheques[]
   LiquidacionCajaChica LiquidacionCajaChica[]
 
   @@index([id_rol], name: "fk_usuario_rol_id")
@@ -377,6 +378,18 @@ model Proveedores {
   @@index([id_usuario], name: "fk_proveedor_usuario_id")
 }
 
+model Cheques {
+  id_cheque      Int       @id @default(autoincrement())
+  no_cheque      String?
+  fecha_creacion DateTime  @default(now())
+  estado         Estado    @default(ACTIVO)
+  Compras        Compras[]
+  id_usuario     Int
+  Usuario        Usuarios  @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cheque_usuario")
+
+  @@index([id_usuario], name: "fk_cheque_usuario_id")
+}
+
 model Compras {
   id_compras          Int              @id @default(autoincrement())
   numero_factura      String           @default("0")
@@ -386,7 +399,9 @@ model Compras {
   id_proveedor        Int?
   nombre_proveedor    String?          @default("")
   dui_proveedor       String?          @default("")
-  no_cheque           String?          @default("") // esto para cuando sea de credito y se paga
+  no_cheque           String?          @default("")
+  id_cheque           Int?
+  Cheques             Cheques?         @relation(fields: [id_cheque], references: [id_cheque], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_cheque")
   Proveedor           Proveedores?     @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_compras_proveedor")
   tipo_pago           TipoPago         @default(CONTADO)
   tipo_compra         TipoCompra       @default(INTERNA)
@@ -418,6 +433,7 @@ model Compras {
   fecha_de_pago       DateTime?
   estado_pago         EstadoPago       @default(PENDIENTE)
 
+  @@index([id_cheque], name: "fk_compras_cheque_id")
   @@index([id_tipo_factura], name: "fk_compras_tipo_factura_id")
   @@index([id_sucursal], name: "fk_compras_sucursal_id")
   @@index([id_bodega], name: "fk_compras_bodega_id")

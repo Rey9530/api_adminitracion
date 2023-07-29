@@ -24,7 +24,19 @@ export const getData = async (req = request, resp = response) => {
   });
 };
 
+
 export const getPdf = async (_ = request, resp = response) => {
+  const ubicacionPlantilla = require.resolve("./../html/reports/cierres_plantilla.html");
+  let contenidoHtml = fs.readFileSync(ubicacionPlantilla, 'utf8'); 
+
+  const pdf = await generarPdf(contenidoHtml, "reporte_demo4", true); 
+
+  resp.setHeader("Content-Type", "application/pdf");
+  resp.send(pdf);
+
+};
+
+export const getPdf2 = async (_ = request, resp = response) => {
   const ubicacionPlantilla = require.resolve("./../html/emails/cierres_plantilla.html");
   let contenidoHtml = fs.readFileSync(ubicacionPlantilla, 'utf8');
   // Podemos acceder a la petición HTTP 
@@ -53,16 +65,14 @@ export const getPdf = async (_ = request, resp = response) => {
   contenidoHtml = contenidoHtml.replace("{{usuario_generador}}", "$1.00"); 
   contenidoHtml = contenidoHtml.replace("{{nota}}", "$1.00"); 
 
-  const pdf = await generarPdf(contenidoHtml, "reporte_demo4", true);
-  console.log(pdf);
-
+  const pdf = await generarPdf(contenidoHtml, "reporte_demo4", true); 
   resp.setHeader("Content-Type", "application/pdf");
   resp.send(pdf);
 
 };
 
 export const getHtml = async (_ = request, resp = response) => {
-  const ubicacionPlantilla = require.resolve("./../html/emails/cierres_plantilla.html");
+  const ubicacionPlantilla = require.resolve("./../html/reports/cierres_plantilla.html");
   let contenidoHtml = fs.readFileSync(ubicacionPlantilla, 'utf8');
   // Podemos acceder a la petición HTTP
   const valorPasadoPorNode = "Soy un valor pasado desde JavaScript";
