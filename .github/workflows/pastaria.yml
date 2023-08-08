@@ -35,7 +35,6 @@ jobs:
             node-version: 18 
         - run: npm install
         - run: npm ci
-        # run the migration in the test database
         - run: npm run db:push
         - run: npm run datos
         - run: npm run test
@@ -50,7 +49,7 @@ jobs:
       - name: Run production migration
         run: npm run migrate:deploy
         env:
-          DATABASE_URL: postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA}}@${{secrets.HOST}}:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public
+          DATABASE_URL: postgresql://${{secrets.DB_NAME_PASTARIA}}:${{secrets.DB_PASSWORD_PASTARIA}}@${{secrets.HOST_PAST}}:${{secrets.DB_PORT_PASTARIA}}/${{secrets.DB_NAME_PASTARIA}}?schema=public
 
   Deploy:
     runs-on: ubuntu-latest
@@ -59,20 +58,21 @@ jobs:
       - name: Despliegue en Droplet de DigitalOcean
         uses: appleboy/ssh-action@master 
         with:
-          host: ${{secrets.HOST}}
-          username: ${{secrets.USERNAME}}
-          key: ${{secrets.KEY}}
+          host: ${{secrets.HOST_PAST}}
+          username: ${{secrets.USERNAME_PAST}}
+          password: ${{secrets.PASSWORD_PAST}}
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            cd /var/www/pastaria-api.relex-dev.com/html 
+            cd /var/www/pastaria-backend.gvittorios.com/html 
+            git checkout pastaria
             git pull
             sudo rm -r .env 
             echo "Configuran Variables en ENV"  
             sudo echo "JWT_SECRET=${{secrets.JWT_SECRET_PASTARIA}}" >> .env
             sudo echo "DB_PASSWORD=${{secrets.DB_PASSWORD_PASTARIA}}" >> .env
             sudo echo "DB_NAME=${{secrets.DB_NAME_PASTARIA}}" >> .env
-            sudo echo "DB_HOST=${{secrets.DB_HOST}}" >> .env
+            sudo echo "DB_HOST=localhost" >> .env
             sudo echo "DB_PORT=${{secrets.DB_PORT_PASTARIA}}" >> .env
             sudo echo "CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}" >> .env
             sudo echo "CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}" >> .env
@@ -82,14 +82,13 @@ jobs:
             sudo echo "PASSWORD_EMAIL=${{secrets.PASSWORD_EMAIL}}" >> .env 
             sudo echo "PORT=${{secrets.PORT_API_PASTARIA}}" >> .env 
             echo "Fin Variables en ENV"  
-            pm2 stop mi-api-pastaria 
+            pm2 stop api-pastaria 
             rm -r node_modules && rm -r build
             yarn install
             npx prisma generate
             yarn run tsc
-            cp -r src/html build/src
-            mkdir build/src/helpers/pdfs_x_borra 
-            pm2 restart mi-api-pastaria 
+            cp -r src/html build/src && mkdir build/src/helpers/pdfs_x_borra 
+            pm2 restart api-pastaria 
 
 
 # yarn run migrate:deploy
