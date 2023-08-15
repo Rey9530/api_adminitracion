@@ -871,8 +871,8 @@ export const crearCompraServicio = async (req = request, resp = response) => {
     id_sucursal = Number(id_sucursal);
     id_sucursal = id_sucursal > 0 ? id_sucursal : Number(ids);
     dias_credito = Number(dias_credito);
+    var fecha_de_pago = new Date(fecha_factura);
     fecha_factura = new Date(fecha_factura);
-    var fecha_de_pago = new Date();
     if (tipo_pago == "CREDITO" && dias_credito > 0) {
       fecha_de_pago.setDate(fecha_de_pago.getDate() + dias_credito);
     }
