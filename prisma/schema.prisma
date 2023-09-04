@@ -65,6 +65,7 @@ model Sucursales {
 model Bodegas {
   id_bodega     Int             @id @default(autoincrement())
   nombre        String
+  es_principal  Int             @default(0) // 0=no, 1=si // debe existir una prinicpal por sucursal
   estado        Estado          @default(ACTIVO)
   id_sucursal   Int
   Sucursales    Sucursales      @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_bodega_sucursal")

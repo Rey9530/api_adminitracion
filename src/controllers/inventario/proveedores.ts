@@ -264,6 +264,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
     id_tipo_proveedor = Number(id_tipo_proveedor);
     id_banco = Number(id_banco);
     id_municipio = id_municipio > 0 ? id_municipio : null;
+    id_banco = id_banco > 0 ? id_banco : null;
     id_tipo_proveedor = id_tipo_proveedor > 0 ? id_tipo_proveedor : null;
 
     const registro = await prisma.proveedores.findFirst({

@@ -9,7 +9,7 @@ export const getRegistros = async (req: any, resp = response) => {
   var wSucursal = {};
   if (id_usuario > 0) {
     var usuario = await prisma.usuarios.findFirst({ where: { id: id_usuario } });
-    if (Number(usuario?.id_sucursal_reser) > 0) {
+    if (Number(usuario?.id_sucursal_reser) > 0 && usuario?.id_rol!=1) {
       wSucursal = { id_sucursal: Number(usuario?.id_sucursal_reser) };
     }
   }
