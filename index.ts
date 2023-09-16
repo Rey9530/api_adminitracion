@@ -17,6 +17,7 @@ import sucursales from "./src/routes/facturacion/sucursales";
 import catalogo_categorias from "./src/routes/facturacion/catalogo_categorias"; 
 import catalogo from "./src/routes/facturacion/catalogo"; 
 import factura from "./src/routes/facturacion/factura"; 
+import punto_venta from "./src/routes/facturacion/punto_venta"; 
 import reportes from "./src/routes/facturacion/reportes"; 
 import reportes_compras from "./src/routes/facturacion/reportes_compras"; 
 import estadisticas from "./src/routes/facturacion/estadisticas"; 
@@ -53,6 +54,7 @@ app.use('/admin/extras_reservas', extras_reservas);
 //Facturacion
 app.use('/facturacion/cliente', cliente);
 app.use('/facturacion/factura', factura);
+app.use('/facturacion/punto_venta', punto_venta);
 app.use('/facturacion/catalogo', catalogo);
 app.use('/facturacion/sucursales', sucursales);
 app.use('/facturacion/catalogo_tipos', catalogo_tipos);

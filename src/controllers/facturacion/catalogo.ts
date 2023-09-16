@@ -2,6 +2,7 @@ import expres from "express";
 const response = expres.response;
 const request = expres.request;
 import { PrismaClient } from "@prisma/client";
+import { eliminarArchivoCloudinary, subirArchivo } from "../utils";
 const prisma = new PrismaClient();
 
 export const getRegistros = async (req: any, resp = response) => {
@@ -21,18 +22,34 @@ export const getRegistros = async (req: any, resp = response) => {
             OR: [
               { codigo: { contains } },
               { nombre: { contains } },
-              { descripcion: { contains } }, 
+              { descripcion: { contains } },
             ],
           },
         ],
       };
     });
   }
-  const where = { AND: [{ estado: "ACTIVO" }, ...consultas] }; 
+  const where = { AND: [{ estado: "ACTIVO" }, ...consultas] };
   const total = await prisma.catalogo.count({ where });
   const registros = await prisma.catalogo.findMany({
     where,
-    include: { Tipo: true, Categorias: true },
+    select: {
+      Tipo: true,
+      Categorias: true,
+      codigo: true,
+      descripcion: true,
+      estado: true,
+      existencias_maximas: true,
+      existencias_minimas: true,
+      fecha_creacion: true,
+      foto_url: true,
+      id_catalogo: true,
+      id_categoria: true,
+      id_tipo: true,
+      nombre: true,
+      precio_con_iva: true,
+      precio_sin_iva: true,
+    },
     take: registrosXpagina,
     skip: (pagina - 1) * registrosXpagina,
   });
@@ -81,6 +98,20 @@ export const crearRegistro = async (req = request, resp = response) => {
     existencias_maximas = 0,
   } = req.body;
   try {
+    id_tipo = Number(id_tipo);
+    id_categoria = Number(id_categoria);
+    precio_con_iva = Number(precio_con_iva);
+    precio_sin_iva = Number(precio_sin_iva);
+    existencias_minimas = Number(existencias_minimas);
+    existencias_maximas = Number(existencias_maximas);
+    let respImagen: any = {};
+    if (req.files && Object.keys(req.files).length > 0) {
+      respImagen = await subirArchivo(req.files);
+    }
+    let foto_obj = JSON.stringify(respImagen);
+    let foto_url = respImagen.secure_url ? respImagen.secure_url : "";
+
+
     const [tipo, categoria] = await Promise.all([
       await prisma.catalogoTipo.findFirst({
         where: { id_tipo },
@@ -101,25 +132,29 @@ export const crearRegistro = async (req = request, resp = response) => {
         msg: "La categoria no existe",
       });
     }
-    const data = await prisma.catalogo.create({
+    const data: any = await prisma.catalogo.create({
       data: {
         id_tipo,
         id_categoria,
         codigo,
         nombre,
         descripcion,
+        foto_obj,
+        foto_url,
         precio_con_iva,
         precio_sin_iva,
         existencias_minimas,
-        existencias_maximas
+        existencias_maximas,
       },
     });
+    delete data.foto_obj;
     resp.json({
       status: true,
       msg: "Registro creado con Éxito",
       data,
     });
   } catch (error) {
+    console.log(error)
     resp.status(500).json({
       status: false,
       msg: "Error inesperado reviosar log",
@@ -147,10 +182,17 @@ export const actualizarRegistro = async (req = request, resp = response) => {
       nombre = "",
       descripcion = "",
       precio_con_iva = 0,
-      precio_sin_iva = 0, 
-      existencias_minimas=0,
-      existencias_maximas=0
+      precio_sin_iva = 0,
+      existencias_minimas = 0,
+      existencias_maximas = 0
     } = req.body;
+
+    id_tipo = Number(id_tipo);
+    id_categoria = Number(id_categoria);
+    precio_con_iva = Number(precio_con_iva);
+    precio_sin_iva = Number(precio_sin_iva);
+    existencias_minimas = Number(existencias_minimas);
+    existencias_maximas = Number(existencias_maximas);
     const [tipo, categoria] = await Promise.all([
       await prisma.catalogoTipo.findFirst({
         where: { id_tipo },
@@ -170,15 +212,39 @@ export const actualizarRegistro = async (req = request, resp = response) => {
         status: false,
         msg: "La categoria no existe",
       });
+    } 
+
+    let foto_obj: any = registro.foto_obj;
+    let foto_url = registro.foto_url;
+    if (req.files && Object.keys(req.files).length > 0) {
+      try {
+        let respn: any = await subirArchivo(req.files);
+        foto_obj = JSON.stringify(respn);
+        foto_url = respn.secure_url;
+        if (
+          registro.foto_obj != "" &&
+          registro.foto_obj != "{}" &&
+          registro.foto_obj != null &&
+          registro.foto_obj.length > 0
+        ) {
+          let imagenActual = JSON.parse(registro.foto_obj);
+          await eliminarArchivoCloudinary(imagenActual.public_id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
+
     const registroActualizado = await prisma.catalogo.update({
       where: { id_catalogo: uid },
-      data: {
+      data: { 
         id_tipo,
         id_categoria,
         codigo,
         nombre,
         descripcion,
+        foto_obj,
+        foto_url,
         precio_con_iva,
         precio_sin_iva,
         existencias_minimas,
