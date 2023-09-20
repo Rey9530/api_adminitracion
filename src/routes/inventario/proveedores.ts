@@ -18,7 +18,7 @@ import { obntenerTiposContribuyentes } from "../../controllers/facturacion/clien
 router.use(fileUpload()); 
 router.get("/", validarJWT, getRegistros);
 router.get("/listado/bancos", validarJWT, getBancos);
-router.get("/listado/facturas/:id", validarJWT, getFacturasProveedores);
+router.get("/listado/facturas/:id_proveedor/:id_sucursal", validarJWT, getFacturasProveedores);
 router.get("/:id", validarJWT, getRegistro);
 router.post(
   "/",

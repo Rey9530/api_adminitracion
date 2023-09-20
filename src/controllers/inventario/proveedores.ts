@@ -21,12 +21,24 @@ export const getBancos = async (_: any, resp = response) => {
 
 
 export const getFacturasProveedores = async (req = request, resp = response) => {
-  let id_proveedor: number = Number(req.params.id);
+  let { id_proveedor = 0, id_sucursal = 0 } = req.params;
+  id_proveedor = Number(id_proveedor);
+  id_sucursal = Number(id_sucursal);
+
+  var wSucursal = {}
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal }
+
+  }
   var data = await prisma.compras.findMany({
     where: {
-      id_proveedor
+      id_proveedor,
+      ...wSucursal
     },
-    include: { Sucursales: true, FacturasTipos:true }
+    include: { Sucursales: true, FacturasTipos: true },
+    orderBy:{
+      fecha_factura:'desc'
+    }
   });
   return resp.json({
     status: true,
