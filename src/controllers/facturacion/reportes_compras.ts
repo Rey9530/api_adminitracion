@@ -64,25 +64,38 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
   hasta = new Date(hasta);
   hasta.setDate(hasta.getDate() + 1);
 
-  const data = await prisma.compras.findMany({
-    where: {
-      fecha_creacion: {
-        gte: desde,
-        lte: hasta,
+  const [data, result] = await Promise.all([
+    await prisma.compras.findMany({
+      where: {
+        fecha_creacion: {
+          gte: desde,
+          lte: hasta,
+        },
       },
-    },
-    include: { Proveedor: true, Sucursales: true, FacturasTipos: true },
-    orderBy: [
-      {
-        id_compras: "asc",
+      include: { Proveedor: true, Sucursales: true, FacturasTipos: true },
+      orderBy: [
+        {
+          id_compras: "asc",
+        },
+      ],
+    }),
+    await prisma.compras.aggregate({
+      _sum: {
+        total: true,
       },
-    ],
-  });
+      where: {
+        fecha_creacion: {
+          gte: desde,
+          lte: hasta,
+        },
+      },
+    }),
+  ]);
 
   return resp.json({
     status: true,
     msg: "Success",
-    data,
+    data: { listado: data, total: result._sum.total ?? 0, },
   });
 };
 
