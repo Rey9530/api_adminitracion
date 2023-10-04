@@ -509,7 +509,7 @@ export const obtenerListadocheques = async (
 
 
   var proveedores = await prisma.compras.groupBy({
-    by: ["id_cheque","no_cheque" ,"id_proveedor"],
+    by: ["id_cheque", "no_cheque", "id_proveedor"],
     where: {
       tipo_pago: "CREDITO",
       estado_pago: "PAGADO",
@@ -574,7 +574,7 @@ export const obtenerListadocheques = async (
         total: true,
       },
       where
-    }); 
+    });
     var fecha = new Date(compras[0].fecha_actualizacion);
     fecha.setHours(fecha.getHours() + 6)
     data.push({
@@ -593,6 +593,66 @@ export const obtenerListadocheques = async (
     status: true,
     msg: "Success",
     data,
+  });
+};
+
+
+
+export const obtenerListadoCreditoUsuario = async (
+  req = request,
+  resp = response
+) => {
+
+  var id_usuario: number = Number(req.query.query ? req.query.id_usuario!.toString() : "0");
+  var desde_v: any = req.query.desde ? req.query.desde!.toString() : new Date().toString();
+  var hasta_v: any = req.query.hasta ? req.query.hasta!.toString() : new Date().toString();
+  var desde = new Date(desde_v);
+  desde.setHours(0);
+  desde.setMinutes(0);
+  var hasta = new Date(hasta_v);
+  hasta.setHours(23);
+  hasta.setMinutes(59);
+
+  var wUsuario = {}
+  if (id_usuario > 0) {
+    wUsuario = { id_usuario }
+  }
+  const [compas, suncompas] = await Promise.all([
+    await prisma.compras.findMany({
+      where: {
+        tipo_pago: "TARJETCREDITO",
+        fecha_actualizacion: {
+          gte: desde,
+          lte: hasta,
+        },
+        ...wUsuario,
+      },
+      include: {
+        Sucursales: true,
+        Proveedor: true,
+        FacturasTipos: true,
+      }
+    }),
+    await prisma.compras.aggregate({
+      _sum: {
+        total: true,
+      },
+      where: {
+        tipo_pago: "TARJETCREDITO",
+        fecha_actualizacion: {
+          gte: desde,
+          lte: hasta,
+        },
+        ...wUsuario,
+      },
+    }),
+  ]);
+
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data: compas,
+    suma: suncompas._sum.total
   });
 };
 
