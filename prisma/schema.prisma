@@ -60,6 +60,7 @@ model Sucursales {
   Agenda               Agenda[]
   CierresDiarios       CierresDiarios[]
   LiquidacionCajaChica LiquidacionCajaChica[]
+  Mesas                Mesas[]
 }
 
 model Bodegas {
@@ -677,3 +678,41 @@ model LiquidacionCajaChica {
   @@index([id_cierre], name: "fk_liquidacion_cierre_id")
   @@index([id_sucursal], name: "fk_liquidacion_sucursal_id")
 }
+
+// Cuentas de clientes
+
+model Mesas {
+  id_mesa         Int               @id @default(autoincrement())
+  nombre          String
+  estado          Estado            @default(ACTIVO)
+  ubicacion       Ubicacion         @default(PrimerPiso)
+  id_sucursal     Int
+  Sucursales      Sucursales        @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_mesa_sucursal")
+  // CuentasClientes CuentasClientes[]
+
+  @@index([id_sucursal], name: "fk_mesa_sucursal_id")
+}
+
+enum Ubicacion {
+  PrimerPiso
+  SegundoPiso
+  Terraza
+}
+
+// model CuentasClientes {
+//   id_cuenta       Int          @id @default(autoincrement())
+//   nombre          String?      @default("")
+//   nota            String?      @default("")
+//   numero_clientes String?      @default("0")
+//   estado          EstadoCuenta @default(ABIERTA)
+//   id_mesa         Int
+//   Mesas           Mesas        @relation(fields: [id_mesa], references: [id_mesa], onDelete: NoAction, onUpdate: NoAction, map: "fk_mesa_cuenta")
+
+//   @@index([id_mesa], name: "fk_mesa_cuenta_id")
+// }
+
+// enum EstadoCuenta {
+//   ABIERTA
+//   CERRADA
+//   CANCELADA
+// }
