@@ -18,6 +18,7 @@ router.post(
   [
     validarJWT,
     check("nombre", "El nombre es obligatorio").not().isEmpty(),
+    check("n_personas", "El Número de Personas es obligatorio").not().isEmpty(),
     check("id_sucursal", "La sucursal es requerida").custom((e) =>
       validar_dato(e, "positivo")
     ),
@@ -33,6 +34,7 @@ router.put(
   [
     validarJWT,
     check("nombre", "El nombre es obligatorio").not().isEmpty(),
+    check("n_personas", "El Número de Personas es obligatorio").not().isEmpty(),
     check("id_sucursal", "La sucursal es requerida").custom((e) =>
       validar_dato(e, "positivo")
     ),

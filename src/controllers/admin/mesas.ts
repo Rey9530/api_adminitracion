@@ -43,7 +43,7 @@ export const getRegistro = async (req = request, resp = response) => {
 
 
 export const crearRegistro = async (req = request, resp = response) => {
-  let { nombre = "", ubicacion = "", id_sucursal = 0 } = req.body;
+  let { nombre = "", ubicacion = "", n_personas = "", id_sucursal = 0 } = req.body;
   try {
     id_sucursal = Number(id_sucursal);
 
@@ -62,6 +62,7 @@ export const crearRegistro = async (req = request, resp = response) => {
       data: {
         nombre,
         id_sucursal,
+        n_personas,
         ubicacion
       },
     });
@@ -82,7 +83,7 @@ export const crearRegistro = async (req = request, resp = response) => {
 export const actualizarRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
   try {
-    let { nombre = "", ubicacion = "", id_sucursal = 0 } = req.body;
+    let { nombre = "", ubicacion = "", n_personas = "", id_sucursal = 0 } = req.body;
     id_sucursal = Number(id_sucursal);
 
     const [registro, sucursal] = await Promise.all([
@@ -101,7 +102,7 @@ export const actualizarRegistro = async (req = request, resp = response) => {
     }
     const registroActualizado = await prisma.mesas.update({
       where: { id_mesa: uid },
-      data: { nombre, id_sucursal, ubicacion },
+      data: { nombre, id_sucursal, ubicacion, n_personas, },
     });
     resp.json({
       status: true,

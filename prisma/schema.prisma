@@ -682,12 +682,13 @@ model LiquidacionCajaChica {
 // Cuentas de clientes
 
 model Mesas {
-  id_mesa         Int               @id @default(autoincrement())
-  nombre          String
-  estado          Estado            @default(ACTIVO)
-  ubicacion       Ubicacion         @default(PrimerPiso)
-  id_sucursal     Int
-  Sucursales      Sucursales        @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_mesa_sucursal")
+  id_mesa     Int        @id @default(autoincrement())
+  nombre      String
+  n_personas  String?    @default("2")
+  estado      Estado     @default(ACTIVO)
+  ubicacion   Ubicacion  @default(PrimerPiso)
+  id_sucursal Int
+  Sucursales  Sucursales @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_mesa_sucursal")
   // CuentasClientes CuentasClientes[]
 
   @@index([id_sucursal], name: "fk_mesa_sucursal_id")
