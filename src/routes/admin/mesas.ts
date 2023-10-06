@@ -9,11 +9,13 @@ import {
   crearRegistro,
   actualizarRegistro,
   eliminarRegistro,
+  getRegistrosBySucursal,
 } from "../../controllers/admin/mesas";
 
 router.get("/", validarJWT, getRegistros);
+router.get("/get_by_sucursal/:id_sucursal/:ubicacion", validarJWT, getRegistrosBySucursal);
 router.get("/:id", validarJWT, getRegistro);
-router.post(
+router.post( 
   "/",
   [
     validarJWT,

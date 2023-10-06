@@ -9,9 +9,9 @@ export const getProdctosByCategorys = async (req = request, resp = response) => 
   console.log(id_usuario);
   const registros = await prisma.catalogoCategorias.findMany({
     where: { estado: "ACTIVO", },
-    include: { catalogo: true },
-    orderBy:{
-      nombre:'asc'
+    include: { catalogo: { include: { Categorias: true, Tipo: true } } },
+    orderBy: {
+      nombre: 'asc'
     }
   });
   const total = await registros.length;

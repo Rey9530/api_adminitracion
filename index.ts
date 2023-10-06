@@ -11,6 +11,7 @@ app.use(expres.json());
 //listado de rutas
 import usuarios from "./src/routes/usuarios";
 import mesas from "./src/routes/admin/mesas";
+import cuentas_cliente from "./src/routes/cuentas_clientes/cuentas_cliente";
 import perfil from "./src/routes/perfil";
 import auth from "./src/routes/auth"; 
 import catalogo_tipos from "./src/routes/facturacion/catalogo_tipos"; 
@@ -41,6 +42,7 @@ app.use('/utils', utils );
 //intanciando rutas
 app.use('/usuarios', usuarios );
 app.use('/admin/mesas', mesas );
+app.use('/cuentas_cliente', cuentas_cliente );
 app.use('/perfil', perfil );
 app.use('/auth', auth);  
 

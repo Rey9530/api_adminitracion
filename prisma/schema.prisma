@@ -121,27 +121,28 @@ model CatalogoTipo {
 }
 
 model Catalogo {
-  id_catalogo          Int                    @id @default(autoincrement())
-  id_tipo              Int
-  id_categoria         Int
-  codigo               String?                @db.Text
-  nombre               String
-  descripcion          String?                @db.Text
-  precio_sin_iva       Float?                 @default(0)
-  precio_con_iva       Float?                 @default(0)
-  existencias_minimas  Int?                   @default(0)
-  existencias_maximas  Int?                   @default(0)
-  Tipo                 CatalogoTipo           @relation(fields: [id_tipo], references: [id_tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_tipo_catalogo")
-  Categorias           CatalogoCategorias     @relation(fields: [id_categoria], references: [id_categoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_categoria_sefvicio")
-  estado               Estado                 @default(ACTIVO)
-  fecha_creacion       DateTime               @default(now()) @db.Timestamptz()
-  foto_obj             String?                @db.Text
-  foto_url             String?                @db.Text
-  FacturasDetalle      FacturasDetalle[]
-  ComprasDetalle       ComprasDetalle[]
-  Kardex               Kardex[]
-  Inventario           Inventario[]
-  OrdenDeSalidaDetalle OrdenDeSalidaDetalle[]
+  id_catalogo            Int                      @id @default(autoincrement())
+  id_tipo                Int
+  id_categoria           Int
+  codigo                 String?                  @db.Text
+  nombre                 String
+  descripcion            String?                  @db.Text
+  precio_sin_iva         Float?                   @default(0)
+  precio_con_iva         Float?                   @default(0)
+  existencias_minimas    Int?                     @default(0)
+  existencias_maximas    Int?                     @default(0)
+  Tipo                   CatalogoTipo             @relation(fields: [id_tipo], references: [id_tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_tipo_catalogo")
+  Categorias             CatalogoCategorias       @relation(fields: [id_categoria], references: [id_categoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_categoria_sefvicio")
+  estado                 Estado                   @default(ACTIVO)
+  fecha_creacion         DateTime                 @default(now()) @db.Timestamptz()
+  foto_obj               String?                  @db.Text
+  foto_url               String?                  @db.Text
+  FacturasDetalle        FacturasDetalle[]
+  ComprasDetalle         ComprasDetalle[]
+  Kardex                 Kardex[]
+  Inventario             Inventario[]
+  OrdenDeSalidaDetalle   OrdenDeSalidaDetalle[]
+  CuentasClientesDetalle CuentasClientesDetalle[]
 
   @@index([id_tipo], name: "fk_tipo_catalogo_id")
   @@index([id_categoria], name: "fk_categoria_sefvicio_id")
@@ -682,16 +683,18 @@ model LiquidacionCajaChica {
 // Cuentas de clientes
 
 model Mesas {
-  id_mesa     Int        @id @default(autoincrement())
-  nombre      String
-  n_personas  String?    @default("2")
-  estado      Estado     @default(ACTIVO)
-  ubicacion   Ubicacion  @default(PrimerPiso)
-  id_sucursal Int
-  Sucursales  Sucursales @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_mesa_sucursal")
-  // CuentasClientes CuentasClientes[]
+  id_mesa         Int              @id @default(autoincrement())
+  nombre          String
+  n_personas      String?          @default("2")
+  estado          Estado           @default(ACTIVO)
+  ubicacion       Ubicacion        @default(PrimerPiso)
+  id_sucursal     Int
+  Sucursales      Sucursales       @relation(fields: [id_sucursal], references: [id_sucursal], onDelete: NoAction, onUpdate: NoAction, map: "fk_mesa_sucursal")
+  id_cuenta       Int?
+  CuentasClientes CuentasClientes? @relation(fields: [id_cuenta], references: [id_cuenta], onDelete: NoAction, onUpdate: NoAction, map: "fk_mesa_cuenta")
 
   @@index([id_sucursal], name: "fk_mesa_sucursal_id")
+  @@index([id_cuenta], name: "fk_mesa_cuenta_id")
 }
 
 enum Ubicacion {
@@ -700,20 +703,39 @@ enum Ubicacion {
   Terraza
 }
 
-// model CuentasClientes {
-//   id_cuenta       Int          @id @default(autoincrement())
-//   nombre          String?      @default("")
-//   nota            String?      @default("")
-//   numero_clientes String?      @default("0")
-//   estado          EstadoCuenta @default(ABIERTA)
-//   id_mesa         Int
-//   Mesas           Mesas        @relation(fields: [id_mesa], references: [id_mesa], onDelete: NoAction, onUpdate: NoAction, map: "fk_mesa_cuenta")
+model CuentasClientes {
+  id_cuenta              Int                      @id @default(autoincrement())
+  nombre                 String?                  @default("")
+  nota                   String?                  @default("")
+  numero_clientes        String?                  @default("0")
+  total                  Float?                   @default(0)
+  estado                 EstadoCuenta             @default(ABIERTA)
+  fecha_creacion         DateTime                 @default(now()) @db.Timestamptz()
+  fecha_actualizacion    DateTime                 @default(now()) @db.Timestamptz()
+  Mesas                  Mesas[]
+  CuentasClientesDetalle CuentasClientesDetalle[]
+}
 
-//   @@index([id_mesa], name: "fk_mesa_cuenta_id")
-// }
+model CuentasClientesDetalle {
+  id_cuenta_detalle   Int              @id @default(autoincrement())
+  // nota                String?          @default("") 
+  costo_unitario      Float            @default(0)
+  cantidad            Float            @default(0)
+  total               Float?           @default(0)
+  estado              Estado           @default(ACTIVO)
+  fecha_creacion      DateTime         @default(now()) @db.Timestamptz()
+  fecha_actualizacion DateTime         @default(now()) @db.Timestamptz()
+  id_cuenta           Int?
+  CuentasClientes     CuentasClientes? @relation(fields: [id_cuenta], references: [id_cuenta], onDelete: NoAction, onUpdate: NoAction, map: "fk_cuenta_detalle")
+  id_catalogo         Int              @default(0)
+  Catalogo            Catalogo         @relation(fields: [id_catalogo], references: [id_catalogo], onDelete: NoAction, onUpdate: NoAction, map: "fk_detalle_cuenta")
 
-// enum EstadoCuenta {
-//   ABIERTA
-//   CERRADA
-//   CANCELADA
-// }
+  @@index([id_cuenta], name: "fk_cuenta_detalle_id")
+  @@index([id_catalogo], name: "fk_detalle_cuenta_id")
+}
+
+enum EstadoCuenta {
+  ABIERTA
+  CERRADA
+  CANCELADA
+}

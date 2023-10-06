@@ -20,6 +20,35 @@ export const getRegistros = async (__: any, resp = response) => {
     total,
   });
 };
+export const getRegistrosBySucursal = async (req = request, resp = response) => {
+  var arrayUbi = ['PrimerPiso', 'SegundoPiso', 'Terraza'];
+  let id_sucursal: number = Number(req.params.id_sucursal);
+  let ubicacion: any = req.params.ubicacion.toString();
+  if (!arrayUbi.includes(ubicacion)) {
+
+    return resp.json({
+      status: false,
+      msg: "Parametro ubicacion es incorrecto",
+      data: null
+    });
+  }
+  const registros = await prisma.mesas.findMany({
+    where: { estado: "ACTIVO", id_sucursal, ubicacion },
+    orderBy: {
+      id_mesa: "asc",
+    },
+    include: {
+      CuentasClientes: true
+    }
+  });
+  const total = await registros.length;
+  return resp.json({
+    status: true,
+    msg: "Listado de registros",
+    registros,
+    total,
+  });
+};
 
 export const getRegistro = async (req = request, resp = response) => {
   let uid: number = Number(req.params.id);
@@ -46,8 +75,6 @@ export const crearRegistro = async (req = request, resp = response) => {
   let { nombre = "", ubicacion = "", n_personas = "", id_sucursal = 0 } = req.body;
   try {
     id_sucursal = Number(id_sucursal);
-
-
     var sucursal = await prisma.sucursales.findFirst({
       where: { id_sucursal },
     });
