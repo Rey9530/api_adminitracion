@@ -6,5 +6,5 @@ export const formatNumber = (numb: any) => {
   if (str.length == 1) {
     str[1] = "00";
   }
-  return "$" + str.join(".");
+  return "$ " + str.join(".");
 }

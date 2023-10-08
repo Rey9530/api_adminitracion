@@ -2,7 +2,7 @@ import expres from "express";
 const response = expres.response;
 const request = expres.request;
 import { PrismaClient } from "@prisma/client";
-import { htmlReporteCheques, htmlImprimirCheque } from "../../helpers/html_to_pdf/cheques_reporte";
+import { htmlReporteCheques, htmlImprimirCheque, htmlReporteChequesConsoli } from "../../helpers/html_to_pdf/cheques_reporte";
 import { generarPdf } from "../../helpers/generar_pdfs";
 const prisma = new PrismaClient();
 
@@ -501,12 +501,11 @@ export const obtenerListadocheques = async (
   var desde_v: any = req.query.desde ? req.query.desde!.toString() : new Date().toString();
   var hasta_v: any = req.query.hasta ? req.query.hasta!.toString() : new Date().toString();
   var desde = new Date(desde_v);
-  desde.setHours(0);
-  desde.setMinutes(0);
-  var hasta = new Date(hasta_v);
-  hasta.setHours(23);
-  hasta.setMinutes(59);
-
+  var hasta = new Date(hasta_v); 
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59);  
+  desde = new Date(desde.toUTCString());
+  hasta = new Date(hasta.toUTCString());
 
   var proveedores = await prisma.compras.groupBy({
     by: ["id_cheque", "no_cheque", "id_proveedor"],
@@ -606,12 +605,10 @@ export const obtenerListadoCreditoUsuario = async (
   var id_usuario: number = Number(req.query.query ? req.query.id_usuario!.toString() : "0");
   var desde_v: any = req.query.desde ? req.query.desde!.toString() : new Date().toString();
   var hasta_v: any = req.query.hasta ? req.query.hasta!.toString() : new Date().toString();
-  var desde = new Date(desde_v);
-  desde.setHours(0);
-  desde.setMinutes(0);
-  var hasta = new Date(hasta_v);
-  hasta.setHours(23);
-  hasta.setMinutes(59);
+  var desde = new Date(desde_v); 
+  var hasta = new Date(hasta_v); 
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59); 
 
   var wUsuario = {}
   if (id_usuario > 0) {
@@ -717,6 +714,61 @@ export const imprimirListadoPrecheques = async (
 
   var contenidoHtml: any = await htmlReporteCheques(data);
   const pdf = await generarPdf(contenidoHtml, "reporte_demo4", true, true);
+  resp.set({ "Content-Type": "application/pdf", "Content-Length": pdf.length });
+  return resp.send(pdf);
+};
+
+
+export const imprimirListadoConsol = async (
+  req = request,
+  resp = response
+) => {
+  let id_sucursal: number = Number(req.params.id_sucursal);
+  let wSucursal = {};
+  if (id_sucursal > 0) {
+    wSucursal = { id_sucursal };
+  }
+
+  var proveedores = await prisma.compras.groupBy({
+    by: ["id_proveedor"],
+    where: {
+      ...wSucursal,
+      tipo_pago: "CREDITO",
+      estado_pago: "ENCHEQUE",
+    },
+  });
+
+  var data = [];
+  for (let index = 0; index < proveedores.length; index++) {
+    const element = proveedores[index];
+    var provv = await prisma.proveedores.findFirst({
+      where: { id_proveedor: element.id_proveedor ?? 0 },
+      select: { nombre: true, id_proveedor: true, Banco: true, no_cuenta: true, tipo_cuenta: true },
+    });
+ 
+    var registro = await prisma.compras.aggregate({
+      _sum: {
+        total: true,
+      },
+      where: {
+        id_proveedor: element.id_proveedor,
+        estado_pago: "ENCHEQUE",
+        ...wSucursal,
+      },
+    });
+    data.push({
+      proveedor: provv?.nombre ?? "",
+      id_proveedor: provv?.id_proveedor ?? 0,
+      banco: provv?.Banco?.nombre ?? 0,
+      no_cuenta: provv?.no_cuenta ?? 0,
+      tipo_cuenta: provv?.tipo_cuenta ?? 0,
+      monto: registro._sum.total ?? 0,
+       
+    });
+  }
+
+  var contenidoHtml: any = await htmlReporteChequesConsoli(data);
+  const pdf = await generarPdf(contenidoHtml, "reporte_demo4", true);
   resp.set({ "Content-Type": "application/pdf", "Content-Length": pdf.length });
   return resp.send(pdf);
 };
@@ -920,6 +972,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
       detalle = "",
       iva = 0,
       cesc = 0,
+      descuento = 0,
       iva_percivido = 0,
       monto = 0,
       fovial = 0,
@@ -958,6 +1011,7 @@ export const crearCompraServicio = async (req = request, resp = response) => {
         id_sucursal,
         numero_quedan,
         fecha_de_pago,
+        descuento,
         estado_pago: tipo_pago == "CREDITO" ? "PENDIENTE" : "PAGADO",
       },
     });

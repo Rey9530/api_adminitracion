@@ -4,7 +4,7 @@ import { check } from "express-validator";
 import { validarCampos } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt"; 
 import { libroCompras, libroComprasAlContado, obtenerListadoCompras, obtenerListadoComprasInventario } from "../../controllers/facturacion/reportes_compras";
-import { eliminarCompra, imprimirChequecheques, imprimirListadoPrecheques, obntenerListadoFacturasAlCredito, obntenerListadoPrecheques, obtenerListadoCreditoUsuario, obtenerListadocheques, revertirEstadoCompra } from "../../controllers/inventario/ingreso";
+import { eliminarCompra, imprimirChequecheques, imprimirListadoConsol, imprimirListadoPrecheques, obntenerListadoFacturasAlCredito, obntenerListadoPrecheques, obtenerListadoCreditoUsuario, obtenerListadocheques, revertirEstadoCompra } from "../../controllers/inventario/ingreso";
  
 router.get(
   "/libro_compras",
@@ -78,6 +78,11 @@ router.get(
 router.get(
   "/imprimir_pre_cheques/:id_sucursal", 
   imprimirListadoPrecheques 
+); 
+
+router.get(
+  "/imprimir_pre_cheques_cons/:id_sucursal", 
+  imprimirListadoConsol 
 ); 
 
 

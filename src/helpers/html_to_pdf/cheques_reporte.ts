@@ -124,6 +124,77 @@ export const htmlReporteCheques = async (datos: any) => {
 }
 
 
+export const htmlReporteChequesConsoli = async (datos: any) => {
+  var html = `
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte</title>
+    <style>
+    table,th,td {
+      border: 0.2px solid black;
+      border-collapse: collapse;
+    }
+    td { 
+      font-size:10px; 
+    }
+    th { 
+      font-size:12px;
+      font-weight: bold; 
+    }
+    </style>
+</head>
+<body>
+<h3 style="margin:0;">RESTAURANTE PASTARIA</h3>
+<table  id="table_id" style="width:100%; ">
+<thead>
+  <tr> 
+    <th scope="col" style="width: 2%">#</th>
+    <th scope="col" style="width: 15%">Nombre del proveedor</th>
+    <th scope="col" style="width: 20%">No. Cheque</th>
+    <th scope="col" style="width: 10%">Monto total</th>
+  </tr>
+</thead>
+<tbody   >
+`;
+  var total = 0;
+  for (let index = 0; index < datos.length; index++) {
+    const data = datos[index];
+    total += data.monto;
+    html += `
+      <tr> 
+         <td align="center">`+ (index + 1) + `</td>
+        <td align="left">`+ data.proveedor + `</td>
+        <td align="right"> </td> 
+        <td align="right">`+ formatNumber(data.monto) + `</td>
+      </tr> `;
+  }
+  if (datos.length == 0) {
+    html += `
+<tr >
+  <td colspan="6" class="text-center">
+    <h4>Sin Datos</h4>
+  </td>
+</tr>
+`;
+  }
+  html += `
+<tr>  
+        <td align="right" colspan="3">Total </td> 
+        <td align="right">`+ formatNumber(total) + `</td>
+      </tr>
+</tbody> 
+</table>
+</body>
+</html>
+    `;
+
+  return html;
+}
+
+
 export const htmlImprimirCheque = async (datos: any) => {
   const ubicacionPlantilla = require.resolve(__dirname + "/../../html/reports/cierres_plantilla.html");
   let contenidoHtml = fs.readFileSync(ubicacionPlantilla, 'utf8');
@@ -170,13 +241,14 @@ export const htmlImprimirCheque = async (datos: any) => {
     html_facturas += `C.C.F&nbsp;&nbsp;${element.numero_factura}&nbsp;&nbsp;&nbsp;&nbsp;$${formatNumber(element.total)}<br/>`;
   }
   html_facturas += `<hr/>${formatNumber(monto)}`;
- 
+  console.log(datos)
   contenidoHtml = contenidoHtml.replace("{{fecha_60}}", shoFecha);
   contenidoHtml = contenidoHtml.replace("{{no_comprobante}}", (datos[0].id_cheque).toString().padStart(6, '0'));
   contenidoHtml = contenidoHtml.replace("{{proveedor_name_145}}", shoProveedor);
   contenidoHtml = contenidoHtml.replace("{{suma_125}}", shoSuma);
   contenidoHtml = contenidoHtml.replace("{{monto_35}}", shoMonto);
   contenidoHtml = contenidoHtml.replace("{{listado_facturas}}", html_facturas);
+  contenidoHtml = contenidoHtml.replace("{{cheque_}}", datos[0].no_cheque);
   return contenidoHtml;
 }
 
