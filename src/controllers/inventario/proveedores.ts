@@ -25,6 +25,15 @@ export const getFacturasProveedores = async (req = request, resp = response) => 
   id_proveedor = Number(id_proveedor);
   id_sucursal = Number(id_sucursal);
 
+
+  var desde1: any = req.query.desde!.toString();
+  var hasta1: any = req.query.hasta!.toString(); 
+  let desde = new Date(desde1);
+  let hasta = new Date(hasta1);
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59);
+  hasta.setSeconds(hasta.getSeconds() + 59);
+
   var wSucursal = {}
   if (id_sucursal > 0) {
     wSucursal = { id_sucursal }
@@ -32,12 +41,16 @@ export const getFacturasProveedores = async (req = request, resp = response) => 
   }
   var data = await prisma.compras.findMany({
     where: {
+      fecha_factura: {
+        gte: desde,
+        lte: hasta,
+      },
       id_proveedor,
       ...wSucursal
     },
     include: { Sucursales: true, FacturasTipos: true },
-    orderBy:{
-      fecha_factura:'desc'
+    orderBy: {
+      fecha_factura: 'desc'
     }
   });
   return resp.json({
