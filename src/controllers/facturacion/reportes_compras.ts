@@ -58,12 +58,19 @@ export const libroComprasAlContado = async (req = request, resp = response) => {
 };
 
 export const obtenerListadoCompras = async (req = request, resp = response) => {
-  var desde: any = req.query.desde!.toString();
-  var hasta: any = req.query.hasta!.toString();
-  desde = new Date(desde);
-  hasta = new Date(hasta);
-  hasta.setDate(hasta.getDate() + 1);
+  var desde1: any = req.query.desde!.toString();
+  var hasta1: any = req.query.hasta!.toString();
+  var sucursal: number = Number(req.query.sucursal);
+  let desde = new Date(desde1);
+  let hasta = new Date(hasta1);
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59);
+  hasta.setSeconds(hasta.getSeconds() + 59);
 
+  let wSucursal = {};
+  if (sucursal > 0) {
+    wSucursal = { id_sucursal: sucursal };
+  } 
   const [data, result] = await Promise.all([
     await prisma.compras.findMany({
       where: {
@@ -71,6 +78,7 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
           gte: desde,
           lte: hasta,
         },
+        ...wSucursal,
       },
       include: { Proveedor: true, Sucursales: true, FacturasTipos: true },
       orderBy: [
@@ -88,6 +96,7 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
           gte: desde,
           lte: hasta,
         },
+        ...wSucursal,
       },
     }),
   ]);
