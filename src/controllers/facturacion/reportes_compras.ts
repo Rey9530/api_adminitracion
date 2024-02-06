@@ -74,7 +74,7 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
   const [data, result] = await Promise.all([
     await prisma.compras.findMany({
       where: {
-        fecha_creacion: {
+        fecha_factura: {
           gte: desde,
           lte: hasta,
         },
@@ -92,7 +92,7 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
         total: true,
       },
       where: {
-        fecha_creacion: {
+        fecha_factura: {
           gte: desde,
           lte: hasta,
         },
