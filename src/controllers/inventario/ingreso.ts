@@ -501,9 +501,9 @@ export const obtenerListadocheques = async (
   var desde_v: any = req.query.desde ? req.query.desde!.toString() : new Date().toString();
   var hasta_v: any = req.query.hasta ? req.query.hasta!.toString() : new Date().toString();
   var desde = new Date(desde_v);
-  var hasta = new Date(hasta_v); 
+  var hasta = new Date(hasta_v);
   hasta.setHours(hasta.getHours() + 23);
-  hasta.setMinutes(hasta.getMinutes() + 59);  
+  hasta.setMinutes(hasta.getMinutes() + 59);
   desde = new Date(desde.toUTCString());
   hasta = new Date(hasta.toUTCString());
 
@@ -595,6 +595,115 @@ export const obtenerListadocheques = async (
   });
 };
 
+export const comprasPorProveedor = async (
+  req = request,
+  resp = response
+) => {
+
+  var query: any = req.query.query ? req.query.query!.toString() : "";
+  var desde_v: any = req.query.desde ? req.query.desde!.toString() : new Date().toString();
+  var hasta_v: any = req.query.hasta ? req.query.hasta!.toString() : new Date().toString();
+  var desde = new Date(desde_v);
+  var hasta = new Date(hasta_v);
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59);
+  desde = new Date(desde.toUTCString());
+  hasta = new Date(hasta.toUTCString());
+
+  var proveedores = await prisma.compras.groupBy({
+    by: ["id_proveedor"],
+    where: {
+      // tipo_pago: "CREDITO",
+      // estado_pago: "PAGADO",
+      estado: "ACTIVO",
+      fecha_factura: {
+        gte: desde,
+        lte: hasta,
+      },
+      OR: [
+        {
+          Proveedor: {
+            nombre: {
+              mode: "insensitive",
+              contains: query,
+            },
+          },
+        },
+      ]
+    },
+    // orderBy: {
+    //   Proveedor: {
+    //     nombre: "asc"
+    //   }
+    // }
+  });
+  let data = [];
+  for (let proveedor of proveedores) {
+    let provv = await prisma.proveedores.findFirst({
+      where: { id_proveedor: proveedor.id_proveedor ?? 0 },
+      select: { nombre: true, },
+    });
+
+    const [contado, credito, tarjetacredito] = await Promise.all([
+      await prisma.compras.aggregate({
+        where: {
+          id_proveedor: proveedor.id_proveedor,
+          estado: "ACTIVO",
+          tipo_pago: "CONTADO",
+          fecha_factura: {
+            gte: desde,
+            lte: hasta,
+          },
+        },
+        _sum: {
+          total: true,
+        },
+      }),
+      await prisma.compras.aggregate({
+        where: {
+          id_proveedor: proveedor.id_proveedor,
+          estado: "ACTIVO",
+          tipo_pago: "CREDITO",
+          fecha_factura: {
+            gte: desde,
+            lte: hasta,
+          },
+        },
+        _sum: {
+          total: true,
+        },
+      }),
+      await prisma.compras.aggregate({
+        where: {
+          id_proveedor: proveedor.id_proveedor,
+          estado: "ACTIVO",
+          tipo_pago: "TARJETCREDITO",
+          fecha_factura: {
+            gte: desde,
+            lte: hasta,
+          },
+        },
+        _sum: {
+          total: true,
+        },
+      }),
+    ]);
+    data.push({
+      proveedor: provv?.nombre ?? "",
+      contado: contado._sum.total ?? 0,
+      credito: credito._sum.total ?? 0,
+      tarjetacredito: tarjetacredito._sum.total ?? 0,
+    });
+  }
+
+
+  return resp.json({
+    status: true,
+    msg: "Success",
+    data,
+  });
+};
+
 
 
 export const obtenerListadoCreditoUsuario = async (
@@ -605,10 +714,10 @@ export const obtenerListadoCreditoUsuario = async (
   var id_usuario: number = Number(req.query.query ? req.query.id_usuario!.toString() : "0");
   var desde_v: any = req.query.desde ? req.query.desde!.toString() : new Date().toString();
   var hasta_v: any = req.query.hasta ? req.query.hasta!.toString() : new Date().toString();
-  var desde = new Date(desde_v); 
-  var hasta = new Date(hasta_v); 
+  var desde = new Date(desde_v);
+  var hasta = new Date(hasta_v);
   hasta.setHours(hasta.getHours() + 23);
-  hasta.setMinutes(hasta.getMinutes() + 59); 
+  hasta.setMinutes(hasta.getMinutes() + 59);
 
   var wUsuario = {}
   if (id_usuario > 0) {
@@ -745,7 +854,7 @@ export const imprimirListadoConsol = async (
       where: { id_proveedor: element.id_proveedor ?? 0 },
       select: { nombre: true, id_proveedor: true, Banco: true, no_cuenta: true, tipo_cuenta: true },
     });
- 
+
     var registro = await prisma.compras.aggregate({
       _sum: {
         total: true,
@@ -763,7 +872,7 @@ export const imprimirListadoConsol = async (
       no_cuenta: provv?.no_cuenta ?? 0,
       tipo_cuenta: provv?.tipo_cuenta ?? 0,
       monto: registro._sum.total ?? 0,
-       
+
     });
   }
 
