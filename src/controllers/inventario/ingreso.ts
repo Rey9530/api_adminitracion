@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import { htmlReporteCheques, htmlImprimirCheque, htmlReporteChequesConsoli } from "../../helpers/html_to_pdf/cheques_reporte";
 import { generarPdf } from "../../helpers/generar_pdfs";
 const prisma = new PrismaClient();
+import axios from 'axios';
 
 export const buscarEnCatalogo = async (req = request, resp = response) => {
   let { query = "", id_bodega = 0 } = req.body;
@@ -899,9 +900,29 @@ export const imprimirChequecheques = async (
   });
 
   var contenidoHtml: any = await htmlImprimirCheque(compras);
-  const pdf = await generarPdf(contenidoHtml, "reporte_cheque", true);
-  resp.set({ "Content-Type": "application/pdf", "Content-Length": pdf.length });
-  return resp.send(pdf);
+  const jsreportUrl = 'https://reports.helixsys.dev/api/report';
+ 
+  // const templateContent = fs.readFileSync(templateFilePath, 'utf-8');
+  // Registrar un helper para comparaciones
+  // Define el payload para la solicitud a la API 
+  const payload = {
+    template: {
+      content: contenidoHtml,
+      engine: 'jsrender',
+      recipe: 'chrome-pdf',
+    }, 
+  };  // Realiza la solicitud a la API de jsreport
+  try {
+    const response = await axios.post(jsreportUrl, payload, {
+      responseType: 'arraybuffer',
+    }); 
+    resp.set({ "Content-Type": "application/pdf", "Content-Length": response.data.length });
+    return resp.send(response.data);
+  } catch (error) {
+    console.error('Error generando el PDF:', error);
+    throw new Error('No se pudo generar el PDF');
+  }
+ 
 };
 
 export const obntenerCompra = async (req = request, resp = response) => {
