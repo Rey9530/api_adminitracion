@@ -71,6 +71,11 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
   if (sucursal > 0) {
     wSucursal = { id_sucursal: sucursal };
   } 
+  let id_proveedor: number = Number(req.query.id_proveedor);
+  let wProveedor = {};//id_proveedor
+  if (id_proveedor > 0) {
+    wProveedor = { id_proveedor };
+  }
   const [data, result] = await Promise.all([
     await prisma.compras.findMany({
       where: {
@@ -79,6 +84,7 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
           lte: hasta,
         },
         ...wSucursal,
+        ...wProveedor,
       },
       include: { Proveedor: true, Sucursales: true, FacturasTipos: true },
       orderBy: [
@@ -97,6 +103,7 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
           lte: hasta,
         },
         ...wSucursal,
+        ...wProveedor,
       },
     }),
   ]);

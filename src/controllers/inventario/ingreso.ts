@@ -889,7 +889,7 @@ export const imprimirChequecheques = async (
 ) => {
   let id_cheque: number = Number(req.params.id_cheque);
 
-  var compras = await prisma.compras.findMany({
+  const compras = await prisma.compras.findMany({
     where: {
       id_cheque
     },
