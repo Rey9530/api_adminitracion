@@ -2,6 +2,8 @@ import expres from "express";
 const response = expres.response;
 const request = expres.request;
 import { PrismaClient } from "@prisma/client";
+import { formatDate } from "../../helpers/format_dates";
+import * as XLSX from 'xlsx';
 const prisma = new PrismaClient();
 
 export const libroCompras = async (req = request, resp = response) => {
@@ -70,7 +72,7 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
   let wSucursal = {};
   if (sucursal > 0) {
     wSucursal = { id_sucursal: sucursal };
-  } 
+  }
   let id_proveedor: number = Number(req.query.id_proveedor);
   let wProveedor = {};//id_proveedor
   if (id_proveedor > 0) {
@@ -113,6 +115,105 @@ export const obtenerListadoCompras = async (req = request, resp = response) => {
     msg: "Success",
     data: { listado: data, total: result._sum.total ?? 0, },
   });
+};
+export const obtenerListadoComprasExcel = async (req = request, res = response) => {
+  try {
+    var desde1: any = req.query.desde!.toString();
+  var hasta1: any = req.query.hasta!.toString();
+  var sucursal: number = Number(req.query.sucursal);
+  let desde = new Date(desde1);
+  let hasta = new Date(hasta1);
+  hasta.setHours(hasta.getHours() + 23);
+  hasta.setMinutes(hasta.getMinutes() + 59);
+  hasta.setSeconds(hasta.getSeconds() + 59);
+
+  let wSucursal = {};
+  if (sucursal > 0) {
+    wSucursal = { id_sucursal: sucursal };
+  }
+  let id_proveedor: number = Number(req.query.id_proveedor);
+  let wProveedor = {};//id_proveedor
+  if (id_proveedor > 0) {
+    wProveedor = { id_proveedor };
+  }
+  const [compras, total] = await Promise.all([
+    await prisma.compras.findMany({
+      where: {
+        fecha_factura: {
+          gte: desde,
+          lte: hasta,
+        },
+        ...wSucursal,
+        ...wProveedor,
+      },
+      include: { Proveedor: true, Sucursales: true, FacturasTipos: true },
+      orderBy: [
+        {
+          id_compras: "asc",
+        },
+      ],
+    }),
+    await prisma.compras.aggregate({
+      _sum: {
+        total: true,
+      },
+      where: {
+        fecha_factura: {
+          gte: desde,
+          lte: hasta,
+        },
+        ...wSucursal,
+        ...wProveedor,
+      },
+    }),
+  ]);
+
+    // Preparar los datos para el archivo Excel
+    const data: any = compras.map((compra) => ({
+      'Fecha doc': formatDate(compra.fecha_factura ?? new Date()),
+      '# Doc': compra.numero_factura,
+      'Tipo': compra.FacturasTipos?.nombre ?? "",
+      'Proveedor': compra.Proveedor ? compra.Proveedor.nombre : '',
+      'Concepto': compra.detalle,
+      'Sumas': compra.subtotal,
+      'IVA': compra.iva,
+      'Sub Total': (Number(compra.iva) + Number(compra.subtotal)),
+      'IVA Percibido': compra.iva_percivido,
+      'Descuento': compra.descuento,
+      'Valor Total': compra.total
+    }));
+
+    // Agregar una fila para el total
+    data.push({ 
+      'Fecha doc': '',
+      '# Doc': '',
+      'Tipo': '',
+      'Proveedor': '',
+      'Concepto': '',
+      'Sumas': '',
+      'IVA': '',
+      'Sub Total': '',
+      'IVA Percibido': '',
+      'Descuento': '',
+      'Valor Total': total._sum.total ?? 0
+    }); 
+    // Crear un nuevo libro de Excel y agregar una hoja con los datos
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Listado de Compras');
+
+    // Convertir el libro a un buffer de Excel
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
+    const fileName = `ListadoCompras_${formatDate(new Date(), true)}.xlsx`;
+
+    // Configurar las cabeceras y enviar el archivo como respuesta
+    res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(excelBuffer);
+  } catch (error) {
+    console.error('Error al generar el archivo Excel:', error);
+    res.status(500).json({ status: false, msg: 'Error al generar el archivo Excel' });
+  }
 };
 
 export const obtenerListadoComprasInventario = async (

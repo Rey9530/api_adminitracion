@@ -3,7 +3,7 @@ const router = expres.Router();
 import { check } from "express-validator"; 
 import { validarCampos } from "../../middlewares/validar-campos";
 import { validarJWT } from "../../middlewares/validar-jwt"; 
-import { libroCompras, libroComprasAlContado, obtenerListadoCompras, obtenerListadoComprasInventario } from "../../controllers/facturacion/reportes_compras";
+import { libroCompras, libroComprasAlContado, obtenerListadoCompras, obtenerListadoComprasExcel, obtenerListadoComprasInventario } from "../../controllers/facturacion/reportes_compras";
 import { comprasPorProveedor, eliminarCompra, imprimirChequecheques, imprimirListadoConsol, imprimirListadoPrecheques, obntenerListadoFacturasAlCredito, obntenerListadoPrecheques, obtenerListadoCreditoUsuario, obtenerListadocheques, revertirEstadoCompra } from "../../controllers/inventario/ingreso";
  
 router.get(
@@ -36,6 +36,17 @@ router.get(
     validarCampos,
   ],
   obtenerListadoCompras
+);
+
+router.get(
+  "/obtener_listado_compras_excel",
+  [
+    validarJWT,
+    check("desde", "El parametro desde es requerido y debe ser formato fecha YYYY-mm-dd").not().isEmpty().isDate(),
+    check("hasta", "El parametro hasta es requerido y debe ser formato fecha YYYY-mm-dd").not().isEmpty().isDate(),
+    validarCampos,
+  ],
+  obtenerListadoComprasExcel
 );
 
 
