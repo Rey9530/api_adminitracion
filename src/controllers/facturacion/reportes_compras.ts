@@ -2,7 +2,7 @@ import expres from "express";
 const response = expres.response;
 const request = expres.request;
 import { PrismaClient } from "@prisma/client";
-import { formatDate } from "../../helpers/format_dates";
+import { formatDate, formatOnlyDate } from "../../helpers/format_dates";
 import * as XLSX from 'xlsx';
 const prisma = new PrismaClient();
 
@@ -170,9 +170,10 @@ export const obtenerListadoComprasExcel = async (req = request, res = response) 
 
     // Preparar los datos para el archivo Excel
     const data: any = compras.map((compra) => ({
-      'Fecha doc': formatDate(compra.fecha_factura ?? new Date()),
+      'Fecha doc': formatOnlyDate(compra.fecha_factura ?? new Date()),
       '# Doc': compra.numero_factura,
       'Tipo': compra.FacturasTipos?.nombre ?? "",
+      'Sucursal': compra.Sucursales ? compra.Sucursales.nombre : '',
       'Proveedor': compra.Proveedor ? compra.Proveedor.nombre : '',
       'Concepto': compra.detalle,
       'Sumas': compra.subtotal,
@@ -188,6 +189,7 @@ export const obtenerListadoComprasExcel = async (req = request, res = response) 
       'Fecha doc': '',
       '# Doc': '',
       'Tipo': '',
+      'Sucursal': '',
       'Proveedor': '',
       'Concepto': '',
       'Sumas': '',
